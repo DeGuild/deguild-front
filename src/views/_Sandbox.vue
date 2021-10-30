@@ -1,11 +1,32 @@
 <template>
-  <button @click="sendTest()">TEST ME!</button>
+  <div>
+    <p>Upload an image to Firebase:</p>
+    <input type="file" @change="previewImage($event)" accept="image/*" />
+  </div>
+  <div>
+    <p>
+      Progress: {{ state.uploadValue.toFixed() + '%' }}
+      <progress :value="state.uploadValue" max="100"></progress>
+    </p>
+  </div>
+  <div>
+    <img class="preview" :src="state.picture" /><br /><button
+      @click="onUpload()"
+    >
+      Upload
+    </button>
+  </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import Web3 from 'web3';
-import Web3Token from 'web3-token';
+import { reactive } from 'vue';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
 
 export default {
   name: 'Sandbox',
@@ -13,36 +34,69 @@ export default {
     // console.log(store.state.User.user);
     // console.log(user);
     // Connection to MetaMask wallet
-    const web3 = new Web3(window.ethereum);
+    const state = reactive({
+      imageData: null,
+      picture: null,
+      uploadValue: 0,
+    });
 
-    // attaching token to authorization header ... for example
-    async function sendTest() {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      // getting address from which we will sign message
-      const address = (await web3.eth.getAccounts())[0];
-
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      const requestOptions = {
-        method: 'GET',
-        // eslint-disable-next-line quote-props
-        headers: { Authorization: token },
-      };
-
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/guild/test',
-        requestOptions,
-        { mode: 'cors' },
-      );
-      const data = await response.json();
-      console.log(data);
+    function previewImage(event) {
+      state.uploadValue = 0;
+      state.picture = null;
+      const file = event.target.files[0];
+      console.log(file);
+      state.imageData = file;
     }
 
-    return { sendTest };
+    function onUpload() {
+      state.picture = null;
+      const storage = getStorage();
+      const storageRef = ref(storage, `${state.imageData.name}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, state.imageData);
+
+      // Register three observers:
+      // 1. 'state_changed' observer, called any time the state changes
+      // 2. Error observer, called on failure
+      // 3. Completion observer, called on successful completion
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+          state.uploadValue = progress;
+          // eslint-disable-next-line default-case
+          switch (snapshot.state) {
+            case 'paused':
+              console.log('Upload is paused');
+              break;
+            case 'running':
+              console.log('Upload is running');
+              break;
+          }
+        },
+        (error) => {
+          // Handle unsuccessful uploads
+          console.log(error.message);
+        },
+        () => {
+          // Handle successful uploads on complete
+          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log('File available at', downloadURL);
+            state.picture = downloadURL;
+          });
+        },
+      );
+    }
+
+    return { state, previewImage, onUpload };
   },
 };
 </script>
+<style scoped>
+img.preview {
+  width: 200;
+}
+</style>

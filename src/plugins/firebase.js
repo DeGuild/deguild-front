@@ -1,4 +1,4 @@
-import firebase from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
@@ -19,7 +19,6 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 // for accessing firestore database
-// eslint-disable-next-line import/prefer-default-export
-export const db = firebase.firestore();
+export default app;
