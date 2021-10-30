@@ -27,17 +27,19 @@ export default {
         (msg) => web3.eth.personal.sign(msg, address),
         '1d',
       );
-
-      console.log(token);
-
       const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: token },
+        method: 'GET',
+        // eslint-disable-next-line quote-props
+        headers: { Authorization: token },
       };
-      await fetch(
+
+      const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/guild/test',
         requestOptions,
+        { mode: 'cors' },
       );
+      const data = await response.json();
+      console.log(data);
     }
 
     return { sendTest };
