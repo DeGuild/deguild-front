@@ -10,7 +10,7 @@
     </p>
   </div>
   <div>
-    <img class="preview" :src="state.picture" /><br /><button
+    <img class="preview" :src="state.picture" :v-show="state.picture" /><br /><button
       @click="onUpload()"
     >
       Upload
@@ -29,7 +29,7 @@ import {
 } from 'firebase/storage';
 
 export default {
-  name: 'Sandbox',
+  name: 'UploadImage',
   setup() {
     // console.log(store.state.User.user);
     // console.log(user);
