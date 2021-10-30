@@ -8,6 +8,7 @@ import '@fontsource/poppins';
 import '@fontsource/secular-one';
 import 'viewerjs/dist/viewer.css';
 import VueSocialSharing from 'vue-social-sharing';
+import '@/plugins/firebase';
 
 import App from './App.vue';
 import router from './router';
