@@ -1,18 +1,65 @@
 <template>
   <div class="job">
-    <div class="job background" v-bind:class="{ smaller: state.smaller }">
+    <div class="job background dark" v-bind:class="{ smaller: state.smaller }">
       <div
         class="job background light"
+        @click="dummy()"
         v-bind:class="{ smaller: state.smaller }"
       >
-        <div><h4>level</h4></div>
-        <div><h4>id</h4></div>
-        <div><h4>time</h4></div>
-        <div><h4>reward</h4></div>
-        <div><h4>name</h4></div>
-        <div><h4>client</h4></div>
-        <div><h4>difficulty</h4></div>
-        <button>take</button>
+        <div class="block id">
+          <div class="icon">
+            <i class="fa fa-hashtag" aria-hidden="true"></i>
+          </div>
+          <div class="icon value">5</div>
+          <div class="icon label">
+            <h5>ID</h5>
+          </div>
+        </div>
+
+        <div class="block level">
+          <div class="icon">
+            <i class="fas fa-fire"></i>
+          </div>
+          <div class="icon value">5</div>
+          <div class="icon label">
+            <h5>LEVEL</h5>
+          </div>
+        </div>
+        <div class="block time">
+          <div class="icon">
+            <i class="fas fa-stopwatch"></i>
+          </div>
+          <div class="icon value">365 D</div>
+          <div class="icon label">
+            <h5>TIME</h5>
+          </div>
+        </div>
+        <div class="block reward">
+          <div class="icon">
+            <i class="fas fa-hand-holding-usd"></i>
+          </div>
+          <div class="icon value">50000000</div>
+          <div class="icon label">
+            <h5>REWARD</h5>
+          </div>
+        </div>
+        <div class="block difficulty"><p>Difficulty: ★★☆☆☆</p></div>
+        <img class="image" :src="state.noUrl" />
+        <div class="text">
+          <h4>Do something!Do something!Do something!Do something!</h4>
+        </div>
+        <div class="text client"><p>who?who?who?who?who?who?who?</p></div>
+        <h3 class="btn" @click="dummy()">CHECK</h3>
+        <div class="text description" v-bind:class="{ smaller: state.smaller }">
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+          <h4>Lrolasjdklfjassdfousdifouasdoifuasoipfuasoifuio</h4>
+        </div>
       </div>
     </div>
   </div>
@@ -44,6 +91,7 @@ export default defineComponent({
       primary: 'BUY',
       primary2: 'ADD',
       primary3: 'Require prerequisite',
+      noUrl,
       addScroll: false,
       showBoth: false,
       showExam: false,
@@ -64,76 +112,6 @@ export default defineComponent({
       pageIdx: 0,
       images: computed(() => (store.state.User.scrollList ? store.state.User.scrollList : [])),
       own: 0,
-      styles: [
-        {},
-        {
-          left: '50vw',
-          top: '26.406vw',
-        },
-        {
-          left: '61.979vw',
-          top: '26.406vw',
-        },
-        {
-          left: '73.958vw',
-          top: '26.406vw',
-        },
-        {
-          left: '85.938vw',
-          top: '26.406vw',
-        },
-        {
-          left: '50vw',
-          top: '38.021vw',
-        },
-        {
-          left: '61.979vw',
-          top: '38.021vw',
-        },
-        {
-          left: '73.958vw',
-          top: '38.021vw',
-        },
-        {
-          left: '85.938vw',
-          top: '38.021vw',
-        },
-      ],
-      stylesFrame: [
-        {},
-        {
-          left: '49.4vw',
-          top: '25.9vw',
-        },
-        {
-          left: '61.379vw',
-          top: '25.9vw',
-        },
-        {
-          left: '73.358vw',
-          top: '25.9vw',
-        },
-        {
-          left: '85.337vw',
-          top: '25.9vw',
-        },
-        {
-          left: '49.4vw',
-          top: '37.515vw',
-        },
-        {
-          left: '61.379vw',
-          top: '37.515vw',
-        },
-        {
-          left: '73.358vw',
-          top: '37.515vw',
-        },
-        {
-          left: '85.337vw',
-          top: '37.515vw',
-        },
-      ],
     });
 
     function validURL(str) {
@@ -463,6 +441,10 @@ export default defineComponent({
         'These scrolls let you earn certificate, but you do not get to learn the lessons',
       );
     }
+    function dummy() {
+      console.log('Tested!');
+      state.smaller = !state.smaller;
+    }
 
     return {
       state,
@@ -482,6 +464,7 @@ export default defineComponent({
       selectHasPrereq,
       showNext,
       showPrevious,
+      dummy,
       owner,
       previewUrl,
     };
@@ -490,11 +473,61 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.image {
+  border-radius: 50%;
+  height: 3vw;
+  width: 3vw;
+  top: 0.4vw;
+  left: 1vw;
+  position: absolute;
+}
+.block {
+  height: 7vw;
+  width: 6vw;
+  top: 0vw;
+  position: absolute;
+  background: #eed9d2;
+  line-height: 0.4vw;
+  color: #919191;
+  font-family: Roboto;
+  font-style: normal;
+  &.id {
+    left: 25.5vw;
+  }
+  &.level {
+    left: 32vw;
+  }
+  &.time {
+    left: 38.5vw;
+  }
+  &.reward {
+    left: 45vw;
+  }
+  &.difficulty {
+    background: #fdf1e3;
+
+    height: 2vw;
+    width: 10vw;
+    left: 1vw;
+    top: 4vw;
+    padding-left: 1vw;
+    font-family: Roboto;
+    font-style: normal;
+    font-size: 0.8vw;
+    justify-content: center;
+    align-content: center;
+    text-align: left;
+    color: #6c421b;
+  }
+}
 .job {
   position: relative;
-  padding-top: 1vw;
+  // padding-top: 1vw;
   padding-left: 2vw;
   padding-right: 2vw;
+  margin-bottom: 1vw;
+  color: #6c421b;
+
   &.selection {
     top: 3.5vw;
     left: -2vw;
@@ -529,22 +562,25 @@ export default defineComponent({
   }
   &.background {
     width: 55vw;
-    height: 24.167vw;
+    height: 24vw;
     position: static;
     background: #593a2d;
     padding-left: unset;
-
+    &.dark {
+      &.smaller {
+        height: 9vw;
+      }
+    }
     &.light {
-      height: 22.167vw;
+      top: 1vw;
+      height: 22vw;
       position: relative;
+      cursor: pointer;
 
       background: #cfb7a1;
       &.smaller {
-        height: 8vw;
+        height: 7vw;
       }
-    }
-    &.smaller {
-      height: 10vw;
     }
   }
   &.Button {
@@ -583,31 +619,83 @@ export default defineComponent({
     text-shadow: 0px 2px 4px rgba(91, 26, 26, 0.14),
       0px 3px 4px rgba(123, 12, 12, 0.12), 0px 1px 5px rgba(136, 13, 13, 0.2);
   }
+}
+.text {
+  position: absolute;
+  width: 20vw;
+  height: 2vw;
+  left: 5vw;
+  top: 0vw;
 
-  &.text {
-    position: absolute;
-    width: 20vw;
-    height: 6vw;
-    left: 13vw;
-    top: 4.5vw;
+  font-family: Roboto;
+  font-style: normal;
+  font-size: 0.9vw;
+  line-height: 1vw;
 
-    font-family: Poppins;
-    font-weight: bold;
-    font-size: 1.302vw;
-    line-height: 1.927vw;
+  color: #000000;
+  align-items: center;
+  text-align: left;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #ffffff;
+  text-overflow: ellipsis;
 
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: normal;
+  background-size: cover;
+  overflow: hidden;
+  &.client {
+    top: 1.7vw;
+    font-size: 0.7vw;
+    opacity: 60%;
+  }
+  &.description {
+    width: 54vw;
+    height: 13vw;
+    top: 8vw;
+    left: 1vw;
+    padding-left: 1vw;
+    overflow: auto;
+    background-color: #bba693;
+    &.smaller {
+      height: 0vw;
+    }
+  }
+}
+.btn {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 4vw;
+  height: 2vw;
+  top: 1.4vw;
+  right: 1vw;
+  font-family: Roboto;
+  font-style: normal;
+  color: #754d28;
+  background: #fdf1e3;
+  font-size: 0.8vw;
+  font-weight: 500;
 
-    background: '';
-    background-size: cover;
-    // background-color: red;
+  cursor: pointer;
+  border-radius: 10%;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
+
+  &:hover {
+    background: #ffd19d;
+  }
+}
+.icon {
+  // background-color: red;
+  width: 6vw;
+  // height:
+  // overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 2.5vw;
+  margin-top: 1vw;
+  &.value {
+    font-size: 0.9vw;
+  }
+  &.label {
+    font-size: 0.75vw;
   }
 }
 </style>

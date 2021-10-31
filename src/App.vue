@@ -30,6 +30,6 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-color: #464646;om: -5vw;
+  background-color: #464646;
 }
 </style>

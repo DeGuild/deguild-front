@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faUserSecret, faPhone, faCog, faSpinner,
+  faDollarSign, faFire, faCog, faSpinner, faHashtag, faClock,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -14,10 +14,12 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
-library.add(faUserSecret);
-library.add(faPhone);
+library.add(faFire);
+library.add(faDollarSign);
+library.add(faHashtag);
 library.add(faCog);
 library.add(faSpinner);
+library.add(faClock);
 
 createApp(App)
   .use(store)
