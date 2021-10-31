@@ -9,6 +9,7 @@
 
 <script>
 /* eslint-disable no-await-in-loop */
+/* eslint-disable no-unused-vars */
 
 import { useStore } from 'vuex';
 // import { useRoute } from 'vue-router';
@@ -247,7 +248,7 @@ export default {
           state.primary = connectedAddress;
           const ownership = await isOwner(accounts.result[0]);
           const approve = await hasApproval(accounts.result[0]);
-          let toAdd = [];
+          // const toAdd = [];
 
           store.dispatch(
             'User/setUser',
@@ -270,29 +271,29 @@ export default {
           }
 
           // const userCertificates = [];
-          let scrollsData = await fetchAllMagicScrolls();
-          state.magicScrollsData = scrollsData;
+          // let scrollsData = await fetchAllMagicScrolls();
+          // state.magicScrollsData = scrollsData;
 
-          while (state.magicScrollsData.length > 0) {
-            console.log(store.state.User.scrollToFetch);
-            const tokenAvailability = await Promise.all(
-              state.magicScrollsData.map(tokenSetup),
-            );
+          // while (state.magicScrollsData.length > 0) {
+          //   console.log(store.state.User.scrollToFetch);
+          //   const tokenAvailability = await Promise.all(
+          //     state.magicScrollsData.map(tokenSetup),
+          //   );
 
-            toAdd = toAdd.concat(
-              tokenAvailability.filter((obj) => obj !== null),
-            );
+          //   toAdd = toAdd.concat(
+          //     tokenAvailability.filter((obj) => obj !== null),
+          //   );
 
-            store.dispatch('User/setMagicScrolls', toAdd);
-            if (store.state.User.scrollToFetch) {
-              scrollsData = await fetchAllMagicScrolls(
-                store.state.User.scrollToFetch,
-              );
-              state.magicScrollsData = scrollsData;
-            } else {
-              state.magicScrollsData = [];
-            }
-          }
+          //   store.dispatch('User/setMagicScrolls', toAdd);
+          //   if (store.state.User.scrollToFetch) {
+          //     scrollsData = await fetchAllMagicScrolls(
+          //       store.state.User.scrollToFetch,
+          //     );
+          //     state.magicScrollsData = scrollsData;
+          //   } else {
+          //     state.magicScrollsData = [];
+          //   }
+          // }
 
           store.dispatch('User/setFetching', false);
           // console.log(store.state.User.scrollList);

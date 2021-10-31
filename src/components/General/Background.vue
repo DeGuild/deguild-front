@@ -23,46 +23,15 @@ export default defineComponent({
 });
 </script>
 <style scoped lang="scss">
-.dialog {
-  position: absolute;
-  width: 68vw;
-  height: 13.1vw;
-  left: 27.24vw;
-  top: 4vw;
-
-  background: url('../../assets/dialog.webp');
-  background-size: cover;
-}
 .desk {
   position: absolute;
   width: 35vw;
-  height: 20vw;
+  height: 19vw;
   left: -2vw;
   top: 32vw;
 
   background: url('../../assets/counter.webp');
   background-size: cover;
-}
-.dialog-text {
-  /* Share your certificate and show your skill! */
-  position: absolute;
-  width: 60vw;
-  height: 3vw;
-  left: 5vw;
-  top: 5.5vw;
-  font-family: Secular One;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 2.25vw;
-  line-height: 3vw;
-  color: #ffffff;
-  background: '';
-  background-size: cover;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  &.smaller {
-    font-size: 1.4vw;
-  }
 }
 .npc {
   position: absolute;
