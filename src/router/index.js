@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ConnectWallet from '../views/MagicShop.vue';
+import DeGuildSite from '../views/DeGuild.vue';
 import Sandbox from '../views/_Sandbox.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: ConnectWallet,
+    component: DeGuildSite,
   },
   {
     path: '/test',
