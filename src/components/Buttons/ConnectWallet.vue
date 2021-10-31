@@ -1,6 +1,6 @@
 <template>
   <div v-if="!user">
-    <button class="btn" @click="ethEnabled" v-html="state.primary"></button>
+    <div class="btn" @click="ethEnabled" v-html="state.primary"></div>
   </div>
   <div v-if="user">
     <div class="btn connected" v-html="state.primary"></div>
@@ -377,14 +377,16 @@ export default {
   align-items: center;
 
   position: absolute;
-  width: 10vw;
-  height: 3vw;
-  left: 88vw;
-  top: 20px;
+  width: 16vw;
+  height: 8vw;
+  left: 82vw;
+  top: 0vw;
 
   /* standart theme/error */
-  background: #ff5252;
+  background: url('../../assets/wallet-board.png');
   border-radius: 4px;
+  background-size: contain;
+  background-repeat: no-repeat;
 
   font-family: Secular One;
   font-style: normal;
@@ -397,6 +399,7 @@ export default {
 
   /* shades/white */
   color: #ffffff;
+  cursor: pointer;
 
   /* Inside Auto Layout */
   flex: none;
@@ -404,14 +407,8 @@ export default {
   flex-grow: 0;
   margin: 0px 0px;
 
-  &:hover {
-    background: #cc3b3b;
-  }
   &.connected {
-    &:hover {
-      background: #ff5252;
-    }
-    cursor: cursor;
+    cursor: unset;
   }
 }
 </style>

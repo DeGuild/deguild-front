@@ -4,7 +4,16 @@
       <div
         class="job background light"
         v-bind:class="{ smaller: state.smaller }"
-      ></div>
+      >
+        <div><h4>level</h4></div>
+        <div><h4>id</h4></div>
+        <div><h4>time</h4></div>
+        <div><h4>reward</h4></div>
+        <div><h4>name</h4></div>
+        <div><h4>client</h4></div>
+        <div><h4>difficulty</h4></div>
+        <button>take</button>
+      </div>
     </div>
   </div>
 </template>
@@ -529,7 +538,7 @@ export default defineComponent({
       height: 22.167vw;
       position: relative;
 
-      background: #eed9d2;
+      background: #cfb7a1;
       &.smaller {
         height: 8vw;
       }
