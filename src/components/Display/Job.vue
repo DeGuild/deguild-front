@@ -715,7 +715,7 @@ export default defineComponent({
   &.frame {
     width: 8.542vw;
     height: 8.542vw;
-    background: url('../../assets/itemFrame.png');
+    // background: url('../../assets/itemFrame.png');
     background-size: cover;
   }
   &.item-box {
@@ -725,7 +725,7 @@ export default defineComponent({
     left: 7vw;
     top: 21vw;
 
-    background: url('../../assets/itemDescription.png');
+    // background: url('../../assets/itemDescription.png');
     background-size: contain;
     background-repeat: no-repeat;
   }
@@ -736,7 +736,7 @@ export default defineComponent({
     left: 4vw;
     top: 4vw;
 
-    background: url('../../assets/currentItemFrame.png');
+    // background: url('../../assets/currentItemFrame.png');
     background-size: cover;
   }
   &.overlay {

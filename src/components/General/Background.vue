@@ -1,5 +1,4 @@
 <template>
-  <div class="shopfront"></div>
   <div class="dialog">
     <div class="dialog-text" v-bind:class="{ smaller: state.dialogStyle }">
       {{ state.dialog }}
@@ -28,16 +27,6 @@ export default defineComponent({
 });
 </script>
 <style scoped lang="scss">
-.shopfront{
-  position: absolute;
-  width: 99.215vw;
-  height: 19vw;
-  top: 0vw;
-  left: 0vw;
-
-  background: url('../../assets/magic-shop-bg.png');
-  background-size: cover;
-}
 .dialog {
   position: absolute;
   width: 68vw;
@@ -45,7 +34,7 @@ export default defineComponent({
   left: 27.24vw;
   top: 4vw;
 
-  background: url('../../assets/dialogue.png');
+  background: url('../../assets/dialog.png');
   background-size: cover;
 }
 .dialog-text {
