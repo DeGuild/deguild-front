@@ -3,9 +3,11 @@
   <connect-wallet />
   <div v-if="user !== null">
     <dialogue-box></dialogue-box>
+
     <job-dashboard></job-dashboard>
-    <div v-if="wallet === true">
-    </div>
+    <profile />
+
+    <div v-if="wallet === true"></div>
     <div v-if="wallet !== true">
       <approve-modal></approve-modal>
       <approve-wallet></approve-wallet>
@@ -24,6 +26,7 @@ import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
 import JobDashboard from '../components/Display/JobDashboard.vue';
+import Profile from '../components/Buttons/Profile.vue';
 // @ is an alias to /src
 
 export default {
@@ -36,6 +39,7 @@ export default {
     ApproveWallet,
     DialogueBox,
     JobDashboard,
+    Profile,
   },
   setup() {
     const store = useStore();

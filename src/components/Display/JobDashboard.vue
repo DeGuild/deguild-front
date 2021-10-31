@@ -1,6 +1,13 @@
 <template>
   <div class="background">
-    <job></job>
+    <div class="search"></div>
+    <div class="display">
+      <br />
+      <job></job>
+      <job></job>
+      <job></job>
+      <job></job>
+    </div>
   </div>
 </template>
 
@@ -485,8 +492,25 @@ export default defineComponent({
   left: 35vw;
   top: 9vw;
   overflow: auto;
-  background-size:cover;
+  background-size: cover;
   background-repeat: no-repeat;
+}
+.display{
+  width: 61vw;
+  height: 37vw;
+  position: absolute;
+  left: 1vw;
+  top: 5vw;
+  overflow: auto;
+}
+.search {
+  width: 61vw;
+  height: 4vw;
+  top: 1vw;
+  left: 1vw;
+  position: relative;
+  background: #997c61;
+  // padding-bottom: 1vw;
 }
 .half-circle-spinner {
   box-sizing: border-box;
