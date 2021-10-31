@@ -3,7 +3,6 @@
   <connect-wallet />
   <div v-if="user !== null">
     <div v-if="wallet === true">
-      <item-shelf />
     </div>
     <div v-if="wallet !== true">
       <approve-modal></approve-modal>
@@ -21,7 +20,6 @@ import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
-import ItemShelf from '../components/Display/ItemShelf.vue';
 // @ is an alias to /src
 
 export default {
@@ -30,7 +28,6 @@ export default {
     ConnectWallet,
     Background,
     NoWallet,
-    ItemShelf,
     ApproveModal,
     ApproveWallet,
   },

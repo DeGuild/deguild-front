@@ -27,7 +27,7 @@
   margin-top: 60px;
 }
 body {
-  background-image: url('assets/bg.jpg');
+  background-image: url('assets/bg.webp');
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;

@@ -1,10 +1,6 @@
 <template>
-  <div class="dialog">
-    <div class="dialog-text" v-bind:class="{ smaller: state.dialogStyle }">
-      {{ state.dialog }}
-    </div>
-  </div>
   <div class="npc"></div>
+  <div class="desk"></div>
 </template>
 
 <script>
@@ -34,7 +30,17 @@ export default defineComponent({
   left: 27.24vw;
   top: 4vw;
 
-  background: url('../../assets/dialog.png');
+  background: url('../../assets/dialog.webp');
+  background-size: cover;
+}
+.desk {
+  position: absolute;
+  width: 35vw;
+  height: 20vw;
+  left: -2vw;
+  top: 32vw;
+
+  background: url('../../assets/counter.webp');
   background-size: cover;
 }
 .dialog-text {
@@ -60,12 +66,12 @@ export default defineComponent({
 }
 .npc {
   position: absolute;
-  width: 32vw;
-  height: 16.5vw;
-  left: 0vw;
-  top: 2.45vw;
+  width: 30vw;
+  height: 30vw;
+  left: 2vw;
+  top: 11.563vw;
 
-  background: url('../../assets/npc.png');
+  background: url('../../assets/npc.webp');
   background-size: cover;
 }
 </style>
