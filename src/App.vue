@@ -32,4 +32,8 @@ body {
   background-attachment: fixed;
   background-color: #464646;
 }
+
+textarea:focus, input:focus{
+    outline: none;
+}
 </style>

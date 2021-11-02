@@ -51,12 +51,12 @@
         <div class="text client"><p>{{this.job.client}}</p></div>
         <h3 class="btn" @click="dummy()">CHECK</h3>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
-          <h3>JOB TITLE:</h3>
+          <h2>JOB TITLE:</h2>
           <h4>{{ this.job.title }}</h4>
           <h3>SKILL REQUIRES:</h3>
-          <h4>{{ this.job.skills }}</h4>
-          <h3>JOB DESCRIPTION:</h3>
-          <h4>{{ this.job.description }}</h4>
+          <h5>{{ this.job.skills }}</h5>
+          <h4>JOB DESCRIPTION:</h4>
+          <h5>{{ this.job.description }}</h5>
         </div>
       </div>
     </div>

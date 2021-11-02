@@ -1,7 +1,16 @@
 import { createApp } from 'vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faDollarSign, faFire, faCog, faSpinner, faHashtag, faClock,
+  faDollarSign,
+  faFire,
+  faCog,
+  faSpinner,
+  faHashtag,
+  faClock,
+  faSearch,
+  faStar,
+  faUserClock,
+  faBalanceScale,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -20,6 +29,10 @@ library.add(faHashtag);
 library.add(faCog);
 library.add(faSpinner);
 library.add(faClock);
+library.add(faSearch);
+library.add(faBalanceScale);
+library.add(faStar);
+library.add(faUserClock);
 
 createApp(App)
   .use(store)
