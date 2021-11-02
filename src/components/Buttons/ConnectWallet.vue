@@ -1,6 +1,6 @@
 <template>
   <div v-if="!user">
-    <button class="btn" @click="ethEnabled" v-html="state.primary"></button>
+    <div class="btn" @click="ethEnabled" v-html="state.primary"></div>
   </div>
   <div v-if="user">
     <div class="btn connected" v-html="state.primary"></div>
@@ -9,6 +9,7 @@
 
 <script>
 /* eslint-disable no-await-in-loop */
+/* eslint-disable no-unused-vars */
 
 import { useStore } from 'vuex';
 // import { useRoute } from 'vue-router';
@@ -247,7 +248,7 @@ export default {
           state.primary = connectedAddress;
           const ownership = await isOwner(accounts.result[0]);
           const approve = await hasApproval(accounts.result[0]);
-          let toAdd = [];
+          // const toAdd = [];
 
           store.dispatch(
             'User/setUser',
@@ -270,29 +271,29 @@ export default {
           }
 
           // const userCertificates = [];
-          let scrollsData = await fetchAllMagicScrolls();
-          state.magicScrollsData = scrollsData;
+          // let scrollsData = await fetchAllMagicScrolls();
+          // state.magicScrollsData = scrollsData;
 
-          while (state.magicScrollsData.length > 0) {
-            console.log(store.state.User.scrollToFetch);
-            const tokenAvailability = await Promise.all(
-              state.magicScrollsData.map(tokenSetup),
-            );
+          // while (state.magicScrollsData.length > 0) {
+          //   console.log(store.state.User.scrollToFetch);
+          //   const tokenAvailability = await Promise.all(
+          //     state.magicScrollsData.map(tokenSetup),
+          //   );
 
-            toAdd = toAdd.concat(
-              tokenAvailability.filter((obj) => obj !== null),
-            );
+          //   toAdd = toAdd.concat(
+          //     tokenAvailability.filter((obj) => obj !== null),
+          //   );
 
-            store.dispatch('User/setMagicScrolls', toAdd);
-            if (store.state.User.scrollToFetch) {
-              scrollsData = await fetchAllMagicScrolls(
-                store.state.User.scrollToFetch,
-              );
-              state.magicScrollsData = scrollsData;
-            } else {
-              state.magicScrollsData = [];
-            }
-          }
+          //   store.dispatch('User/setMagicScrolls', toAdd);
+          //   if (store.state.User.scrollToFetch) {
+          //     scrollsData = await fetchAllMagicScrolls(
+          //       store.state.User.scrollToFetch,
+          //     );
+          //     state.magicScrollsData = scrollsData;
+          //   } else {
+          //     state.magicScrollsData = [];
+          //   }
+          // }
 
           store.dispatch('User/setFetching', false);
           // console.log(store.state.User.scrollList);
@@ -376,14 +377,16 @@ export default {
   align-items: center;
 
   position: absolute;
-  width: 10vw;
-  height: 3vw;
-  left: 88vw;
-  top: 20px;
+  width: 16vw;
+  height: 8vw;
+  left: 82vw;
+  top: 0vw;
 
   /* standart theme/error */
-  background: #ff5252;
+  background: url('../../assets/wallet-board.png');
   border-radius: 4px;
+  background-size: contain;
+  background-repeat: no-repeat;
 
   font-family: Secular One;
   font-style: normal;
@@ -396,6 +399,7 @@ export default {
 
   /* shades/white */
   color: #ffffff;
+  cursor: pointer;
 
   /* Inside Auto Layout */
   flex: none;
@@ -403,14 +407,8 @@ export default {
   flex-grow: 0;
   margin: 0px 0px;
 
-  &:hover {
-    background: #cc3b3b;
-  }
   &.connected {
-    &:hover {
-      background: #ff5252;
-    }
-    cursor: cursor;
+    cursor: unset;
   }
 }
 </style>

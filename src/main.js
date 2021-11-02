@@ -1,7 +1,16 @@
 import { createApp } from 'vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faUserSecret, faPhone, faCoffee, faSpinner,
+  faDollarSign,
+  faFire,
+  faCog,
+  faSpinner,
+  faHashtag,
+  faClock,
+  faSearch,
+  faStar,
+  faUserClock,
+  faBalanceScale,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -14,10 +23,16 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
-library.add(faUserSecret);
-library.add(faPhone);
-library.add(faCoffee);
+library.add(faFire);
+library.add(faDollarSign);
+library.add(faHashtag);
+library.add(faCog);
 library.add(faSpinner);
+library.add(faClock);
+library.add(faSearch);
+library.add(faBalanceScale);
+library.add(faStar);
+library.add(faUserClock);
 
 createApp(App)
   .use(store)
