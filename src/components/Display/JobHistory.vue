@@ -1,30 +1,6 @@
 <template>
   <div class="background">
     <div class="search">
-      <div
-        class="search button recommend"
-        v-bind:class="{ selected: state.recommend }"
-        @click="selectRecommend()"
-      >
-        <div class="search icon"><i class="fa fa-star"></i></div>
-        Recommend
-      </div>
-      <div
-        class="search button available"
-        v-bind:class="{ selected: state.available }"
-        @click="selectAvailable()"
-      >
-        <div class="search icon"><i class="fas fa-balance-scale"></i></div>
-        Available
-      </div>
-      <div
-        class="search button check-post"
-        v-bind:class="{ selected: state.posted }"
-        @click="selectPosted()"
-      >
-        <div class="search icon"><i class="fa fa-user-clock"></i></div>
-        Posted
-      </div>
       <select
         class="sorter box-1"
         v-model="state.selectedSort"
@@ -184,55 +160,6 @@ export default defineComponent({
       sortJobs();
     }
 
-    async function fetchRecommend() {
-      store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter(
-        (job) => job.level - state.level > -2 && job.level - state.level < 1,
-      );
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'Recommendation from us is based on your level. Please take a look!',
-      );
-      return response;
-    }
-
-    async function fetchAvailable() {
-      store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter((job) => job.state === 1);
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'Be careful! Though you can take any job, you might not be able to complete it easily.',
-      );
-      return response;
-    }
-
-    async function fetchPosted() {
-      store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter(
-        (job) => job.state === 2 && job.taker === userAddress.value.user,
-      );
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'You should contact your job taker as soon as possible.',
-      );
-      return response;
-    }
-
     async function fetchTitle() {
       store.dispatch('User/setDialog', 'Please wait!');
       const response = await fetch(
@@ -247,25 +174,6 @@ export default defineComponent({
       return response;
     }
 
-    async function selectAvailable() {
-      state.recommend = false;
-      state.available = true;
-      state.posted = false;
-      const data = await fetchAvailable();
-    }
-    async function selectRecommend() {
-      state.recommend = true;
-      state.available = false;
-      state.posted = false;
-      const data = await fetchRecommend();
-    }
-    async function selectPosted() {
-      state.recommend = false;
-      state.available = false;
-      state.posted = true;
-      const data = await fetchPosted();
-    }
-
     async function findJobs() {
       console.log(state.searchTitle);
 
@@ -275,9 +183,6 @@ export default defineComponent({
     return {
       state,
       userAddress,
-      selectAvailable,
-      selectPosted,
-      selectRecommend,
       findJobs,
       changedSort,
     };

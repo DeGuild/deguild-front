@@ -35,10 +35,10 @@ export default defineComponent({
 }
 .npc {
   position: absolute;
-  width: 30vw;
-  height: 30vw;
+  width: 25vw;
+  height: 25vw;
   left: 2vw;
-  top: 11.563vw;
+  top: 11vw;
 
   background: url('../../assets/npc.webp');
   background-size: cover;

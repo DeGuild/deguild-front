@@ -4,12 +4,11 @@ export const UserModule = {
   state: {
     user: null,
     owner: false,
-    scrollList: null,
+    jobList: null,
     approval: false,
-    selectedScroll: null,
-    scrollToFetch: null,
+    jobToFetch: null,
     fetching: false,
-    dialog: "Welcome to Mona's shop",
+    dialog: 'Welcome to DeGuild!',
   },
   mutations: {
     SET_USER(state, user) {
@@ -21,14 +20,11 @@ export const UserModule = {
     SET_OWNER(state, bool) {
       state.owner = bool;
     },
-    SET_SCROLL_LIST(state, list) {
-      state.scrollList = list;
+    SET_JOB_LIST(state, list) {
+      state.jobList = list;
     },
-    SET_SCROLL_SELECTED(state, scroll) {
-      state.selectedScroll = scroll;
-    },
-    SET_SCROLL_TO_FETCH(state, scroll) {
-      state.scrollToFetch = scroll;
+    SET_JOB_TO_FETCH(state, scroll) {
+      state.jobToFetch = scroll;
     },
     SET_DIALOG(state, text) {
       state.dialog = text;
@@ -41,12 +37,11 @@ export const UserModule = {
     reset({ commit }) {
       commit('SET_USER', null);
       commit('SET_OWNER', false);
-      commit('SET_SCROLL_LIST', null);
+      commit('SET_JOB_LIST', null);
       commit('SET_APPROVAL', false);
-      commit('SET_SCROLL_SELECTED', null);
-      commit('SET_SCROLL_TO_FETCH', null);
+      commit('SET_JOB_TO_FETCH', null);
       commit('SET_FETCHING', false);
-      commit('SET_DIALOG', "Welcome to Mona's shop");
+      commit('SET_DIALOG', 'Welcome to DeGuild!');
     },
     setUser({ commit }, user) {
       commit('SET_USER', user);
@@ -63,14 +58,11 @@ export const UserModule = {
     setFetching({ commit }, bool) {
       commit('SET_FETCHING', bool);
     },
-    setMagicScrolls({ commit }, scrolls) {
-      commit('SET_SCROLL_LIST', scrolls);
+    setJobs({ commit }, scrolls) {
+      commit('SET_JOB_LIST', scrolls);
     },
-    setSelectedMagicScroll({ commit }, scroll) {
-      commit('SET_SCROLL_SELECTED', scroll);
-    },
-    setMagicScrollToFetch({ commit }, scroll) {
-      commit('SET_SCROLL_TO_FETCH', scroll);
+    setJobToFetch({ commit }, scroll) {
+      commit('SET_JOB_TO_FETCH', scroll);
     },
   },
   modules: {},
