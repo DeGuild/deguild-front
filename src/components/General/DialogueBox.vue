@@ -1,7 +1,7 @@
 <template>
-  <div class="dialog" v-bind:class="{ smaller: state.dialogStyle }"></div>
+  <div class="dialog"></div>
   <div class="dialog-text">
-    <h5>{{ state.dialog }}</h5>
+    <p v-bind:class="{ smaller: state.dialogStyle }">{{ state.dialog }}</p>
   </div>
 </template>
 
@@ -14,9 +14,9 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const state = reactive({
-      // dialog: computed(() => store.state.User.dialog),
-      dialog: 'test!est!test!test!test!',
-      dialogStyle: computed(() => store.state.User.dialog.length > 70),
+      dialog: computed(() => store.state.User.dialog),
+      // dialog: 'test!est!test!test!test!',
+      dialogStyle: computed(() => store.state.User.dialog.length > 80),
     });
 
     return {
@@ -40,17 +40,19 @@ export default defineComponent({
   /* Hi! How can I help you? */
 
   position: absolute;
-  width: 55vw;
+  width: 52vw;
   height: 8vw;
-  left: 2vw;
+  left: 3.5vw;
 
   font-family: Secular One;
   font-style: normal;
   font-weight: normal;
-  font-size: 2vw;
-  line-height: 3vw;
-  align-content: center;
+  font-size: 1.5vw;
+  // line-height: 3vw;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  vertical-align: middle;
   // background: red;
   overflow: hidden;
   text-overflow: ellipsis;

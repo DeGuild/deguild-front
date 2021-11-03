@@ -185,6 +185,7 @@ export default defineComponent({
     }
 
     async function fetchRecommend() {
+      store.dispatch('User/setDialog', 'Please wait!');
       const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
@@ -193,21 +194,30 @@ export default defineComponent({
         (job) => job.level - state.level > -2 && job.level - state.level < 1,
       );
       changedSort();
+      store.dispatch(
+        'User/setDialog',
+        'Recommendation from us is based on your level. Please take a look!',
+      );
       return response;
     }
 
     async function fetchAvailable() {
+      store.dispatch('User/setDialog', 'Please wait!');
       const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
       );
       state.jobs = mockJobs.filter((job) => job.state === 1);
       changedSort();
-
+      store.dispatch(
+        'User/setDialog',
+        'Be careful! Though you can take any job, you might not be able to complete it easily.',
+      );
       return response;
     }
 
     async function fetchPosted() {
+      store.dispatch('User/setDialog', 'Please wait!');
       const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
@@ -216,17 +226,24 @@ export default defineComponent({
         (job) => job.state === 2 && job.taker === userAddress.value.user,
       );
       changedSort();
-
+      store.dispatch(
+        'User/setDialog',
+        'You should contact your job taker as soon as possible.',
+      );
       return response;
     }
 
     async function fetchTitle() {
+      store.dispatch('User/setDialog', 'Please wait!');
       const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
       );
       changedSort();
-
+      store.dispatch(
+        'User/setDialog',
+        `Here is the list of job titles starting with ${state.searchTitle}.`,
+      );
       return response;
     }
 

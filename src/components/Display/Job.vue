@@ -102,11 +102,13 @@ export default defineComponent({
       console.log('Taking this job!');
       console.log(this.job.image);
       state.smaller = !state.smaller;
+      store.dispatch(
+        'User/setDialog',
+        'Please wait and I will tell the client that you will be taking this job!',
+      );
     }
 
     function extend() {
-      console.log(userAddress.value.user);
-      console.log(this.job.taker);
       state.smaller = !state.smaller;
     }
 
