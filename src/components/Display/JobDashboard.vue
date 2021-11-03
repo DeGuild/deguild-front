@@ -25,22 +25,35 @@
         <div class="search icon"><i class="fa fa-user-clock"></i></div>
         Posted
       </div>
-      <select class="sorter box-1" name="cars" id="cars">
-        <option value="volvo">ID</option>
-        <option value="saab">REWARD</option>
-        <option value="opel">DIFFICULTY</option>
-        <option value="audi">LEVEL</option>
+      <select
+        class="sorter box-1"
+        v-model="state.selectedSort"
+        @change="changedSort()"
+      >
+        <option value="id">ID</option>
+        <option value="reward">REWARD</option>
+        <option value="difficulty">DIFFICULTY</option>
+        <option value="level">LEVEL</option>
       </select>
-      <select class="sorter box-2" name="cars" id="cars">
-        <option value="volvo">Ascending</option>
-        <option value="saab">Descending</option>
+      <select
+        class="sorter box-2"
+        v-model="state.selectedOrder"
+        @change="changedSort()"
+      >
+        <option value="asc">Ascending</option>
+        <option value="dsc">Descending</option>
       </select>
       <div class="sorter text"><h2>Sort By</h2></div>
 
       <div class="searcher icon">
         <p><i class="fa fa-search" aria-hidden="true"></i></p>
       </div>
-      <input class="searcher" placeholder="Search job title" />
+      <input
+        class="searcher"
+        v-model="state.searchTitle"
+        @keyup.enter="findJobs()"
+        placeholder="Search job title"
+      />
     </div>
     <div class="display">
       <br />
@@ -67,22 +80,38 @@ export default defineComponent({
     const userAddress = computed(() => store.state.User);
     const mockJobs = [
       {
-        id: 1,
+        id: 0,
         level: 5,
         time: 365,
-        reward: 80000,
-        difficulty: 4,
+        reward: 800,
+        difficulty: 1,
         image:
           'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
         title: 'Do something!',
-        client: 'who?',
+        client: userAddress.value.user,
         description:
           'I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
+        state: 1,
+        taker: '',
       },
       {
         id: 1,
-        level: 5,
+        level: 10,
+        time: 365,
+        reward: 8000,
+        difficulty: 2,
+        image: '',
+        title: 'Do something!',
+        client: 'who?',
+        description: 'I have no idea you have to figure this out!',
+        skills: ['skilla', 'skillb'],
+        state: 2,
+        taker: userAddress.value.user,
+      },
+      {
+        id: 2,
+        level: 8,
         time: 365,
         reward: 80000,
         difficulty: 4,
@@ -91,10 +120,12 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
+        state: 1,
+        taker: '',
       },
       {
-        id: 1,
-        level: 5,
+        id: 3,
+        level: 8,
         time: 365,
         reward: 80000,
         difficulty: 4,
@@ -103,33 +134,119 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
+        state: 1,
+        taker: '',
+      },
+      {
+        id: 8,
+        level: 8,
+        time: 365,
+        reward: 80000,
+        difficulty: 4,
+        image: '',
+        title: 'Do something!',
+        client: 'who?',
+        description: 'I have no idea you have to figure this out!',
+        skills: ['skilla', 'skillb'],
+        state: 1,
+        taker: '',
       },
     ];
 
-    function sortJobs() {
-      return mockJobs;
-    }
     const state = reactive({
-      jobs: computed(() => sortJobs()),
+      jobs: mockJobs,
       recommend: false,
       available: true,
       posted: false,
+      selectedOrder: 'asc',
+      selectedSort: 'id',
+      searchTitle: null,
+      level: 5,
     });
 
-    function selectAvailable() {
+    function sortJobs() {
+      if (state.selectedOrder === 'asc') {
+        state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
+          > parseInt(b[state.selectedSort], 10)
+          ? 1
+          : -1));
+      } else {
+        state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
+          < parseInt(b[state.selectedSort], 10)
+          ? 1
+          : -1));
+      }
+    }
+
+    function changedSort() {
+      console.log(state.selectedOrder);
+      console.log(state.selectedSort);
+      sortJobs();
+    }
+
+    async function fetchRecommend() {
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
+        { mode: 'cors' },
+      );
+      state.jobs = mockJobs.filter(
+        (job) => job.level - state.level > -2 && job.level - state.level < 1,
+      );
+      return response;
+    }
+
+    async function fetchAvailable() {
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
+        { mode: 'cors' },
+      );
+      state.jobs = mockJobs.filter((job) => job.state === 1);
+      return response;
+    }
+
+    async function fetchPosted() {
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
+        { mode: 'cors' },
+      );
+      state.jobs = mockJobs.filter(
+        (job) => job.state === 2 && job.taker === userAddress.value.user,
+      );
+
+      return response;
+    }
+
+    async function fetchTitle() {
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
+        { mode: 'cors' },
+      );
+      return response;
+    }
+
+    async function selectAvailable() {
       state.recommend = false;
       state.available = true;
       state.posted = false;
+      const data = await fetchAvailable();
     }
-    function selectRecommend() {
+    async function selectRecommend() {
       state.recommend = true;
       state.available = false;
       state.posted = false;
+      const data = await fetchRecommend();
     }
-    function selectPosted() {
+    async function selectPosted() {
       state.recommend = false;
       state.available = false;
       state.posted = true;
+      const data = await fetchPosted();
+    }
+
+    async function findJobs() {
+      console.log(state.searchTitle);
+
+      const data = await fetchTitle();
     }
 
     return {
@@ -138,6 +255,8 @@ export default defineComponent({
       selectAvailable,
       selectPosted,
       selectRecommend,
+      findJobs,
+      changedSort,
     };
   },
 });
@@ -276,7 +395,7 @@ export default defineComponent({
 
   &.icon {
     width: 3vw;
-    height: 3.1vw;
+    height: 3.05vw;
     align-content: center;
     justify-content: center;
     right: 19vw;
@@ -328,20 +447,19 @@ export default defineComponent({
   }
   &.text {
     position: absolute;
-    height: 16px;
+    height: 1vw;
 
-    right: 35.5vw;
+    right: 36vw;
     top: 0.5vw;
     /* Roboto / OVERLINE */
     font-family: Roboto;
     font-style: normal;
     font-weight: 500;
-    font-size: 10px;
-    line-height: 16px;
+    font-size: 0.6vw;
+    line-height: 0vw;
     /* identical to box height, or 160% */
     display: flex;
     align-items: center;
-    letter-spacing: 1.5px;
     text-transform: uppercase;
 
     /* Gray / 50 */
