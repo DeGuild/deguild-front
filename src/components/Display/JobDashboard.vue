@@ -192,6 +192,7 @@ export default defineComponent({
       state.jobs = mockJobs.filter(
         (job) => job.level - state.level > -2 && job.level - state.level < 1,
       );
+      changedSort();
       return response;
     }
 
@@ -201,6 +202,8 @@ export default defineComponent({
         { mode: 'cors' },
       );
       state.jobs = mockJobs.filter((job) => job.state === 1);
+      changedSort();
+
       return response;
     }
 
@@ -212,6 +215,7 @@ export default defineComponent({
       state.jobs = mockJobs.filter(
         (job) => job.state === 2 && job.taker === userAddress.value.user,
       );
+      changedSort();
 
       return response;
     }
@@ -221,6 +225,8 @@ export default defineComponent({
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
       );
+      changedSort();
+
       return response;
     }
 
