@@ -219,6 +219,9 @@ export default defineComponent({
       }
     }
   }
+  &.button:hover {
+    background: rgba(108, 66, 27, 0.4);
+  }
 }
 .half-circle-spinner {
   box-sizing: border-box;
