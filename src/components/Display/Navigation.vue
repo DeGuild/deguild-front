@@ -98,6 +98,7 @@ export default defineComponent({
     padding-left: 0.5vw;
     color: black;
     cursor: pointer;
+    border-radius: 4px;
 
     &.job-list {
     transform: translateY(-50%);
@@ -105,7 +106,6 @@ export default defineComponent({
       font-weight: 600;
       background: #FDF1E3;
       color: #6C421B;
-      border-radius: 4px;
       }
     }
 
@@ -114,7 +114,6 @@ export default defineComponent({
         font-weight: 600;
         background: #FDF1E3;
         color: #6C421B;
-        border-radius: 4px;
       }
     }
 
@@ -124,13 +123,11 @@ export default defineComponent({
         font-weight: 600;
         background: #FDF1E3;
         color: #6C421B;
-        border-radius: 4px;
       }
     }
   }
   &.nav-select:hover {
     background: rgba(253, 241, 227, 0.6);
-    border-radius:4px;
   }
 }
 
