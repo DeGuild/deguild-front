@@ -3,14 +3,14 @@
     <div class="job background dark" v-bind:class="{ smaller: state.smaller }">
       <div
         class="job background light"
-        @click="dummy()"
+        @click="extend()"
         v-bind:class="{ smaller: state.smaller }"
       >
         <div class="block id">
           <div class="icon">
             <i class="fa fa-hashtag" aria-hidden="true"></i>
           </div>
-          <div class="icon value">{{this.job.id}}</div>
+          <div class="icon value">{{ this.job.id }}</div>
           <div class="icon label">
             <h5>ID</h5>
           </div>
@@ -20,7 +20,7 @@
           <div class="icon">
             <i class="fas fa-fire"></i>
           </div>
-          <div class="icon value">{{this.job.level}}</div>
+          <div class="icon value">{{ this.job.level }}</div>
           <div class="icon label">
             <h5>LEVEL</h5>
           </div>
@@ -29,7 +29,7 @@
           <div class="icon">
             <i class="fas fa-stopwatch"></i>
           </div>
-          <div class="icon value">{{this.job.time}} D</div>
+          <div class="icon value">{{ this.job.time }} D</div>
           <div class="icon label">
             <h5>TIME</h5>
           </div>
@@ -38,18 +38,35 @@
           <div class="icon">
             <i class="fas fa-hand-holding-usd"></i>
           </div>
-          <div class="icon value">{{this.job.reward}}</div>
+          <div class="icon value">{{ this.job.reward }}</div>
           <div class="icon label">
             <h5>REWARD</h5>
           </div>
         </div>
-        <div class="block difficulty"><p>Difficulty: ★★☆☆☆</p></div>
+        <div class="block difficulty">
+          <p>
+            Difficulty:
+            {{
+              '★'.repeat(this.job.difficulty) +
+              '☆'.repeat(5 - this.job.difficulty)
+            }}
+          </p>
+        </div>
         <img class="image" :src="this.job.image" />
         <div class="text">
-          <h4>{{this.job.title}}</h4>
+          <h4>{{ this.job.title }}</h4>
         </div>
-        <div class="text client"><p>{{this.job.client}}</p></div>
-        <h3 class="btn" @click="dummy()">CHECK</h3>
+        <div class="text client">
+          <p>{{ this.job.client }}</p>
+        </div>
+        <h3
+          class="btn"
+          @click="take()"
+          v-if="this.job.state === 2 && this.job.taker === state.user"
+        >
+          CHECK
+        </h3>
+        <h3 class="btn" @click="take()" v-if="this.job.state === 1">TAKE</h3>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
           <h2>JOB TITLE:</h2>
           <h4>{{ this.job.title }}</h4>
@@ -68,24 +85,38 @@
 /* eslint-disable max-len */
 
 import { defineComponent, reactive, computed } from 'vue';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'JobDisplay',
   props: ['job'],
   setup() {
+    const store = useStore();
+    const userAddress = computed(() => store.state.User);
     const state = reactive({
       smaller: true,
+      user: userAddress.value.user,
     });
 
-    function dummy() {
-      console.log('Tested!');
+    function take() {
+      console.log('Taking this job!');
       console.log(this.job.image);
+      state.smaller = !state.smaller;
+      store.dispatch(
+        'User/setDialog',
+        'Please wait and I will tell the client that you will be taking this job!',
+      );
+    }
+
+    function extend() {
       state.smaller = !state.smaller;
     }
 
     return {
       state,
-      dummy,
+      userAddress,
+      take,
+      extend,
     };
   },
 });
@@ -242,7 +273,7 @@ export default defineComponent({
 .text {
   position: absolute;
   width: 20vw;
-  height: 2vw;
+  height: 2.5vw;
   left: 5vw;
   top: 0vw;
 

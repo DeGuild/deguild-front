@@ -299,7 +299,7 @@ export default {
           // console.log(store.state.User.scrollList);
           store.dispatch(
             'User/setDialog',
-            'Great! So, what would you like to buy?',
+            'Hi there! So, what would you like to take?',
           );
 
           return true;
