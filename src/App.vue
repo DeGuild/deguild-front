@@ -18,7 +18,7 @@
 
 <style lang="scss">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif, 'Roboto';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -26,7 +26,7 @@
   color: $primary;
 }
 body {
-  background-image: url('assets/bg.webp');
+  background-image: url('assets/bg 1920.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;

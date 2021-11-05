@@ -15,6 +15,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
 import '@fontsource/secular-one';
+import '@fontsource/roboto';
 import 'viewerjs/dist/viewer.css';
 import VueSocialSharing from 'vue-social-sharing';
 import '@/plugins/firebase';

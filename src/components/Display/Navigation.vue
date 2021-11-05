@@ -2,31 +2,33 @@
   <div class="background">
     <div class="nav">
       <div
-        class="nav nav-select job-list"
+        class="nav nav-select job-list icon"
         v-bind:class="{ selected: state.jobList }"
         @click="selectJobList()"
       >
-      <i class="fa fa-book">
-        Job list
-      </i>
+        <i class="fa fa-book"> </i>        Job list
+
       </div>
+      <!-- <div
+        class="nav nav-select job-list text"
+        v-bind:class="{ selected: state.jobList }"
+        @click="selectJobList()"
+      >
+        Job list
+      </div> -->
       <div
         class="nav nav-select my-tasks"
         v-bind:class="{ selected: state.myTasks }"
         @click="selectMyTasks()"
       >
-      <i class="fa fa-address-card">
-      My Tasks
-      </i>
+        <i class="fa fa-address-card"> </i> My Tasks
       </div>
       <div
         class="nav nav-select job-history"
         v-bind:class="{ selected: state.jobHistory }"
         @click="selectJobHistory()"
       >
-      <i class="fa fa-history">
-      Job History
-      </i>
+        <i class="fa fa-history"> </i> Job History
       </div>
     </div>
   </div>
@@ -75,7 +77,7 @@ export default defineComponent({
   width: 18.646vw;
   height: 16.563vw;
   left: 6.823vw;
-  top: 35vw;
+  bottom: 1vw;
   position: absolute;
   overflow: auto;
   background-size: cover;
@@ -84,7 +86,9 @@ export default defineComponent({
 .nav {
   left: 1.5vw;
   top: 2.5vw;
-  position:relative;
+  position: relative;
+  width: 0vw;
+  height: 0vw;
 
   &.nav-select {
     width: 12vw;
@@ -101,28 +105,32 @@ export default defineComponent({
     border-radius: 4px;
 
     &.job-list {
-    transform: translateY(-50%);
+      transform: translateY(-50%);
+      &.icon{
+      }
+      &.text{
+      }
       &.selected {
-      font-weight: 600;
-      background: #FDF1E3;
-      color: #6C421B;
-      }
-    }
-
-    &.my-tasks{
-      &.selected{
         font-weight: 600;
-        background: #FDF1E3;
-        color: #6C421B;
+        background: #fdf1e3;
+        color: #6c421b;
       }
     }
 
-    &.job-history{
+    &.my-tasks {
+      &.selected {
+        font-weight: 600;
+        background: #fdf1e3;
+        color: #6c421b;
+      }
+    }
+
+    &.job-history {
       transform: translateY(50%);
-      &.selected{
+      &.selected {
         font-weight: 600;
-        background: #FDF1E3;
-        color: #6C421B;
+        background: #fdf1e3;
+        color: #6c421b;
       }
     }
   }
@@ -130,5 +138,4 @@ export default defineComponent({
     background: rgba(253, 241, 227, 0.6);
   }
 }
-
 </style>

@@ -288,25 +288,25 @@ export default defineComponent({
 <style scoped lang="scss">
 .background {
   width: 63vw;
-  height: 42vw;
+  height: 38.5vw;
   position: absolute;
   background: url('../../assets/dashboard-bg.webp');
   left: 35vw;
-  top: 9vw;
+  bottom: 0vw;
   overflow: auto;
   background-size: cover;
   background-repeat: no-repeat;
 }
 .display {
   width: 61vw;
-  height: 37vw;
+  height: 33.3vw;
   position: absolute;
   left: 1vw;
-  top: 5vw;
+  top: 5.2vw;
   overflow: auto;
 }
 .search {
-  width: 61vw;
+  width: 61.05vw;
   height: 4.2vw;
   top: 1vw;
   left: 1vw;
@@ -475,7 +475,7 @@ export default defineComponent({
     position: absolute;
     height: 1vw;
 
-    right: 36vw;
+    right: 36.8vw;
     top: 0.5vw;
     /* Roboto / OVERLINE */
     font-family: Roboto;

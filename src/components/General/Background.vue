@@ -28,7 +28,7 @@ export default defineComponent({
   width: 35vw;
   height: 19vw;
   left: -2vw;
-  top: 32vw;
+  bottom: 0vw;
 
   background: url('../../assets/counter.webp');
   background-size: cover;
@@ -38,7 +38,7 @@ export default defineComponent({
   width: 25vw;
   height: 25vw;
   left: 2vw;
-  top: 11vw;
+  bottom: 14vw;
 
   background: url('../../assets/npc.webp');
   background-size: cover;
