@@ -6,8 +6,7 @@
         v-bind:class="{ selected: state.jobList }"
         @click="selectJobList()"
       >
-        <i class="fa fa-book"> </i>        Job list
-
+        <i class="fa fa-book"> </i> Job list
       </div>
       <!-- <div
         class="nav nav-select job-list text"
@@ -35,30 +34,27 @@
 </template>
 
 <script>
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default defineComponent({
   setup() {
     const state = reactive({
-      jobList: true,
-      myTasks: false,
-      jobHistory: false,
+      jobList: computed(() => useRoute().name === 'Home'),
+      myTasks: computed(() => useRoute().name === 'Task'),
+      jobHistory: computed(() => useRoute().name === 'History'),
     });
 
+    console.log(useRoute().name);
+
     function selectJobList() {
-      state.jobList = true;
-      state.myTasks = false;
-      state.jobHistory = false;
+      this.$router.push('/');
     }
     function selectMyTasks() {
-      state.jobList = false;
-      state.myTasks = true;
-      state.jobHistory = false;
+      this.$router.push('/task');
     }
     function selectJobHistory() {
-      state.jobList = false;
-      state.myTasks = false;
-      state.jobHistory = true;
+      this.$router.push('/history');
     }
 
     return {
@@ -106,9 +102,9 @@ export default defineComponent({
 
     &.job-list {
       transform: translateY(-50%);
-      &.icon{
+      &.icon {
       }
-      &.text{
+      &.text {
       }
       &.selected {
         font-weight: 600;

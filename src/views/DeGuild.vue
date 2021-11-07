@@ -6,7 +6,6 @@
 
     <job-dashboard></job-dashboard>
     <profile />
-    <navigation></navigation>
 
     <div v-if="wallet === true"></div>
     <div v-if="wallet !== true">
@@ -28,7 +27,6 @@ import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
 import JobDashboard from '../components/Display/JobDashboard.vue';
 import Profile from '../components/Buttons/Profile.vue';
-import Navigation from '../components/Display/Navigation.vue';
 // @ is an alias to /src
 
 export default {
@@ -42,7 +40,7 @@ export default {
     DialogueBox,
     JobDashboard,
     Profile,
-    Navigation,
+    // Navigation,
   },
   setup() {
     const store = useStore();
