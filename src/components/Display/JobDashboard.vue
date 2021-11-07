@@ -302,15 +302,15 @@ export default defineComponent({
 }
 .display {
   width: 61vw;
-  height: 69vh;
+  height: 68vh;
   position: absolute;
   left: 1vw;
-  top: 5.2vw;
+  top: 10vh;
   overflow: auto;
 }
 .search {
   width: 61.05vw;
-  height: 4.2vw;
+  height: 8vh;
   top: 1vw;
   left: 1vw;
   position: relative;

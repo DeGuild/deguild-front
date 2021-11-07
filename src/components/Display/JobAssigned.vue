@@ -63,9 +63,17 @@
           <h3>JOB DESCRIPTION:</h3>
           <h5>{{ this.job.description }}</h5>
         </div>
+        <h3 class="badge" v-if="state.submitted">
+          <h1 class="fas fa-user-clock"></h1>
+        </h3>
         <div class="text status">
-          <h4>STATUS: {{ this.job.title }}</h4>
-          <h4 class="text due-date">DUE DATE: {{ this.job.skills }}</h4>
+          <h4>STATUS: {{ this.job.status }}</h4>
+          <h4 class="text due-date">
+            DUE DATE: {{ this.job.deadline.getDate() }} /
+            {{ this.job.deadline.getMonth() + 1 }} /
+            {{ this.job.deadline.getFullYear() }}, &nbsp;
+            {{ state.time }}
+          </h4>
         </div>
         <div class="custom-file-upload">
           <label for="file-upload" class="custom-file-upload button">
@@ -116,26 +124,26 @@ import {
 export default defineComponent({
   name: 'JobAssigned',
   props: ['job'],
-  setup() {
+  setup(props) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
+    const isSubmitted = computed(() => props.job.submitted);
+    const hour = computed(() => (props.job.deadline.getHours() <= 9
+      ? `0${props.job.deadline.getHours()}`
+      : props.job.deadline.getHours()));
+    const minutes = computed(() => (props.job.deadline.getMinutes() <= 9
+      ? `0${props.job.deadline.getMinutes()}`
+      : props.job.deadline.getMinutes()));
+    console.log(isSubmitted);
     const state = reactive({
       user: userAddress.value.user,
       uploadValue: 0,
       fileName: 'Click to upload file',
       zipData: null,
       uploading: false,
+      submitted: isSubmitted.value,
+      time: `${hour.value}:${minutes.value}`,
     });
-
-    function submit() {
-      console.log('Submitting this job!');
-      console.log(this.job.image);
-      state.smaller = !state.smaller;
-      store.dispatch(
-        'User/setDialog',
-        'Please wait and I will tell the client that you will be taking this job!',
-      );
-    }
 
     function previewZipName(event) {
       console.log('File changed!');
@@ -185,6 +193,9 @@ export default defineComponent({
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             console.log('File available at', downloadURL);
           });
+          state.submitted = true;
+          console.log(state.submitted);
+
           // state.uploading = false;
         },
       );
@@ -193,7 +204,6 @@ export default defineComponent({
     return {
       state,
       userAddress,
-      submit,
       previewZipName,
       onUpload,
     };
@@ -415,6 +425,26 @@ export default defineComponent({
   &:hover {
     background: #ffd19d;
   }
+}
+.badge {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  right: 1vw;
+  top: 1vw;
+  width: 4vw;
+  height: 4vw;
+  font-family: Roboto;
+  color: #754d28;
+  background: #f8d7b0;
+  font-size: 0.8vw;
+  font-weight: 500;
+
+  cursor: unset;
+  border-radius: 50%;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 }
 .icon {
   // background-color: red;

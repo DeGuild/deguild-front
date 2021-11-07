@@ -36,6 +36,9 @@ export default defineComponent({
       skills: ['skilla', 'skillb'],
       state: 2,
       taker: '',
+      submitted: false,
+      deadline: new Date(1555650125 * 1000),
+      status: 'No submission',
     };
     const state = reactive({
       job: mockJob,

@@ -192,9 +192,9 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .background {
-  -webkit-box-shadow: inset 0px 0px 0px 1vw #6C421B;
-  -moz-box-shadow: inset 0px 0px 0px 1vw #6C421B;
-  box-shadow: inset 0px 0px 0px 1vw #6C421B;
+  -webkit-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  -moz-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  box-shadow: inset 0px 0px 0px 1vw #6c421b;
   width: 63vw;
   height: 80vh;
   position: absolute;
@@ -207,15 +207,15 @@ export default defineComponent({
 }
 .display {
   width: 61vw;
-  height: 69vh;
+  height: 68vh;
   position: absolute;
   left: 1vw;
-  top: 5.2vw;
+  top: 10vh;
   overflow: auto;
 }
 .search {
   width: 61.05vw;
-  height: 4.2vw;
+  height: 8vh;
   top: 1vw;
   left: 1vw;
   position: relative;
