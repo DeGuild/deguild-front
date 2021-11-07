@@ -6,28 +6,21 @@
         v-bind:class="{ selected: state.jobList }"
         @click="selectJobList()"
       >
-        <i class="fa fa-book"> </i> Job list
+        <i class="fa fa-book"> </i> <span class="nav nav-select text">Job List</span>
       </div>
-      <!-- <div
-        class="nav nav-select job-list text"
-        v-bind:class="{ selected: state.jobList }"
-        @click="selectJobList()"
-      >
-        Job list
-      </div> -->
       <div
         class="nav nav-select my-tasks"
         v-bind:class="{ selected: state.myTasks }"
         @click="selectMyTasks()"
       >
-        <i class="fa fa-address-card"> </i> My Tasks
+        <i class="fa fa-address-card"> </i> <span class="nav nav-select text">My Task</span>
       </div>
       <div
         class="nav nav-select job-history"
         v-bind:class="{ selected: state.jobHistory }"
         @click="selectJobHistory()"
       >
-        <i class="fa fa-history"> </i> Job History
+        <i class="fa fa-history"> </i> <span class="nav nav-select text">Job History</span>
       </div>
     </div>
   </div>
@@ -102,10 +95,6 @@ export default defineComponent({
 
     &.job-list {
       transform: translateY(-50%);
-      &.icon {
-      }
-      &.text {
-      }
       &.selected {
         font-weight: 600;
         background: #fdf1e3;
@@ -127,6 +116,17 @@ export default defineComponent({
         font-weight: 600;
         background: #fdf1e3;
         color: #6c421b;
+      }
+    }
+
+    &.text{
+      position: absolute;
+      width: 9vw;
+      left: 3vw;
+      top: 0vw;
+
+      &:hover{
+        background: unset;
       }
     }
   }

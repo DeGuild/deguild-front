@@ -11,6 +11,7 @@ import {
   faStar,
   faUserClock,
   faBalanceScale,
+  faPaperclip,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -34,6 +35,7 @@ library.add(faSearch);
 library.add(faBalanceScale);
 library.add(faStar);
 library.add(faUserClock);
+library.add(faPaperclip);
 
 createApp(App)
   .use(store)
