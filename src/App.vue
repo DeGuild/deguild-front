@@ -14,11 +14,32 @@
   <!-- <footer></footer> -->
 
   <router-view />
+  <navigation v-if="user"></navigation>
 </template>
+<script>
+import { useStore } from 'vuex';
+import { computed } from 'vue';
+import Navigation from '@/components/General/Navigation.vue';
+// @ is an alias to /src
 
+export default {
+  name: 'App',
+  components: {
+    Navigation,
+  },
+  setup() {
+    const store = useStore();
+    const user = computed(() => store.state.User.user);
+    const wallet = computed(() => store.state.User.approval);
+    // console.log(store.state.User.user);
+    // console.log(user);
+    return { user, wallet };
+  },
+};
+</script>
 <style lang="scss">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif, 'Roboto';
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

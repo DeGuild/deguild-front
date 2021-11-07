@@ -6,59 +6,48 @@
         v-bind:class="{ selected: state.jobList }"
         @click="selectJobList()"
       >
-        <i class="fa fa-book"> </i>        Job list
-
+        <i class="fa fa-book"> </i> <span class="nav nav-select text">Job List</span>
       </div>
-      <!-- <div
-        class="nav nav-select job-list text"
-        v-bind:class="{ selected: state.jobList }"
-        @click="selectJobList()"
-      >
-        Job list
-      </div> -->
       <div
         class="nav nav-select my-tasks"
         v-bind:class="{ selected: state.myTasks }"
         @click="selectMyTasks()"
       >
-        <i class="fa fa-address-card"> </i> My Tasks
+        <i class="fa fa-address-card"> </i> <span class="nav nav-select text">My Task</span>
       </div>
       <div
         class="nav nav-select job-history"
         v-bind:class="{ selected: state.jobHistory }"
         @click="selectJobHistory()"
       >
-        <i class="fa fa-history"> </i> Job History
+        <i class="fa fa-history"> </i> <span class="nav nav-select text">Job History</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default defineComponent({
   setup() {
     const state = reactive({
-      jobList: true,
-      myTasks: false,
-      jobHistory: false,
+      jobList: computed(() => useRoute().name === 'Home'),
+      myTasks: computed(() => useRoute().name === 'Task'),
+      jobHistory: computed(() => useRoute().name === 'History'),
     });
 
+    console.log(useRoute().name);
+
     function selectJobList() {
-      state.jobList = true;
-      state.myTasks = false;
-      state.jobHistory = false;
+      this.$router.push('/');
     }
     function selectMyTasks() {
-      state.jobList = false;
-      state.myTasks = true;
-      state.jobHistory = false;
+      this.$router.push('/task');
     }
     function selectJobHistory() {
-      state.jobList = false;
-      state.myTasks = false;
-      state.jobHistory = true;
+      this.$router.push('/history');
     }
 
     return {
@@ -106,10 +95,6 @@ export default defineComponent({
 
     &.job-list {
       transform: translateY(-50%);
-      &.icon{
-      }
-      &.text{
-      }
       &.selected {
         font-weight: 600;
         background: #fdf1e3;
@@ -131,6 +116,17 @@ export default defineComponent({
         font-weight: 600;
         background: #fdf1e3;
         color: #6c421b;
+      }
+    }
+
+    &.text{
+      position: absolute;
+      width: 9vw;
+      left: 3vw;
+      top: 0vw;
+
+      &:hover{
+        background: unset;
       }
     }
   }

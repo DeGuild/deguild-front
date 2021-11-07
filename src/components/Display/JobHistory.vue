@@ -50,7 +50,7 @@ import Job from './Job.vue';
 
 export default defineComponent({
   components: { Job },
-  name: 'JobDashboard',
+  name: 'JobHistory',
   setup() {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
@@ -68,7 +68,7 @@ export default defineComponent({
         description:
           'I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
-        state: 1,
+        state: 3,
         taker: '',
       },
       {
@@ -82,7 +82,7 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
-        state: 2,
+        state: 3,
         taker: userAddress.value.user,
       },
       {
@@ -96,7 +96,7 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
-        state: 1,
+        state: 3,
         taker: '',
       },
       {
@@ -110,7 +110,7 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
-        state: 1,
+        state: 3,
         taker: '',
       },
       {
@@ -124,7 +124,7 @@ export default defineComponent({
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
-        state: 1,
+        state: 3,
         taker: '',
       },
     ];
@@ -192,27 +192,30 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .background {
+  -webkit-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  -moz-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  box-shadow: inset 0px 0px 0px 1vw #6c421b;
   width: 63vw;
-  height: 42vw;
+  height: 80vh;
   position: absolute;
-  background: url('../../assets/dashboard-bg.webp');
+  background: url('../../assets/dashboard-bg.png');
   left: 35vw;
-  top: 9vw;
+  bottom: 0vw;
   overflow: auto;
   background-size: cover;
   background-repeat: no-repeat;
 }
 .display {
   width: 61vw;
-  height: 37vw;
+  height: 68vh;
   position: absolute;
   left: 1vw;
-  top: 5vw;
+  top: 10vh;
   overflow: auto;
 }
 .search {
-  width: 61vw;
-  height: 4.2vw;
+  width: 61.05vw;
+  height: 8vh;
   top: 1vw;
   left: 1vw;
   position: relative;
@@ -265,6 +268,9 @@ export default defineComponent({
         background: #6c421b;
       }
     }
+  }
+  &.button:hover {
+    background: rgba(108, 66, 27, 0.4);
   }
 }
 .half-circle-spinner {
@@ -377,7 +383,7 @@ export default defineComponent({
     position: absolute;
     height: 1vw;
 
-    right: 36vw;
+    right: 36.8vw;
     top: 0.5vw;
     /* Roboto / OVERLINE */
     font-family: Roboto;

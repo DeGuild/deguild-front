@@ -2,8 +2,11 @@
   <background />
   <connect-wallet />
   <div v-if="user !== null">
-    <div v-if="wallet === true">
-    </div>
+    <dialogue-box></dialogue-box>
+    <job-current></job-current>
+    <profile />
+
+    <div v-if="wallet === true"></div>
     <div v-if="wallet !== true">
       <approve-modal></approve-modal>
       <approve-wallet></approve-wallet>
@@ -20,16 +23,23 @@ import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
+import DialogueBox from '../components/General/DialogueBox.vue';
+import Profile from '../components/Buttons/Profile.vue';
+import JobCurrent from '../components/Display/JobCurrent.vue';
+// import Navigation from '../components/Display/Navigation.vue';
 // @ is an alias to /src
 
 export default {
-  name: 'ConnectWalletSite',
+  name: 'MyTaskSite',
   components: {
     ConnectWallet,
     Background,
     NoWallet,
     ApproveModal,
     ApproveWallet,
+    DialogueBox,
+    Profile,
+    JobCurrent,
   },
   setup() {
     const store = useStore();
