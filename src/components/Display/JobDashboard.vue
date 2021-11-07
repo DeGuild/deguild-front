@@ -287,10 +287,13 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .background {
+  -webkit-box-shadow: inset 0px 0px 0px 1vw #6C421B;
+  -moz-box-shadow: inset 0px 0px 0px 1vw #6C421B;
+  box-shadow: inset 0px 0px 0px 1vw #6C421B;
   width: 63vw;
-  height: 38.5vw;
+  height: 80vh;
   position: absolute;
-  background: url('../../assets/dashboard-bg.webp');
+  background: url('../../assets/dashboard-bg.png');
   left: 35vw;
   bottom: 0vw;
   overflow: auto;
@@ -299,7 +302,7 @@ export default defineComponent({
 }
 .display {
   width: 61vw;
-  height: 33.3vw;
+  height: 69vh;
   position: absolute;
   left: 1vw;
   top: 5.2vw;
