@@ -50,6 +50,9 @@ export const UserModule = {
     SET_FETCHING(state, bool) {
       state.fetching = bool;
     },
+    SET_OVERLAY(state, bool) {
+      state.overlay = bool;
+    },
   },
   actions: {
     reset({ commit }) {
@@ -81,6 +84,9 @@ export const UserModule = {
     },
     setJobToFetch({ commit }, scroll) {
       commit('SET_JOB_TO_FETCH', scroll);
+    },
+    setOverlay({ commit }, bool) {
+      commit('SET_OVERLAY', bool);
     },
   },
   modules: {},

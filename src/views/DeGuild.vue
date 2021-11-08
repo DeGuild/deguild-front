@@ -1,12 +1,12 @@
 <template>
-  <!-- <background /> -->
+  <background v-if="!overlay" />
   <connect-wallet />
 
   <div v-if="user !== null">
     <job-dashboard></job-dashboard>
     <profile />
     <overlay v-if="overlay"> </overlay>
-    <job-review :job="reviewJob"></job-review>
+    <job-review :job="reviewJob" v-if="overlay"></job-review>
 
     <dialogue-box></dialogue-box>
 
@@ -24,7 +24,7 @@ import { useStore } from 'vuex';
 import { computed } from 'vue';
 import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
-// import Background from '../components/General/Background.vue';
+import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
@@ -38,7 +38,7 @@ export default {
   name: 'DeGuildSite',
   components: {
     ConnectWallet,
-    // Background,
+    Background,
     NoWallet,
     ApproveModal,
     ApproveWallet,

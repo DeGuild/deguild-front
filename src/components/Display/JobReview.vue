@@ -5,6 +5,8 @@
         <div class="title">
           <i class="fa fa-eye"></i><span class="title header">Job Review</span>
         </div>
+        <div @click="closeOverlay()" class="close">X</div>
+
         <div class="info">
           <img class="image" :src="this.job.image" /><img />
           <span>
@@ -144,17 +146,45 @@ export default defineComponent({
       );
     }
 
+    function closeOverlay() {
+      store.dispatch(
+        'User/setOverlay',
+        false,
+      );
+    }
+
     return {
       state,
       userAddress,
       previewZipName,
       onUpload,
+      closeOverlay,
     };
   },
 });
 </script>
 
 <style scoped lang="scss">
+.close {
+  position: absolute;
+  background: unset;
+  right: 1vw;
+  top: 1vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 1vw;
+  height: 1vw;
+  font-family: Roboto;
+  font-style: normal;
+  color: #754d28;
+  font-size: 2vw;
+  font-weight: 500;
+
+  cursor: pointer;
+  border-radius: 10%;
+}
 .title {
   font-family: Roboto;
   font-style: normal;
@@ -197,7 +227,6 @@ export default defineComponent({
   font-size: 0.8vw;
   font-weight: 500;
   &.comment {
-
     margin-top: unset;
 
     width: 35vw;
@@ -206,7 +235,6 @@ export default defineComponent({
     font-size: 1vw;
   }
   &.say {
-
     margin-top: unset;
 
     margin-left: 2vw;
