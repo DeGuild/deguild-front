@@ -34,7 +34,8 @@
             >File
             namedddddddddddddddddddddddddddddsssssssssssssssssssssssssssssssssssssssssss</span
           >
-          <button class="btn">Download</button>
+
+          <a class="btn" :href="state.zipUrl" download>Download </a>
         </div>
         <div class="decision">
           <span>
@@ -59,12 +60,8 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from 'firebase/storage';
+
+const fs = require('fs');
 
 export default defineComponent({
   name: 'JobReview',
@@ -82,82 +79,33 @@ export default defineComponent({
     console.log(isSubmitted);
     const state = reactive({
       user: userAddress.value.user,
-      uploadValue: 0,
-      fileName: 'Click to upload file',
-      zipData: null,
-      uploading: false,
       submitted: isSubmitted.value,
       time: `${hour.value}:${minutes.value}`,
+      zipUrl:
+        'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/testing354848949494948949848.zip?alt=media&token=c9bee8d1-f436-4ff7-8600-c0608c457890',
     });
 
-    function previewZipName(event) {
-      console.log('File changed!');
-      state.uploadValue = 0;
-      const file = event.target.files[0];
-      console.log(file);
-      state.zipData = file;
-      state.fileName = file.name;
-    }
-
-    function onUpload() {
-      const storage = getStorage();
-      const storageRef = ref(storage, `${state.zipData.name}`);
-
-      const uploadTask = uploadBytesResumable(storageRef, state.zipData);
-
-      // Register three observers:
-      // 1. 'state_changed' observer, called any time the state changes
-      // 2. Error observer, called on failure
-      // 3. Completion observer, called on successful completion
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Observe state change events such as progress, pause, and resume
-          state.uploading = true;
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-          state.uploadValue = progress;
-          // eslint-disable-next-line default-case
-          switch (snapshot.state) {
-            case 'paused':
-              console.log('Upload is paused');
-              break;
-            case 'running':
-              console.log('Upload is running');
-              break;
-          }
-        },
-        (error) => {
-          // Handle unsuccessful uploads
-          console.log(error.message);
-          state.uploading = false;
-        },
-        () => {
-          // Handle successful uploads on complete
-          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-          });
-          state.submitted = true;
-          console.log(state.submitted);
-
-          // state.uploading = false;
-        },
-      );
+    async function onDownload(url, path) {
+      const res = await fetch(url, {
+        method: 'GET',
+        mode: 'no-cors',
+      });
+      const fileStream = fs.createWriteStream(path);
+      await new Promise((resolve, reject) => {
+        res.body.pipe(fileStream);
+        res.body.on('error', reject);
+        fileStream.on('finish', resolve);
+      });
     }
 
     function closeOverlay() {
-      store.dispatch(
-        'User/setOverlay',
-        false,
-      );
+      store.dispatch('User/setOverlay', false);
     }
 
     return {
       state,
       userAddress,
-      previewZipName,
-      onUpload,
+      onDownload,
       closeOverlay,
     };
   },
@@ -366,6 +314,7 @@ export default defineComponent({
   background: #fdf1e3;
   font-size: 0.8vw;
   font-weight: 500;
+  text-decoration: none;
 
   cursor: pointer;
   border-radius: 10%;

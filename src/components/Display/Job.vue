@@ -120,6 +120,7 @@ export default defineComponent({
 
     function review() {
       store.dispatch('User/setOverlay', true);
+      state.smaller = !state.smaller;
     }
 
     return {
