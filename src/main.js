@@ -12,6 +12,7 @@ import {
   faUserClock,
   faBalanceScale,
   faPaperclip,
+  faEye,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -34,6 +35,7 @@ library.add(faClock);
 library.add(faSearch);
 library.add(faBalanceScale);
 library.add(faStar);
+library.add(faEye);
 library.add(faUserClock);
 library.add(faPaperclip);
 

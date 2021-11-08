@@ -14,7 +14,7 @@
   <!-- <footer></footer> -->
 
   <router-view />
-  <navigation v-if="user"></navigation>
+  <navigation v-if="user && !overlay"></navigation>
 </template>
 <script>
 import { useStore } from 'vuex';
@@ -31,9 +31,11 @@ export default {
     const store = useStore();
     const user = computed(() => store.state.User.user);
     const wallet = computed(() => store.state.User.approval);
+    const overlay = computed(() => store.state.User.overlay);
+
     // console.log(store.state.User.user);
     // console.log(user);
-    return { user, wallet };
+    return { user, wallet, overlay };
   },
 };
 </script>
@@ -54,7 +56,8 @@ body {
   background-color: #464646;
 }
 
-textarea:focus, input:focus{
-    outline: none;
+textarea:focus,
+input:focus {
+  outline: none;
 }
 </style>
