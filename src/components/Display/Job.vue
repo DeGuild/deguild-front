@@ -61,12 +61,18 @@
         </div>
         <h3
           class="btn"
-          @click="take()"
-          v-if="this.job.state === 2 && this.job.taker === state.user"
+          @click="review()"
+          v-if="this.job.client === state.user && this.job.state === 2"
         >
-          CHECK
+          REVIEW
         </h3>
-        <h3 class="btn" @click="take()" v-if="this.job.state === 1">TAKE</h3>
+        <h3
+          class="btn"
+          @click="take()"
+          v-if="this.job.state === 1 && this.job.client !== state.user"
+        >
+          TAKE
+        </h3>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
           <h2>JOB TITLE:</h2>
           <h4>{{ this.job.title }}</h4>
@@ -112,11 +118,17 @@ export default defineComponent({
       state.smaller = !state.smaller;
     }
 
+    function review() {
+      store.dispatch('User/setOverlay', true);
+      state.smaller = !state.smaller;
+    }
+
     return {
       state,
       userAddress,
       take,
       extend,
+      review,
     };
   },
 });

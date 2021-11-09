@@ -117,6 +117,20 @@ export default defineComponent({
         difficulty: 4,
         image: '',
         title: 'Do something!',
+        client: userAddress.value.user,
+        description: 'I have no idea you have to figure this out!',
+        skills: ['skilla', 'skillb'],
+        state: 2,
+        taker: '',
+      },
+      {
+        id: 3,
+        level: 8,
+        time: 365,
+        reward: 80000,
+        difficulty: 4,
+        image: '',
+        title: 'Do something!',
         client: 'who?',
         description: 'I have no idea you have to figure this out!',
         skills: ['skilla', 'skillb'],
@@ -124,7 +138,21 @@ export default defineComponent({
         taker: '',
       },
       {
-        id: 3,
+        id: 4,
+        level: 8,
+        time: 365,
+        reward: 80000,
+        difficulty: 4,
+        image: '',
+        title: 'Do something!',
+        client: 'who?',
+        description: 'I have no idea you have to figure this out!',
+        skills: ['skilla', 'skillb'],
+        state: 1,
+        taker: '',
+      },
+      {
+        id: 5,
         level: 8,
         time: 365,
         reward: 80000,
@@ -151,6 +179,20 @@ export default defineComponent({
         state: 1,
         taker: '',
       },
+      {
+        id: 9,
+        level: 8,
+        time: 365,
+        reward: 80000,
+        difficulty: 4,
+        image: '',
+        title: 'Do something!',
+        client: userAddress.value.user,
+        description: 'I have no idea you have to figure this out!',
+        skills: ['skilla', 'skillb'],
+        state: 2,
+        taker: '',
+      },
     ];
 
     const state = reactive({
@@ -161,7 +203,7 @@ export default defineComponent({
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
-      level: 5,
+      level: 8,
     });
 
     function sortJobs() {
@@ -191,7 +233,7 @@ export default defineComponent({
         { mode: 'cors' },
       );
       state.jobs = mockJobs.filter(
-        (job) => job.level - state.level > -2 && job.level - state.level < 1,
+        (job) => job.level - state.level > -2 && job.level - state.level < 1 && job.client !== userAddress.value.user,
       );
       changedSort();
       store.dispatch(
@@ -207,7 +249,7 @@ export default defineComponent({
         'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
         { mode: 'cors' },
       );
-      state.jobs = mockJobs.filter((job) => job.state === 1);
+      state.jobs = mockJobs.filter((job) => job.state === 1 && job.client !== userAddress.value.user);
       changedSort();
       store.dispatch(
         'User/setDialog',
@@ -223,7 +265,7 @@ export default defineComponent({
         { mode: 'cors' },
       );
       state.jobs = mockJobs.filter(
-        (job) => job.state === 2 && job.taker === userAddress.value.user,
+        (job) => job.client === userAddress.value.user,
       );
       changedSort();
       store.dispatch(

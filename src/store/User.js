@@ -9,6 +9,24 @@ export const UserModule = {
     jobToFetch: null,
     fetching: false,
     dialog: 'Welcome to DeGuild!',
+    overlay: true,
+    reviewJob: {
+      id: 1,
+      level: 10,
+      time: 365,
+      reward: 8000,
+      difficulty: 2,
+      image: '',
+      title: 'Do something!',
+      client: 'who?',
+      description: 'I have no idea you have to figure this out!',
+      skills: ['skilla', 'skillb'],
+      state: 2,
+      taker: 'just a taker',
+      submitted: true,
+      deadline: new Date(1555650125 * 1000),
+      status: 'No submission',
+    },
   },
   mutations: {
     SET_USER(state, user) {
@@ -31,6 +49,9 @@ export const UserModule = {
     },
     SET_FETCHING(state, bool) {
       state.fetching = bool;
+    },
+    SET_OVERLAY(state, bool) {
+      state.overlay = bool;
     },
   },
   actions: {
@@ -63,6 +84,9 @@ export const UserModule = {
     },
     setJobToFetch({ commit }, scroll) {
       commit('SET_JOB_TO_FETCH', scroll);
+    },
+    setOverlay({ commit }, bool) {
+      commit('SET_OVERLAY', bool);
     },
   },
   modules: {},
