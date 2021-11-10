@@ -54,8 +54,8 @@ export default {
     function onUpload() {
       state.picture = null;
       const storage = getStorage();
-      const storageRef = ref(storage, `${state.imageData.name}`);
-
+      // const storageRef = ref(storage, `${state.imageData.name}`);
+      const storageRef = ref(storage, `images/${state.imageData.name}`);
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
 
       // Register three observers:
