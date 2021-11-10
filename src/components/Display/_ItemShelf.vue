@@ -209,8 +209,8 @@ import { useStore } from 'vuex';
 const Web3 = require('web3');
 
 const shopAddress = '0x1B362371f11cAA26B1A993f7Ffd711c0B9966f70';
-const magicScrollABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/MagicShop/IMagicScrolls.sol/IMagicScrolls.json').abi;
-const skillCertificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/ISkillCertificate.sol/ISkillCertificate.json').abi;
+const magicScrollABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/MagicShop/V1/IMagicScrolls.sol/IMagicScrolls.json').abi;
+const skillCertificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V1/ISkillCertificate.sol/ISkillCertificate.json').abi;
 const noUrl = require('@/assets/no-url.jpg');
 
 export default defineComponent({

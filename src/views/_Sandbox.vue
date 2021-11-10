@@ -1,4 +1,5 @@
 <template>
+  <auth-button></auth-button>
   <div>
     <p>Upload an image to Firebase:</p>
     <input type="file" @change="previewImage($event)" accept="image/*" />
@@ -27,8 +28,10 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from 'firebase/storage';
+import AuthButton from '../components/Buttons/_AuthButton.vue';
 
 export default {
+  components: { AuthButton },
   name: 'Sandbox',
   setup() {
     // console.log(store.state.User.user);
