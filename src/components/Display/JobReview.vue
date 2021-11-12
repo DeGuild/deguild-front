@@ -82,7 +82,7 @@ export default defineComponent({
       submitted: isSubmitted.value,
       time: `${hour.value}:${minutes.value}`,
       zipUrl:
-        'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/testing354848949494948949848.zip?alt=media&token=c9bee8d1-f436-4ff7-8600-c0608c457890',
+        'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/zipfile%2Ftesting354848949494948949848.zip?alt=media&token=a95c8541-ff92-49c2-ae19-de06724b226a',
     });
 
     async function onDownload(url, path) {
