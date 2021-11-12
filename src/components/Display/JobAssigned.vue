@@ -156,7 +156,7 @@ export default defineComponent({
 
     function onUpload() {
       const storage = getStorage();
-      const storageRef = ref(storage, `${state.zipData.name}`);
+      const storageRef = ref(storage, `zipfile/${state.zipData.name}`);
 
       const uploadTask = uploadBytesResumable(storageRef, state.zipData);
 

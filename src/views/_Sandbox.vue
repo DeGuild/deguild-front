@@ -1,4 +1,5 @@
 <template>
+  <auth-button></auth-button>
   <div>
     <p>Upload an image to Firebase:</p>
     <input type="file" @change="previewImage($event)" accept="image/*" />
@@ -27,8 +28,10 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from 'firebase/storage';
+import AuthButton from '../components/Buttons/_AuthButton.vue';
 
 export default {
+  components: { AuthButton },
   name: 'Sandbox',
   setup() {
     // console.log(store.state.User.user);
@@ -51,8 +54,8 @@ export default {
     function onUpload() {
       state.picture = null;
       const storage = getStorage();
-      const storageRef = ref(storage, `${state.imageData.name}`);
-
+      // const storageRef = ref(storage, `${state.imageData.name}`);
+      const storageRef = ref(storage, `images/${state.imageData.name}`);
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
 
       // Register three observers:

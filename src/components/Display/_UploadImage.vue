@@ -25,7 +25,7 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
-  getDownloadURL,
+  // getDownloadURL,
 } from 'firebase/storage';
 
 export default {
@@ -53,42 +53,45 @@ export default {
       const storage = getStorage();
       const storageRef = ref(storage, `${state.imageData.name}`);
 
+      // eslint-disable-next-line no-unused-vars
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
-
+      console.log(storage);
       // Register three observers:
       // 1. 'state_changed' observer, called any time the state changes
       // 2. Error observer, called on failure
       // 3. Completion observer, called on successful completion
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Observe state change events such as progress, pause, and resume
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-          state.uploadValue = progress;
-          // eslint-disable-next-line default-case
-          switch (snapshot.state) {
-            case 'paused':
-              console.log('Upload is paused');
-              break;
-            case 'running':
-              console.log('Upload is running');
-              break;
-          }
-        },
-        (error) => {
-          // Handle unsuccessful uploads
-          console.log(error.message);
-        },
-        () => {
-          // Handle successful uploads on complete
-          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-            state.picture = downloadURL;
-          });
-        },
-      );
+      // uploadTask.on(
+      //   'state_changed',
+      //   (snapshot) => {
+      //     // Observe state change events such as progress, pause, and resume
+      //     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      //     console.log(`Upload is ${progress}% done`);
+      //     console.log(storage);
+
+      //     state.uploadValue = progress;
+      //     // eslint-disable-next-line default-case
+      //     switch (snapshot.state) {
+      //       case 'paused':
+      //         console.log('Upload is paused');
+      //         break;
+      //       case 'running':
+      //         console.log('Upload is running');
+      //         break;
+      //     }
+      //   },
+      //   (error) => {
+      //     // Handle unsuccessful uploads
+      //     console.log(error.message);
+      //   },
+      //   () => {
+      //     // Handle successful uploads on complete
+      //     // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+      //     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+      //       console.log('File available at', downloadURL);
+      //       state.picture = downloadURL;
+      //     });
+      //   },
+      // );
     }
 
     return { state, previewImage, onUpload };
