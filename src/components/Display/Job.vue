@@ -92,7 +92,6 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
 
 require('dotenv').config();
 
@@ -122,6 +121,7 @@ export default defineComponent({
         'Please wait and I will tell the client that you will be taking this job!',
       );
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
       const caller = await deGuild.methods.take(this.job.id).send({ from: realAddress });
 
       store.dispatch(
@@ -136,6 +136,15 @@ export default defineComponent({
     }
 
     function review() {
+      store.dispatch(
+        'User/setDialog',
+        'Please wait, we are retrieving your posted job submission!',
+      );
+      console.log(this.job);
+      store.dispatch(
+        'User/setReviewJob',
+        this.job,
+      );
       store.dispatch('User/setOverlay', true);
       state.smaller = !state.smaller;
     }

@@ -72,6 +72,7 @@ import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
 import { useStore } from 'vuex';
+
 import Job from './Job.vue';
 
 require('dotenv').config();
@@ -132,7 +133,8 @@ export default defineComponent({
         description: infoOffChain.description,
         submitted: infoOffChain.submission.length > 0,
         deadline: addDays(timestamp, 7),
-        status: infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
+        status:
+          infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
       };
 
       // console.log(jobObject);
@@ -148,6 +150,17 @@ export default defineComponent({
       searchTitle: null,
       level: 5,
     });
+
+    async function isOccupied(address) {
+      const realAddress = web3.utils.toChecksumAddress(address);
+      try {
+        const caller = await deGuild.methods.jobOf(realAddress).call();
+        return caller !== '0';
+      } catch (error) {
+        // console.error('Not purchasable');
+        return false;
+      }
+    }
 
     async function getJobsAdded() {
       store.dispatch('User/setDialog', 'Please wait!');
@@ -186,9 +199,17 @@ export default defineComponent({
     }
 
     async function fetchRecommend() {
+      if (store.state.User.occupied) {
+        store.dispatch(
+          'User/setDialog',
+          'Please finish your current job before taking a new job',
+        );
+        return;
+      }
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
-        (job) => job.state === 1 && job.level - state.level > -2
+        (job) => job.state === 1
+          && job.level - state.level > -2
           && job.level - state.level < 1
           && job.client !== userAddress.value,
       );
@@ -200,6 +221,13 @@ export default defineComponent({
     }
 
     async function fetchAvailable() {
+      if (store.state.User.occupied) {
+        store.dispatch(
+          'User/setDialog',
+          'Please finish your current job before taking a new job',
+        );
+        return;
+      }
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
         (job) => job.state === 1 && job.client !== userAddress.value,
@@ -222,6 +250,13 @@ export default defineComponent({
     }
 
     async function fetchTitle() {
+      if (store.state.User.occupied) {
+        store.dispatch(
+          'User/setDialog',
+          'Please finish your current job before taking a new job',
+        );
+        return;
+      }
       const jobsAdded = await getJobsAdded();
       const correctRegex = new RegExp(state.searchTitle);
 
@@ -270,6 +305,8 @@ export default defineComponent({
     }
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
+      const occ = await isOccupied(userAddress.value);
+      store.dispatch('User/setOccupied', occ);
 
       await selectAvailable();
       store.dispatch('User/setFetching', false);

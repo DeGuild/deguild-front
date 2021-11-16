@@ -62,7 +62,7 @@
           <h5>{{ this.job.skills }}</h5>
           <h3>JOB DESCRIPTION:</h3>
           <h5>{{ this.job.description }}</h5>
-          <h3>NOTE FROM CLIENT:</h3>
+          <h3>FEEDBACK FROM CLIENT:</h3>
           <h5>{{ this.job.note }}</h5>
         </div>
         <h3 class="badge" v-if="state.submitted">
@@ -174,7 +174,7 @@ export default defineComponent({
       const storage = getStorage();
       const storageRef = ref(
         storage,
-        `zipfile/${userAddress.value.user}/${state.zipData.name}`,
+        `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
       );
 
       const uploadTask = uploadBytesResumable(storageRef, state.zipData);
@@ -217,8 +217,8 @@ export default defineComponent({
             body: JSON.stringify({
               address: deGuildAddress,
               tokenId: this.job.id,
-              submission: `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-              note: 'submitted',
+              submission: `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
+              note: '',
             }),
           };
 
