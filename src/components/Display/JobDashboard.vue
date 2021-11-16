@@ -201,7 +201,7 @@ export default defineComponent({
     async function fetchAvailable() {
       store.dispatch('User/setDialog', 'Please wait!');
       const jobsAdded = await getJobsAdded();
-      state.jobs = jobsAdded.filter((job) => job.state === 1 && job.client !== userAddress.value);
+      state.jobs = jobsAdded.filter((job) => job.state === '1' && job.client !== userAddress.value);
       changedSort();
       store.dispatch(
         'User/setDialog',

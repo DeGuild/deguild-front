@@ -130,7 +130,7 @@ export default defineComponent({
         const caller = await deguildCoin.methods
           .allowance(realAddress, deGuildAddress)
           .call();
-        // console.log(caller, balance);
+        console.log(caller, balance, address);
         return caller <= balance && caller > 0;
       } catch (error) {
         return false;
