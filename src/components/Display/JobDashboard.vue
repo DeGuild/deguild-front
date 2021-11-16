@@ -123,7 +123,7 @@ export default defineComponent({
         skills: skillsFetched,
         state: parseInt(infoOnChain[5], 10),
         difficulty: infoOnChain[6],
-        level: infoOffChain.level,
+        level: parseInt(infoOffChain.level, 10),
         image:
           'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
         title: infoOffChain.title,
@@ -146,7 +146,7 @@ export default defineComponent({
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
-      level: 6,
+      level: 5,
     });
 
     async function getJobsAdded() {
@@ -202,7 +202,7 @@ export default defineComponent({
     async function fetchAvailable() {
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
-        (job) => job.state === '1' && job.client !== userAddress.value,
+        (job) => job.state === 1 && job.client !== userAddress.value,
       );
       changedSort();
       store.dispatch(

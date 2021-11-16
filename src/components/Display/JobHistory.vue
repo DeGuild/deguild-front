@@ -170,9 +170,9 @@ export default defineComponent({
         client: infoOnChain[1],
         taker: infoOnChain[2],
         skills: skillsFetched,
-        state: infoOnChain[5],
+        state: parseInt(infoOnChain[5], 10),
         difficulty: infoOnChain[6],
-        level: infoOffChain.level,
+        level: parseInt(infoOffChain.level, 10),
         image:
           'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
         title: infoOffChain.title,
@@ -181,7 +181,7 @@ export default defineComponent({
         description: infoOffChain.description,
         submitted: infoOffChain.submission.length > 0,
         deadline: addDays(timestamp, 7),
-        status: 'No submission',
+        status: infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
       };
 
       // console.log(jobObject);
