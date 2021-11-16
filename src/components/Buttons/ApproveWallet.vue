@@ -10,19 +10,28 @@
 import { useStore } from 'vuex';
 // import { useRoute } from 'vue-router';
 
-import { reactive, computed } from 'vue';
+import { reactive, computed, defineComponent } from 'vue';
+
+require('dotenv').config();
 
 const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
 // eslint-disable-next-line no-unused-vars
-const shopAddress = '0x1B362371f11cAA26B1A993f7Ffd711c0B9966f70';
-const dgcAddress = '0x4312D992940D0b110525f553160c9984b77D1EF4';
+
+const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
+
+/**
+ * Using relative path, just clone the git beside this project directory and compile to run
+ */
+// eslint-disable-next-line no-unused-vars
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
 
-export default {
+export default defineComponent({
   name: 'ApproveWallet',
   setup() {
     const store = useStore();
@@ -49,7 +58,7 @@ export default {
       try {
         const balance = await deguildCoin.methods.balanceOf(realAddress).call();
         const caller = await deguildCoin.methods
-          .allowance(realAddress, shopAddress)
+          .allowance(realAddress, deGuildAddress)
           .call();
         return caller <= balance && caller > 0;
       } catch (error) {
@@ -71,7 +80,7 @@ export default {
       try {
         const balance = await deguildCoin.methods.balanceOf(realAddress).call();
         const caller = await deguildCoin.methods
-          .approve(shopAddress, balance)
+          .approve(deGuildAddress, balance)
           .send({ from: realAddress });
         console.log(caller);
         const approval = await hasApproval(realAddress);
@@ -89,7 +98,7 @@ export default {
       approve,
     };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

@@ -14,22 +14,28 @@
 import { useStore } from 'vuex';
 // import { useRoute } from 'vue-router';
 
-import { reactive, onBeforeMount, computed } from 'vue';
+import {
+  reactive, onBeforeMount, computed, defineComponent,
+} from 'vue';
+
+require('dotenv').config();
 
 const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
 // eslint-disable-next-line no-unused-vars
-const shopAddress = '0x1B362371f11cAA26B1A993f7Ffd711c0B9966f70';
 
-const dgcAddress = '0x4312D992940D0b110525f553160c9984b77D1EF4';
+const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
-const magicScrollABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/MagicShop/V2/IMagicScrolls+.sol/IMagicScrollsPlus.json').abi;
 const ownerABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json').abi;
 // DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json
-export default {
+export default defineComponent({
   name: 'ConnectWallet',
   setup() {
     const store = useStore();
@@ -37,91 +43,24 @@ export default {
 
     const user = computed(() => store.state.User.user);
 
+    function shortenedAddress(address) {
+      const accountLength = address.length;
+      const connectedAddress = `${address.substring(
+        0,
+        5,
+      )}...${address.substring(
+        accountLength - 4,
+        accountLength,
+      )}`;
+      return connectedAddress;
+    }
+
     const state = reactive({
-      primary: 'SOMETHING WENT WRONG',
+      primary: computed(() => (store.state.User.user ? shortenedAddress(store.state.User.user) : 'CONNECT WALLET')),
       network: '',
       magicScrollsData: [],
     });
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
-
-    /**
-     * Returns all magic scrolls in the DeGuild system.
-     *
-     * @param {address} nextToFetch The address we lastly fetched
-     * @return {address[]} all certificates in the DeGuild system.
-     */
-    async function fetchAllMagicScrolls(nextToFetch) {
-      // console.log(nextToFetch);
-      let response = null;
-      if (nextToFetch) {
-        response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/${shopAddress}/next/${nextToFetch}`,
-          { mode: 'cors' },
-        );
-      } else {
-        response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/${shopAddress}`,
-          { mode: 'cors' },
-        );
-      }
-
-      const magicScrolls = await response.json();
-      // eslint-disable-next-line max-len
-      const sortedById = magicScrolls.sort((a, b) => (parseInt(a.tokenId, 10) > parseInt(b.tokenId, 10) ? 1 : -1));
-      // console.log(sortedById);
-
-      const next = sortedById.length > 0
-        ? sortedById[sortedById.length - 1].tokenId
-        : null;
-      // console.log(next);
-      store.dispatch('User/setMagicScrollToFetch', next);
-      // console.log(magicScrolls);
-      // console.log(next);
-      return magicScrolls;
-    }
-
-    /**
-     * Returns data of the token.
-     *
-     * @param {int} tokenId The address of any contract using the interface given
-     * @return {object} token object that looks like this
-     * { uint256 - tokenId      : 3
-     *   uint256 - price        : 20
-     *   address - prerequisite : 0x0000000000000000000000000000000000000000
-     *   bool - hasLesson       : false
-     *   bool - hasPrerequisite : false
-     *   bool - available       : true}
-     */
-    async function scrollTypeInfo(tokenId) {
-      const magicShop = new web3.eth.Contract(magicScrollABI, shopAddress);
-
-      try {
-        const caller = await magicShop.methods.scrollTypeInfo(tokenId).call();
-        return caller;
-      } catch (error) {
-        // console.error('Not purchasable');
-        return {};
-      }
-    }
-
-    /**
-     * Returns whether user can purchase this token
-     *
-     * @param {int} tokenId The tokenId of any shop using the interface given
-     * @return {bool} purchasablility.
-     */
-    async function isPurchaseable(tokenId, address) {
-      const magicShop = new web3.eth.Contract(magicScrollABI, shopAddress);
-      try {
-        const caller = await magicShop.methods
-          .isPurchasableScroll(tokenId, address)
-          .call();
-        return caller;
-      } catch (error) {
-        console.error(tokenId);
-        return false;
-      }
-    }
 
     /**
      * Returns whether user is the owner of this shop
@@ -130,7 +69,7 @@ export default {
      * @return {bool} ownership.
      */
     async function isOwner(address) {
-      const magicShop = new web3.eth.Contract(ownerABI, shopAddress);
+      const magicShop = new web3.eth.Contract(ownerABI, deGuildAddress);
       const realAddress = web3.utils.toChecksumAddress(address);
       try {
         const caller = await magicShop.methods.owner().call();
@@ -153,8 +92,9 @@ export default {
       try {
         const balance = await deguildCoin.methods.balanceOf(realAddress).call();
         const caller = await deguildCoin.methods
-          .allowance(realAddress, shopAddress)
+          .allowance(realAddress, deGuildAddress)
           .call();
+        // console.log(caller, balance, address);
         return caller <= balance && caller > 0;
       } catch (error) {
         return false;
@@ -195,39 +135,6 @@ export default {
     }
 
     /**
-     * Returns the information of the certificate of this user
-     *
-     * @param {address} address The address of any contract using the interface given
-     * @return {certificate[]} array of the certificates.
-     */
-    async function tokenSetup(data) {
-      // console.log(data.tokenId);
-      const purchasable = await isPurchaseable(
-        data.tokenId,
-        store.state.User.user,
-      );
-      const onChain = await scrollTypeInfo(data.tokenId);
-
-      if (onChain[0]) {
-        const token = {
-          tokenId: data.tokenId,
-          url: data.url,
-          name: data.name,
-          courseId: data.courseId,
-          description: data.description,
-          purchasable,
-          price: web3.utils.fromWei(onChain[1], 'ether'),
-          prerequisite: onChain[2],
-          hasLesson: onChain[3],
-          hasPrerequisite: onChain[4],
-          available: onChain[5],
-        };
-        return token;
-      }
-      return null;
-    }
-
-    /**
      * Connect user to the dapp
      * @return {bool} status of connection.
      */
@@ -237,15 +144,6 @@ export default {
       if (window.ethereum) {
         try {
           const accounts = await window.ethereum.send('eth_requestAccounts');
-          const accountLength = accounts.result[0].length;
-          const connectedAddress = `${accounts.result[0].substring(
-            0,
-            5,
-          )}...${accounts.result[0].substring(
-            accountLength - 4,
-            accountLength,
-          )}`;
-          state.primary = connectedAddress;
           const ownership = await isOwner(accounts.result[0]);
           const approve = await hasApproval(accounts.result[0]);
           // const toAdd = [];
@@ -270,33 +168,7 @@ export default {
             );
           }
 
-          // const userCertificates = [];
-          // let scrollsData = await fetchAllMagicScrolls();
-          // state.magicScrollsData = scrollsData;
-
-          // while (state.magicScrollsData.length > 0) {
-          //   console.log(store.state.User.scrollToFetch);
-          //   const tokenAvailability = await Promise.all(
-          //     state.magicScrollsData.map(tokenSetup),
-          //   );
-
-          //   toAdd = toAdd.concat(
-          //     tokenAvailability.filter((obj) => obj !== null),
-          //   );
-
-          //   store.dispatch('User/setMagicScrolls', toAdd);
-          //   if (store.state.User.scrollToFetch) {
-          //     scrollsData = await fetchAllMagicScrolls(
-          //       store.state.User.scrollToFetch,
-          //     );
-          //     state.magicScrollsData = scrollsData;
-          //   } else {
-          //     state.magicScrollsData = [];
-          //   }
-          // }
-
           store.dispatch('User/setFetching', false);
-          // console.log(store.state.User.scrollList);
           store.dispatch(
             'User/setDialog',
             'Hi there! So, what would you like to take?',
@@ -364,7 +236,7 @@ export default {
       ethEnabled,
     };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

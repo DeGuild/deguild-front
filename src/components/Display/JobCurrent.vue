@@ -15,6 +15,14 @@ import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 import Job from './JobAssigned.vue';
 
+require('dotenv').config();
+
+const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+
 export default defineComponent({
   components: { Job },
   name: 'MyTask',
