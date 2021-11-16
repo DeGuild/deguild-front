@@ -1,6 +1,6 @@
 <template>
   <div class="background">
-    <div class="display">
+    <div class="display" v-if="state.job">
       <br />
       <job :job="state.job"></job>
     </div>
@@ -11,7 +11,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, onBeforeMount,
+} from 'vue';
 import { useStore } from 'vuex';
 import Job from './JobAssigned.vue';
 
@@ -28,7 +30,7 @@ export default defineComponent({
   name: 'MyTask',
   setup() {
     const store = useStore();
-    const userAddress = computed(() => store.state.User);
+    const userAddress = computed(() => store.state.User.user);
     const mockJob = {
       id: 0,
       level: 5,
@@ -48,8 +50,62 @@ export default defineComponent({
       deadline: new Date(1555650125 * 1000),
       status: 'No submission',
     };
+    const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+
+    async function fetchSkills(addresses, tokenIds) {
+      return ['skilla', 'skillb'];
+    }
+
+    function addDays(date, days) {
+      const result = new Date(date * 1000);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    async function idToJob(tokenId, blockNumber) {
+      const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
+      const URI = await deGuild.methods.jobURI(tokenId).call();
+      const responseOffChain = await fetch(URI, { mode: 'cors' });
+      const infoOffChain = await responseOffChain.json();
+      const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
+      const block = await web3.eth.getBlock(blockNumber);
+      // console.log(block);
+      const { timestamp } = block;
+
+      // console.log(infoOffChain);
+      // console.log(infoOnChain);
+
+      // TODO: Fetch user picture profile, and add time given since job is posted
+      const jobObject = {
+        id: tokenId,
+        time: 7,
+        reward: web3.utils.fromWei(infoOnChain[0]),
+        client: infoOnChain[1],
+        taker: infoOnChain[2],
+        skills: skillsFetched,
+        state: parseInt(infoOnChain[5], 10),
+        difficulty: infoOnChain[6],
+        level: parseInt(infoOffChain.level, 10),
+        image:
+          'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
+        title: infoOffChain.title,
+        note: infoOffChain.note,
+        submission: infoOffChain.submission,
+        description: infoOffChain.description,
+        submitted: infoOffChain.submission.length > 0,
+        deadline: addDays(timestamp, 7),
+        status:
+          infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
+      };
+
+      // console.log(jobObject);
+      return jobObject;
+      // return {};
+    }
+
     const state = reactive({
-      job: mockJob,
+      job: null,
       recommend: false,
       available: true,
       posted: false,
@@ -59,6 +115,32 @@ export default defineComponent({
       level: 5,
     });
 
+    async function getCurrentJob() {
+      store.dispatch('User/setDialog', 'Please wait!');
+      const realAddress = web3.utils.toChecksumAddress(userAddress.value);
+      const caller = await deGuild.methods.jobOf(realAddress).call();
+      const events = await deGuild.getPastEvents('JobTaken', {
+        filter: { taker: realAddress },
+        fromBlock: 0,
+        toBlock: 'latest',
+      });
+      const selected = events.filter((ele) => ele.returnValues[0] === caller);
+      // console.log(selected);
+      if (selected.length > 0) {
+        const history = await idToJob(caller, selected[0].blockNumber);
+        state.job = history;
+        store.dispatch('User/setDialog', 'Please carefully read the description. \n Once you have finished your work, upload the zipped file.');
+      } else {
+        store.dispatch('User/setDialog', 'You have nothing to do right now.');
+      }
+    }
+
+    onBeforeMount(async () => {
+      store.dispatch('User/setFetching', true);
+
+      await getCurrentJob();
+      store.dispatch('User/setFetching', false);
+    });
     return {
       state,
       userAddress,
@@ -187,5 +269,4 @@ export default defineComponent({
     }
   }
 }
-
 </style>

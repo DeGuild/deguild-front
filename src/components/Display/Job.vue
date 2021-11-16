@@ -92,6 +92,15 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+
+require('dotenv').config();
+
+const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 export default defineComponent({
   name: 'JobDisplay',
@@ -103,15 +112,23 @@ export default defineComponent({
       smaller: true,
       user: userAddress.value.user,
     });
+    const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
-    function take() {
-      console.log('Taking this job!');
-      console.log(this.job.image);
+    async function take() {
       state.smaller = !state.smaller;
       store.dispatch(
         'User/setDialog',
         'Please wait and I will tell the client that you will be taking this job!',
       );
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      const caller = await deGuild.methods.take(this.job.id).send({ from: realAddress });
+
+      store.dispatch(
+        'User/setDialog',
+        'Done! Please start working on your job early and contact your client as soon as possible',
+      );
+      this.$router.push('/task');
     }
 
     function extend() {

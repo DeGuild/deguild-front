@@ -53,6 +53,8 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   vertical-align: middle;
+  white-space: pre-wrap;
+
   // background: red;
   overflow: hidden;
   text-overflow: ellipsis;

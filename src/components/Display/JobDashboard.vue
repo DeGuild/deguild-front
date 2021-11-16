@@ -188,7 +188,7 @@ export default defineComponent({
     async function fetchRecommend() {
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
-        (job) => job.level - state.level > -2
+        (job) => job.state === 1 && job.level - state.level > -2
           && job.level - state.level < 1
           && job.client !== userAddress.value,
       );
@@ -271,12 +271,8 @@ export default defineComponent({
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
 
-      await getJobsAdded();
+      await selectAvailable();
       store.dispatch('User/setFetching', false);
-      store.dispatch(
-        'User/setDialog',
-        'Hi! What job are you looking for?',
-      );
     });
 
     return {
