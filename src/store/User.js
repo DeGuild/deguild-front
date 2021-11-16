@@ -9,7 +9,7 @@ export const UserModule = {
     jobToFetch: null,
     fetching: false,
     dialog: 'Welcome to DeGuild!',
-    overlay: true,
+    overlay: false,
     reviewJob: {
       id: 1,
       level: 10,
