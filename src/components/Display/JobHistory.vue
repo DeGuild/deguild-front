@@ -43,7 +43,9 @@
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, onBeforeMount,
+} from 'vue';
 import { useStore } from 'vuex';
 import Job from './Job.vue';
 
@@ -136,15 +138,63 @@ export default defineComponent({
       },
     ];
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
-    const deGuild = new web3.eth.Contract(
-      deGuildABI,
-      deGuildAddress,
-    );
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
-    async function getName() {
-      const caller = await deGuild.methods.name().call();
-      return caller;
+    async function fetchSkills(addresses, tokenIds) {
+      return ['skilla', 'skillb'];
     }
+
+    function addDays(date, days) {
+      const result = new Date(date * 1000);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    async function idToJob(tokenId, blockNumber) {
+      const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
+      const URI = await deGuild.methods.jobURI(tokenId).call();
+      const responseOffChain = await fetch(URI, { mode: 'cors' });
+      const infoOffChain = await responseOffChain.json();
+      const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
+      const block = await web3.eth.getBlock(blockNumber);
+      const { timestamp } = block;
+
+      // console.log(infoOffChain);
+      // console.log(infoOnChain);
+
+      // TODO: Fetch user picture profile, and add time given since job is posted
+      const jobObject = {
+        id: tokenId,
+        time: 7,
+        reward: web3.utils.fromWei(infoOnChain[0]),
+        client: infoOnChain[1],
+        taker: infoOnChain[2],
+        skills: skillsFetched,
+        state: infoOnChain[5],
+        difficulty: infoOnChain[6],
+        level: infoOffChain.level,
+        image:
+          'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
+        title: infoOffChain.title,
+        note: infoOffChain.note,
+        submission: infoOffChain.submission,
+        description: infoOffChain.description,
+        submitted: infoOffChain.submission.length > 0,
+        deadline: addDays(timestamp, 7),
+        status: 'No submission',
+      };
+
+      // console.log(jobObject);
+      return jobObject;
+    }
+
+    const state = reactive({
+      jobs: null,
+      selectedOrder: 'asc',
+      selectedSort: 'id',
+      searchTitle: null,
+      level: 5,
+    });
 
     async function getJobsCompleted() {
       const caller = await deGuild.getPastEvents('JobCompleted', {
@@ -152,18 +202,11 @@ export default defineComponent({
         fromBlock: 0,
         toBlock: 'latest',
       });
-      const history = caller.map((ele) => ele.returnValues[0]);
+      const history = await Promise.all(caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)));
+      // console.log(history);
+      state.jobs = history;
       return history;
     }
-
-    const state = reactive({
-      jobs: mockJobs,
-      history: computed(() => getJobsCompleted()),
-      selectedOrder: 'asc',
-      selectedSort: 'id',
-      searchTitle: null,
-      level: 5,
-    });
 
     function sortJobs() {
       if (state.selectedOrder === 'asc') {
@@ -200,13 +243,15 @@ export default defineComponent({
     }
 
     async function findJobs() {
-      console.log(state.searchTitle);
-      console.log(await getName());
-      console.log(await getJobsCompleted());
-      const history = await getJobsCompleted();
-
-      const data = await fetchTitle();
+      // console.log(state.searchTitle);
+      // console.log(await getJobsCompleted());
+      await getJobsCompleted();
+      // const data = await fetchTitle();
     }
+
+    onBeforeMount(async () => {
+      await getJobsCompleted();
+    });
 
     return {
       state,

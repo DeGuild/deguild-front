@@ -38,7 +38,7 @@ export default defineComponent({
       jobHistory: computed(() => useRoute().name === 'History'),
     });
 
-    console.log(useRoute().name);
+    // console.log(useRoute().name);
 
     function selectJobList() {
       this.$router.push('/');

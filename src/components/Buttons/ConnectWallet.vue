@@ -14,7 +14,9 @@
 import { useStore } from 'vuex';
 // import { useRoute } from 'vue-router';
 
-import { reactive, onBeforeMount, computed } from 'vue';
+import {
+  reactive, onBeforeMount, computed, defineComponent,
+} from 'vue';
 
 require('dotenv').config();
 
@@ -33,7 +35,7 @@ const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
 const ownerABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json').abi;
 // DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json
-export default {
+export default defineComponent({
   name: 'ConnectWallet',
   setup() {
     const store = useStore();
@@ -41,8 +43,20 @@ export default {
 
     const user = computed(() => store.state.User.user);
 
+    function shortenedAddress(address) {
+      const accountLength = address.length;
+      const connectedAddress = `${address.substring(
+        0,
+        5,
+      )}...${address.substring(
+        accountLength - 4,
+        accountLength,
+      )}`;
+      return connectedAddress;
+    }
+
     const state = reactive({
-      primary: 'SOMETHING WENT WRONG',
+      primary: computed(() => (store.state.User.user ? shortenedAddress(store.state.User.user) : 'CONNECT WALLET')),
       network: '',
       magicScrollsData: [],
     });
@@ -116,6 +130,7 @@ export default {
         const caller = await deguildCoin.methods
           .allowance(realAddress, deGuildAddress)
           .call();
+        // console.log(caller, balance);
         return caller <= balance && caller > 0;
       } catch (error) {
         return false;
@@ -165,15 +180,6 @@ export default {
       if (window.ethereum) {
         try {
           const accounts = await window.ethereum.send('eth_requestAccounts');
-          const accountLength = accounts.result[0].length;
-          const connectedAddress = `${accounts.result[0].substring(
-            0,
-            5,
-          )}...${accounts.result[0].substring(
-            accountLength - 4,
-            accountLength,
-          )}`;
-          state.primary = connectedAddress;
           const ownership = await isOwner(accounts.result[0]);
           const approve = await hasApproval(accounts.result[0]);
           // const toAdd = [];
@@ -292,7 +298,7 @@ export default {
       ethEnabled,
     };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

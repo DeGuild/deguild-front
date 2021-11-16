@@ -68,7 +68,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, onBeforeMount,
+} from 'vue';
 import { useStore } from 'vuex';
 import Job from './Job.vue';
 
@@ -85,147 +87,83 @@ export default defineComponent({
   name: 'JobDashboard',
   setup() {
     const store = useStore();
-    const userAddress = computed(() => store.state.User);
-    const mockJobs = [
-      {
-        id: 0,
-        level: 5,
-        time: 365,
-        reward: 800,
-        difficulty: 1,
-        image:
-          'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
-        title: 'Do something!',
-        client: userAddress.value.user,
-        description:
-          'I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 1,
-        taker: '',
-      },
-      {
-        id: 1,
-        level: 10,
-        time: 365,
-        reward: 8000,
-        difficulty: 2,
-        image: '',
-        title: 'Do something!',
-        client: 'who?',
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 2,
-        taker: userAddress.value.user,
-      },
-      {
-        id: 2,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: userAddress.value.user,
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 2,
-        taker: '',
-      },
-      {
-        id: 3,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: 'who?',
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 1,
-        taker: '',
-      },
-      {
-        id: 4,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: 'who?',
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 1,
-        taker: '',
-      },
-      {
-        id: 5,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: 'who?',
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 1,
-        taker: '',
-      },
-      {
-        id: 8,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: 'who?',
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 1,
-        taker: '',
-      },
-      {
-        id: 9,
-        level: 8,
-        time: 365,
-        reward: 80000,
-        difficulty: 4,
-        image: '',
-        title: 'Do something!',
-        client: userAddress.value.user,
-        description: 'I have no idea you have to figure this out!',
-        skills: ['skilla', 'skillb'],
-        state: 2,
-        taker: '',
-      },
-    ];
+    const userAddress = computed(() => store.state.User.user);
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(
       deGuildABI,
       deGuildAddress,
     );
-    async function getJobsAdded() {
-      const caller = await deGuild.getPastEvents('JobAdded', {
-        filter: { client: userAddress.value.user },
-        fromBlock: 0,
-        toBlock: 'latest',
-      });
-      const history = caller.map((ele) => ele.returnValues[0]);
-      return history;
+
+    async function fetchSkills(addresses, tokenIds) {
+      return ['skilla', 'skillb'];
+    }
+
+    function addDays(date, days) {
+      const result = new Date(date * 1000);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    async function idToJob(tokenId, blockNumber) {
+      const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
+      const URI = await deGuild.methods.jobURI(tokenId).call();
+      const responseOffChain = await fetch(URI, { mode: 'cors' });
+      const infoOffChain = await responseOffChain.json();
+      const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
+      const block = await web3.eth.getBlock(blockNumber);
+      const { timestamp } = block;
+
+      // console.log(infoOffChain);
+      // console.log(infoOnChain);
+
+      // TODO: Fetch user picture profile, and add time given since job is posted
+      const jobObject = {
+        id: tokenId,
+        time: 7,
+        reward: web3.utils.fromWei(infoOnChain[0]),
+        client: infoOnChain[1],
+        taker: infoOnChain[2],
+        skills: skillsFetched,
+        state: infoOnChain[5],
+        difficulty: infoOnChain[6],
+        level: infoOffChain.level,
+        image:
+          'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
+        title: infoOffChain.title,
+        note: infoOffChain.note,
+        submission: infoOffChain.submission,
+        description: infoOffChain.description,
+        submitted: infoOffChain.submission.length > 0,
+        deadline: addDays(timestamp, 7),
+        status: 'No submission',
+      };
+
+      // console.log(jobObject);
+      return jobObject;
     }
     const state = reactive({
-      jobs: mockJobs,
+      jobs: null,
       recommend: false,
       available: true,
       posted: false,
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
-      level: 8,
+      level: 6,
     });
+
+    async function getJobsAdded() {
+      const caller = await deGuild.getPastEvents('JobAdded', {
+        filter: { taker: userAddress.value },
+        fromBlock: 0,
+        toBlock: 'latest',
+      });
+      const history = await Promise.all(caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)));
+      console.log(history);
+      state.jobs = history;
+
+      return history;
+    }
 
     function sortJobs() {
       if (state.selectedOrder === 'asc') {
@@ -242,98 +180,89 @@ export default defineComponent({
     }
 
     function changedSort() {
-      console.log(state.selectedOrder);
-      console.log(state.selectedSort);
+      // console.log(state.selectedOrder);
+      // console.log(state.selectedSort);
       sortJobs();
     }
 
     async function fetchRecommend() {
       store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter(
-        (job) => job.level - state.level > -2 && job.level - state.level < 1 && job.client !== userAddress.value.user,
+      const jobsAdded = await getJobsAdded();
+      state.jobs = jobsAdded.filter(
+        (job) => job.level - state.level > -2 && job.level - state.level < 1 && job.client !== userAddress.value,
       );
       changedSort();
       store.dispatch(
         'User/setDialog',
         'Recommendation from us is based on your level. Please take a look!',
       );
-      return response;
     }
 
     async function fetchAvailable() {
       store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter((job) => job.state === 1 && job.client !== userAddress.value.user);
+      const jobsAdded = await getJobsAdded();
+      state.jobs = jobsAdded.filter((job) => job.state === 1 && job.client !== userAddress.value);
       changedSort();
       store.dispatch(
         'User/setDialog',
         'Be careful! Though you can take any job, you might not be able to complete it easily.',
       );
-      return response;
     }
 
     async function fetchPosted() {
       store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
-      state.jobs = mockJobs.filter(
-        (job) => job.client === userAddress.value.user,
+      const jobsAdded = await getJobsAdded();
+      state.jobs = jobsAdded.filter(
+        (job) => job.client === userAddress.value,
       );
       changedSort();
       store.dispatch(
         'User/setDialog',
         'You should contact your job taker as soon as possible.',
       );
-      return response;
     }
 
     async function fetchTitle() {
       store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
+      const jobsAdded = await getJobsAdded();
+      const correctRegex = new RegExp(state.searchTitle);
+
+      state.jobs = jobsAdded.filter(
+        (job) => correctRegex.test(job.title),
       );
       changedSort();
       store.dispatch(
         'User/setDialog',
         `Here is the list of job titles starting with ${state.searchTitle}.`,
       );
-      return response;
     }
 
     async function selectAvailable() {
       state.recommend = false;
       state.available = true;
       state.posted = false;
-      const data = await fetchAvailable();
+      fetchAvailable();
     }
     async function selectRecommend() {
       state.recommend = true;
       state.available = false;
       state.posted = false;
-      const data = await fetchRecommend();
+      fetchRecommend();
     }
     async function selectPosted() {
       state.recommend = false;
       state.available = false;
       state.posted = true;
-      const data = await fetchPosted();
+      await fetchPosted();
     }
 
     async function findJobs() {
       console.log(state.searchTitle);
-
-      const data = await fetchTitle();
+      await fetchTitle();
     }
+    onBeforeMount(async () => {
+      await getJobsAdded();
+    });
 
     return {
       state,
