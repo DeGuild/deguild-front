@@ -197,6 +197,8 @@ export default defineComponent({
     });
 
     async function getJobsCompleted() {
+      store.dispatch('User/setDialog', 'Please wait!');
+
       const caller = await deGuild.getPastEvents('JobCompleted', {
         filter: { taker: userAddress.value.user },
         fromBlock: 0,
@@ -204,6 +206,8 @@ export default defineComponent({
       });
       const history = await Promise.all(caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)));
       // console.log(history);
+      store.dispatch('User/setFetching', false);
+
       state.jobs = history;
       return history;
     }
@@ -223,34 +227,36 @@ export default defineComponent({
     }
 
     function changedSort() {
-      console.log(state.selectedOrder);
-      console.log(state.selectedSort);
+      // console.log(state.selectedOrder);
+      // console.log(state.selectedSort);
       sortJobs();
     }
 
     async function fetchTitle() {
-      store.dispatch('User/setDialog', 'Please wait!');
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/',
-        { mode: 'cors' },
-      );
+      const jobsAdded = await getJobsCompleted();
+      const correctRegex = new RegExp(state.searchTitle);
+
+      state.jobs = jobsAdded.filter((job) => correctRegex.test(job.title));
       changedSort();
       store.dispatch(
         'User/setDialog',
         `Here is the list of job titles starting with ${state.searchTitle}.`,
       );
-      return response;
     }
 
     async function findJobs() {
       // console.log(state.searchTitle);
       // console.log(await getJobsCompleted());
-      await getJobsCompleted();
+      await fetchTitle();
       // const data = await fetchTitle();
     }
 
     onBeforeMount(async () => {
       await getJobsCompleted();
+      store.dispatch(
+        'User/setDialog',
+        'Every job you have completed are shown.',
+      );
     });
 
     return {
