@@ -63,42 +63,6 @@ export default defineComponent({
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
     /**
-     * Returns all magic scrolls in the DeGuild system.
-     *
-     * @param {address} nextToFetch The address we lastly fetched
-     * @return {address[]} all certificates in the DeGuild system.
-     */
-    async function fetchAllJobs(nextToFetch) {
-      // console.log(nextToFetch);
-      let response = null;
-      if (nextToFetch) {
-        response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/app/allJobs/${deGuildAddress}/next/${nextToFetch}`,
-          { mode: 'cors' },
-        );
-      } else {
-        response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/app/allJobs/${deGuildAddress}`,
-          { mode: 'cors' },
-        );
-      }
-
-      const magicScrolls = await response.json();
-      // eslint-disable-next-line max-len
-      const sortedById = magicScrolls.sort((a, b) => (parseInt(a.tokenId, 10) > parseInt(b.tokenId, 10) ? 1 : -1));
-      // console.log(sortedById);
-
-      const next = sortedById.length > 0
-        ? sortedById[sortedById.length - 1].tokenId
-        : null;
-      // console.log(next);
-      store.dispatch('User/setMagicScrollToFetch', next);
-      // console.log(magicScrolls);
-      // console.log(next);
-      return magicScrolls;
-    }
-
-    /**
      * Returns whether user is the owner of this shop
      *
      * @param {address} address ethereum address
@@ -130,7 +94,7 @@ export default defineComponent({
         const caller = await deguildCoin.methods
           .allowance(realAddress, deGuildAddress)
           .call();
-        console.log(caller, balance, address);
+        // console.log(caller, balance, address);
         return caller <= balance && caller > 0;
       } catch (error) {
         return false;
@@ -204,33 +168,7 @@ export default defineComponent({
             );
           }
 
-          // const userCertificates = [];
-          // let scrollsData = await fetchAllMagicScrolls();
-          // state.magicScrollsData = scrollsData;
-
-          // while (state.magicScrollsData.length > 0) {
-          //   console.log(store.state.User.scrollToFetch);
-          //   const tokenAvailability = await Promise.all(
-          //     state.magicScrollsData.map(tokenSetup),
-          //   );
-
-          //   toAdd = toAdd.concat(
-          //     tokenAvailability.filter((obj) => obj !== null),
-          //   );
-
-          //   store.dispatch('User/setMagicScrolls', toAdd);
-          //   if (store.state.User.scrollToFetch) {
-          //     scrollsData = await fetchAllMagicScrolls(
-          //       store.state.User.scrollToFetch,
-          //     );
-          //     state.magicScrollsData = scrollsData;
-          //   } else {
-          //     state.magicScrollsData = [];
-          //   }
-          // }
-
           store.dispatch('User/setFetching', false);
-          // console.log(store.state.User.scrollList);
           store.dispatch(
             'User/setDialog',
             'Hi there! So, what would you like to take?',

@@ -89,10 +89,7 @@ export default defineComponent({
     const store = useStore();
     const userAddress = computed(() => store.state.User.user);
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
-    const deGuild = new web3.eth.Contract(
-      deGuildABI,
-      deGuildAddress,
-    );
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
     async function fetchSkills(addresses, tokenIds) {
       return ['skilla', 'skillb'];
@@ -124,7 +121,7 @@ export default defineComponent({
         client: infoOnChain[1],
         taker: infoOnChain[2],
         skills: skillsFetched,
-        state: infoOnChain[5],
+        state: parseInt(infoOnChain[5], 10),
         difficulty: infoOnChain[6],
         level: infoOffChain.level,
         image:
@@ -135,7 +132,7 @@ export default defineComponent({
         description: infoOffChain.description,
         submitted: infoOffChain.submission.length > 0,
         deadline: addDays(timestamp, 7),
-        status: 'No submission',
+        status: infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
       };
 
       // console.log(jobObject);
@@ -153,12 +150,15 @@ export default defineComponent({
     });
 
     async function getJobsAdded() {
+      store.dispatch('User/setDialog', 'Please wait!');
       const caller = await deGuild.getPastEvents('JobAdded', {
         filter: { taker: userAddress.value },
         fromBlock: 0,
         toBlock: 'latest',
       });
-      const history = await Promise.all(caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)));
+      const history = await Promise.all(
+        caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
+      );
       console.log(history);
       state.jobs = history;
 
@@ -186,10 +186,11 @@ export default defineComponent({
     }
 
     async function fetchRecommend() {
-      store.dispatch('User/setDialog', 'Please wait!');
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
-        (job) => job.level - state.level > -2 && job.level - state.level < 1 && job.client !== userAddress.value,
+        (job) => job.level - state.level > -2
+          && job.level - state.level < 1
+          && job.client !== userAddress.value,
       );
       changedSort();
       store.dispatch(
@@ -199,9 +200,10 @@ export default defineComponent({
     }
 
     async function fetchAvailable() {
-      store.dispatch('User/setDialog', 'Please wait!');
       const jobsAdded = await getJobsAdded();
-      state.jobs = jobsAdded.filter((job) => job.state === '1' && job.client !== userAddress.value);
+      state.jobs = jobsAdded.filter(
+        (job) => job.state === '1' && job.client !== userAddress.value,
+      );
       changedSort();
       store.dispatch(
         'User/setDialog',
@@ -210,11 +212,8 @@ export default defineComponent({
     }
 
     async function fetchPosted() {
-      store.dispatch('User/setDialog', 'Please wait!');
       const jobsAdded = await getJobsAdded();
-      state.jobs = jobsAdded.filter(
-        (job) => job.client === userAddress.value,
-      );
+      state.jobs = jobsAdded.filter((job) => job.client === userAddress.value);
       changedSort();
       store.dispatch(
         'User/setDialog',
@@ -223,13 +222,10 @@ export default defineComponent({
     }
 
     async function fetchTitle() {
-      store.dispatch('User/setDialog', 'Please wait!');
       const jobsAdded = await getJobsAdded();
       const correctRegex = new RegExp(state.searchTitle);
 
-      state.jobs = jobsAdded.filter(
-        (job) => correctRegex.test(job.title),
-      );
+      state.jobs = jobsAdded.filter((job) => correctRegex.test(job.title));
       changedSort();
       store.dispatch(
         'User/setDialog',
@@ -241,27 +237,46 @@ export default defineComponent({
       state.recommend = false;
       state.available = true;
       state.posted = false;
-      fetchAvailable();
+      store.dispatch('User/setFetching', true);
+
+      await fetchAvailable();
+      store.dispatch('User/setFetching', false);
     }
     async function selectRecommend() {
       state.recommend = true;
       state.available = false;
       state.posted = false;
+      store.dispatch('User/setFetching', true);
+
       fetchRecommend();
+      store.dispatch('User/setFetching', false);
     }
     async function selectPosted() {
       state.recommend = false;
       state.available = false;
       state.posted = true;
+      store.dispatch('User/setFetching', true);
+
       await fetchPosted();
+      store.dispatch('User/setFetching', false);
     }
 
     async function findJobs() {
       console.log(state.searchTitle);
+      store.dispatch('User/setFetching', true);
+
       await fetchTitle();
+      store.dispatch('User/setFetching', false);
     }
     onBeforeMount(async () => {
+      store.dispatch('User/setFetching', true);
+
       await getJobsAdded();
+      store.dispatch('User/setFetching', false);
+      store.dispatch(
+        'User/setDialog',
+        'Hi! What job are you looking for?',
+      );
     });
 
     return {
@@ -279,9 +294,9 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .background {
-  -webkit-box-shadow: inset 0px 0px 0px 1vw #6C421B;
-  -moz-box-shadow: inset 0px 0px 0px 1vw #6C421B;
-  box-shadow: inset 0px 0px 0px 1vw #6C421B;
+  -webkit-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  -moz-box-shadow: inset 0px 0px 0px 1vw #6c421b;
+  box-shadow: inset 0px 0px 0px 1vw #6c421b;
   width: 63vw;
   height: 80vh;
   position: absolute;
