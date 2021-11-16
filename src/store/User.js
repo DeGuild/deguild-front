@@ -3,6 +3,7 @@ export const UserModule = {
   namespaced: true,
   state: {
     user: null,
+    occupied: false,
     owner: false,
     jobList: null,
     approval: false,
@@ -10,23 +11,7 @@ export const UserModule = {
     fetching: false,
     dialog: 'Welcome to DeGuild!',
     overlay: false,
-    reviewJob: {
-      id: 1,
-      level: 10,
-      time: 365,
-      reward: 8000,
-      difficulty: 2,
-      image: '',
-      title: 'Do something!',
-      client: 'who?',
-      description: 'I have no idea you have to figure this out!',
-      skills: ['skilla', 'skillb'],
-      state: 2,
-      taker: 'just a taker',
-      submitted: true,
-      deadline: new Date(1555650125 * 1000),
-      status: 'No submission',
-    },
+    reviewJob: null,
   },
   mutations: {
     SET_USER(state, user) {
@@ -37,6 +22,9 @@ export const UserModule = {
     },
     SET_OWNER(state, bool) {
       state.owner = bool;
+    },
+    SET_OCCUPIED(state, bool) {
+      state.occupied = bool;
     },
     SET_JOB_LIST(state, list) {
       state.jobList = list;
@@ -53,16 +41,22 @@ export const UserModule = {
     SET_OVERLAY(state, bool) {
       state.overlay = bool;
     },
+    SET_REVIEW_JOB(state, job) {
+      state.reviewJob = job;
+    },
   },
   actions: {
     reset({ commit }) {
       commit('SET_USER', null);
       commit('SET_OWNER', false);
+      commit('SET_OCCUPIED', false);
       commit('SET_JOB_LIST', null);
       commit('SET_APPROVAL', false);
+      commit('SET_OVERLAY', false);
       commit('SET_JOB_TO_FETCH', null);
       commit('SET_FETCHING', false);
       commit('SET_DIALOG', 'Welcome to DeGuild!');
+      commit('SET_REVIEW_JOB', null);
     },
     setUser({ commit }, user) {
       commit('SET_USER', user);
@@ -72,6 +66,9 @@ export const UserModule = {
     },
     setApproval({ commit }, status) {
       commit('SET_APPROVAL', status);
+    },
+    setOccupied({ commit }, status) {
+      commit('SET_OCCUPIED', status);
     },
     setOwner({ commit }, bool) {
       commit('SET_OWNER', bool);
@@ -87,6 +84,9 @@ export const UserModule = {
     },
     setOverlay({ commit }, bool) {
       commit('SET_OVERLAY', bool);
+    },
+    setReviewJob({ commit }, job) {
+      commit('SET_REVIEW_JOB', job);
     },
   },
   modules: {},

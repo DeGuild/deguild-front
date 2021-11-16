@@ -11,10 +11,7 @@
           <img class="image" :src="this.job.image" /><img />
           <span>
             <div class="text">
-              <!-- <h4>{{ this.job.title }}</h4> -->
-              <h4>
-                asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasfasdfasdfasdfasdfasdfdsa
-              </h4>
+              <h4>{{ this.job.title }}</h4>
             </div>
             <div class="text client">
               <p>{{ this.job.client }}</p>
@@ -30,11 +27,19 @@
         </div>
         <div class="file">
           <i class="fas fa-paperclip"></i>
-          <span class="file header"
-            >File
-            namedddddddddddddddddddddddddddddsssssssssssssssssssssssssssssssssssssssssss</span
+          <span class="file header">{{ this.job.submission }}</span>
+          <span class="file header" v-if="this.job.submission.length === 0">
+            NO SUBMISSION</span
           >
 
+          <span
+            class="btn"
+            @click="generateLink()"
+            v-if="this.job.submission.length > 0"
+            >Get Link
+          </span>
+        </div>
+        <div class="file" v-if="state.zipUrl">
           <a class="btn" :href="state.zipUrl" download>Download </a>
         </div>
         <div class="decision">
@@ -42,12 +47,17 @@
             <textarea
               class="decision comment"
               type="text"
+              v-model="state.comment"
               placeholder="Leave your comment or private contact info"
             />
           </span>
 
-          <button class="decision say accept">ACCEPT</button>
-          <button class="decision say reject">REJECT</button>
+          <button class="decision say accept" @click="complete()">
+            ACCEPT
+          </button>
+          <button class="decision say reject" @click="rejectSubmission()">
+            REJECT
+          </button>
         </div>
       </div>
     </div>
@@ -60,8 +70,14 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
+import Web3 from 'web3';
+import Web3Token from 'web3-token';
 
-const fs = require('fs');
+require('dotenv').config();
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 export default defineComponent({
   name: 'JobReview',
@@ -70,6 +86,9 @@ export default defineComponent({
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
+    const web3 = new Web3(window.ethereum);
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+
     const hour = computed(() => (props.job.deadline.getHours() <= 9
       ? `0${props.job.deadline.getHours()}`
       : props.job.deadline.getHours()));
@@ -81,32 +100,100 @@ export default defineComponent({
       user: userAddress.value.user,
       submitted: isSubmitted.value,
       time: `${hour.value}:${minutes.value}`,
-      zipUrl:
-        'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/zipfile%2Ftesting354848949494948949848.zip?alt=media&token=a95c8541-ff92-49c2-ae19-de06724b226a',
+      zipUrl: null,
     });
 
-    async function onDownload(url, path) {
-      const res = await fetch(url, {
+    async function generateLink() {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // getting address from which we will sign message
+      const address = (await web3.eth.getAccounts())[0];
+
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
+      const requestOptions = {
         method: 'GET',
-        mode: 'no-cors',
-      });
-      const fileStream = fs.createWriteStream(path);
-      await new Promise((resolve, reject) => {
-        res.body.pipe(fileStream);
-        res.body.on('error', reject);
-        fileStream.on('finish', resolve);
-      });
+        // eslint-disable-next-line quote-props
+        headers: { Authorization: token },
+      };
+
+      const response = await fetch(
+        `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}/${this.job.id}`,
+        requestOptions,
+      );
+      const data = await response.json();
+      console.log(data);
+      state.zipUrl = data.result;
     }
 
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
     }
 
+    async function rejectSubmission() {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // getting address from which we will sign message
+      const address = (await web3.eth.getAccounts())[0];
+
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
+      const requestOptions = {
+        method: 'PUT',
+        // eslint-disable-next-line quote-props
+        headers: {
+          Authorization: token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: deGuildAddress,
+          tokenId: this.job.id,
+          submission: '',
+          note: state.comment,
+        }),
+      };
+
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/guild/submit',
+        requestOptions,
+      );
+      const data = await response.json();
+      console.log(data);
+      state.zipUrl = data.result;
+      closeOverlay();
+    }
+
+    async function complete() {
+      state.smaller = !state.smaller;
+      store.dispatch(
+        'User/setDialog',
+        'Please wait! We are processing your transaction.',
+      );
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      const caller = await deGuild.methods
+        .complete(this.job.id)
+        .send({ from: realAddress });
+
+      store.dispatch(
+        'User/setDialog',
+        'Hope you like our service! Visit us again next time~',
+      );
+      closeOverlay();
+    }
+
     return {
       state,
       userAddress,
-      onDownload,
       closeOverlay,
+      generateLink,
+      complete,
+      rejectSubmission,
     };
   },
 });

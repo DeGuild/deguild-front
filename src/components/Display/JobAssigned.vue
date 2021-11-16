@@ -62,6 +62,8 @@
           <h5>{{ this.job.skills }}</h5>
           <h3>JOB DESCRIPTION:</h3>
           <h5>{{ this.job.description }}</h5>
+          <h3>FEEDBACK FROM CLIENT:</h3>
+          <h5>{{ this.job.note }}</h5>
         </div>
         <h3 class="badge" v-if="state.submitted">
           <h1 class="fas fa-user-clock"></h1>
@@ -120,6 +122,13 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from 'firebase/storage';
+import Web3Token from 'web3-token';
+
+require('dotenv').config();
+
+const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 export default defineComponent({
   name: 'JobAssigned',
@@ -128,6 +137,8 @@ export default defineComponent({
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
+    const web3 = new Web3(window.ethereum);
+
     const hour = computed(() => (props.job.deadline.getHours() <= 9
       ? `0${props.job.deadline.getHours()}`
       : props.job.deadline.getHours()));
@@ -154,9 +165,17 @@ export default defineComponent({
       state.fileName = file.name;
     }
 
-    function onUpload() {
+    async function onUpload() {
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, userAddress.value.user),
+        '1d',
+      );
       const storage = getStorage();
-      const storageRef = ref(storage, `zipfile/${state.zipData.name}`);
+      const storageRef = ref(
+        storage,
+        `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
+      );
 
       const uploadTask = uploadBytesResumable(storageRef, state.zipData);
 
@@ -187,14 +206,32 @@ export default defineComponent({
           console.log(error.message);
           state.uploading = false;
         },
-        () => {
-          // Handle successful uploads on complete
-          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-          });
+        async () => {
+          const requestOptions = {
+            method: 'PUT',
+            // eslint-disable-next-line quote-props
+            headers: {
+              Authorization: token,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              address: deGuildAddress,
+              tokenId: this.job.id,
+              submission: `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
+              note: '',
+            }),
+          };
+
+          const response = await fetch(
+            'https://us-central1-deguild-2021.cloudfunctions.net/guild/submit',
+            requestOptions,
+          );
+
+          console.log('File available at', `zipfile/${userAddress.value.user}/${state.zipData.name}`);
+          const data = await response.json();
+          console.log(data);
+
           state.submitted = true;
-          console.log(state.submitted);
 
           // state.uploading = false;
         },

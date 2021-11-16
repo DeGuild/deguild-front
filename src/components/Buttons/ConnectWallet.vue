@@ -69,11 +69,23 @@ export default defineComponent({
      * @return {bool} ownership.
      */
     async function isOwner(address) {
-      const magicShop = new web3.eth.Contract(ownerABI, deGuildAddress);
+      const deGuild = new web3.eth.Contract(ownerABI, deGuildAddress);
       const realAddress = web3.utils.toChecksumAddress(address);
       try {
-        const caller = await magicShop.methods.owner().call();
+        const caller = await deGuild.methods.owner().call();
         return caller === realAddress;
+      } catch (error) {
+        // console.error('Not purchasable');
+        return false;
+      }
+    }
+
+    async function isOccupied(address) {
+      const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+      const realAddress = web3.utils.toChecksumAddress(address);
+      try {
+        const caller = await deGuild.methods.jobOf(realAddress).call();
+        return caller !== '0';
       } catch (error) {
         // console.error('Not purchasable');
         return false;
@@ -143,21 +155,28 @@ export default defineComponent({
 
       if (window.ethereum) {
         try {
+          store.dispatch('User/setFetching', true);
+
           const accounts = await window.ethereum.send('eth_requestAccounts');
           const ownership = await isOwner(accounts.result[0]);
           const approve = await hasApproval(accounts.result[0]);
+          const canTakeJob = await isOccupied(accounts.result[0]);
           // const toAdd = [];
 
           store.dispatch(
             'User/setUser',
             web3.utils.toChecksumAddress(accounts.result[0]),
           );
+          store.dispatch(
+            'User/setOccupied',
+            canTakeJob,
+          );
+          console.log(canTakeJob);
           store.dispatch('User/setOwner', ownership);
           store.dispatch(
             'User/setDialog',
             'Please wait and I will show you what we have gotten!',
           );
-          store.dispatch('User/setFetching', true);
 
           // console.log(approve);
           store.dispatch('User/setApproval', approve);
@@ -178,8 +197,9 @@ export default defineComponent({
         } catch (error) {
           console.log(error);
           state.primary = 'ERROR!';
-          // route.push('/no-provider');
         }
+      } else {
+        // this.$route.push('/no-provider');
       }
       return false;
     }
