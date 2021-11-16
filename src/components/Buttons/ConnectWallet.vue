@@ -16,17 +16,21 @@ import { useStore } from 'vuex';
 
 import { reactive, onBeforeMount, computed } from 'vue';
 
+require('dotenv').config();
+
 const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
 // eslint-disable-next-line no-unused-vars
-const shopAddress = '0x1B362371f11cAA26B1A993f7Ffd711c0B9966f70';
 
-const dgcAddress = '0x4312D992940D0b110525f553160c9984b77D1EF4';
+const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
-const magicScrollABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/MagicShop/V2/IMagicScrolls+.sol/IMagicScrollsPlus.json').abi;
 const ownerABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json').abi;
 // DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json
 export default {
@@ -50,17 +54,17 @@ export default {
      * @param {address} nextToFetch The address we lastly fetched
      * @return {address[]} all certificates in the DeGuild system.
      */
-    async function fetchAllMagicScrolls(nextToFetch) {
+    async function fetchAllJobs(nextToFetch) {
       // console.log(nextToFetch);
       let response = null;
       if (nextToFetch) {
         response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/${shopAddress}/next/${nextToFetch}`,
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/allJobs/${deGuildAddress}/next/${nextToFetch}`,
           { mode: 'cors' },
         );
       } else {
         response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/shop/allMagicScrolls/${shopAddress}`,
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/allJobs/${deGuildAddress}`,
           { mode: 'cors' },
         );
       }
@@ -81,56 +85,13 @@ export default {
     }
 
     /**
-     * Returns data of the token.
-     *
-     * @param {int} tokenId The address of any contract using the interface given
-     * @return {object} token object that looks like this
-     * { uint256 - tokenId      : 3
-     *   uint256 - price        : 20
-     *   address - prerequisite : 0x0000000000000000000000000000000000000000
-     *   bool - hasLesson       : false
-     *   bool - hasPrerequisite : false
-     *   bool - available       : true}
-     */
-    async function scrollTypeInfo(tokenId) {
-      const magicShop = new web3.eth.Contract(magicScrollABI, shopAddress);
-
-      try {
-        const caller = await magicShop.methods.scrollTypeInfo(tokenId).call();
-        return caller;
-      } catch (error) {
-        // console.error('Not purchasable');
-        return {};
-      }
-    }
-
-    /**
-     * Returns whether user can purchase this token
-     *
-     * @param {int} tokenId The tokenId of any shop using the interface given
-     * @return {bool} purchasablility.
-     */
-    async function isPurchaseable(tokenId, address) {
-      const magicShop = new web3.eth.Contract(magicScrollABI, shopAddress);
-      try {
-        const caller = await magicShop.methods
-          .isPurchasableScroll(tokenId, address)
-          .call();
-        return caller;
-      } catch (error) {
-        console.error(tokenId);
-        return false;
-      }
-    }
-
-    /**
      * Returns whether user is the owner of this shop
      *
      * @param {address} address ethereum address
      * @return {bool} ownership.
      */
     async function isOwner(address) {
-      const magicShop = new web3.eth.Contract(ownerABI, shopAddress);
+      const magicShop = new web3.eth.Contract(ownerABI, deGuildAddress);
       const realAddress = web3.utils.toChecksumAddress(address);
       try {
         const caller = await magicShop.methods.owner().call();
@@ -153,7 +114,7 @@ export default {
       try {
         const balance = await deguildCoin.methods.balanceOf(realAddress).call();
         const caller = await deguildCoin.methods
-          .allowance(realAddress, shopAddress)
+          .allowance(realAddress, deGuildAddress)
           .call();
         return caller <= balance && caller > 0;
       } catch (error) {
@@ -192,39 +153,6 @@ export default {
     function disconnected() {
       state.primary = 'CONNECT WALLET';
       store.dispatch('User/setUser', null);
-    }
-
-    /**
-     * Returns the information of the certificate of this user
-     *
-     * @param {address} address The address of any contract using the interface given
-     * @return {certificate[]} array of the certificates.
-     */
-    async function tokenSetup(data) {
-      // console.log(data.tokenId);
-      const purchasable = await isPurchaseable(
-        data.tokenId,
-        store.state.User.user,
-      );
-      const onChain = await scrollTypeInfo(data.tokenId);
-
-      if (onChain[0]) {
-        const token = {
-          tokenId: data.tokenId,
-          url: data.url,
-          name: data.name,
-          courseId: data.courseId,
-          description: data.description,
-          purchasable,
-          price: web3.utils.fromWei(onChain[1], 'ether'),
-          prerequisite: onChain[2],
-          hasLesson: onChain[3],
-          hasPrerequisite: onChain[4],
-          available: onChain[5],
-        };
-        return token;
-      }
-      return null;
     }
 
     /**

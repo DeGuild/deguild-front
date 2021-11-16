@@ -72,6 +72,14 @@ import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 import Job from './Job.vue';
 
+require('dotenv').config();
+
+const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+
 export default defineComponent({
   components: { Job },
   name: 'JobDashboard',
@@ -194,7 +202,20 @@ export default defineComponent({
         taker: '',
       },
     ];
-
+    const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
+    const deGuild = new web3.eth.Contract(
+      deGuildABI,
+      deGuildAddress,
+    );
+    async function getJobsAdded() {
+      const caller = await deGuild.getPastEvents('JobAdded', {
+        filter: { client: userAddress.value.user },
+        fromBlock: 0,
+        toBlock: 'latest',
+      });
+      const history = caller.map((ele) => ele.returnValues[0]);
+      return history;
+    }
     const state = reactive({
       jobs: mockJobs,
       recommend: false,

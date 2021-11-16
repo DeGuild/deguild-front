@@ -43,14 +43,15 @@
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
-
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 import Job from './Job.vue';
 
+require('dotenv').config();
+
 const Web3 = require('web3');
 
-const deGuildAddress = '0xf6A5fcCf616D49fAB9FDa0ed59d54Ca5085522DD';
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
@@ -144,15 +145,7 @@ export default defineComponent({
       const caller = await deGuild.methods.name().call();
       return caller;
     }
-    async function getJobsAdded() {
-      const caller = await deGuild.getPastEvents('JobAdded', {
-        filter: { client: userAddress.value.user },
-        fromBlock: 0,
-        toBlock: 'latest',
-      });
-      const history = caller.map((ele) => ele.returnValues[0]);
-      return history;
-    }
+
     async function getJobsCompleted() {
       const caller = await deGuild.getPastEvents('JobCompleted', {
         filter: { taker: userAddress.value.user },
@@ -165,9 +158,7 @@ export default defineComponent({
 
     const state = reactive({
       jobs: mockJobs,
-      recommend: false,
-      available: true,
-      posted: false,
+      history: computed(() => getJobsCompleted()),
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
@@ -212,7 +203,6 @@ export default defineComponent({
       console.log(state.searchTitle);
       console.log(await getName());
       console.log(await getJobsCompleted());
-      console.log(await getJobsAdded());
       const history = await getJobsCompleted();
 
       const data = await fetchTitle();
