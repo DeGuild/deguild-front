@@ -54,7 +54,7 @@ export default defineComponent({
   position: relative;
   padding-left: 2vw;
   padding-right: 2vw;
-  margin-bottom: 1vw;
+  margin-bottom: 1vh;
   color: #6c421b;
 
   &.image {

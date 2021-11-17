@@ -50,11 +50,6 @@
       </div>
 
       <div class="job background" v-show="state.page === 1">
-        <!-- <div class="title">
-          <i class="fas fa-project-diagram"></i>
-
-          <span class="title header">Job Requirement</span>
-        </div> -->
         <div class="title">
           <i class="fa fa-info-circle"></i
           ><span class="title header">Job Preview</span>
@@ -116,7 +111,7 @@
         </div>
         <span class="fields left">
           <span @click="changeMode()" class="btn skill"
-            >SWITCH TO CUSTOM MODE</span
+            >SWITCH INPUT MODE</span
           >
           <div v-show="!state.custom">
             <span
@@ -129,6 +124,8 @@
               <div v-for="skill in state.skills" :key="skill">
                 <skill :skill="skill"></skill>
               </div>
+              <br/>
+              <br/>
             </div>
           </div>
           <div v-show="state.custom">
@@ -154,7 +151,7 @@
         </span>
 
         <div @click="closeOverlay()" class="close">X</div>
-        <div class="btn next">DONE</div>
+        <div @click="send()" class="btn next">DONE</div>
         <div @click="navigateTo(1)" class="btn previous">BACK</div>
       </div>
     </div>
@@ -254,6 +251,10 @@ export default defineComponent({
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
+    function send() {
+      store.dispatch('User/setOverlay', false);
+      store.dispatch('User/setReviewJob', null);
+    }
 
     return {
       state,
@@ -261,6 +262,7 @@ export default defineComponent({
       navigateTo,
       closeOverlay,
       changeMode,
+      send,
     };
   },
 });
@@ -412,7 +414,7 @@ export default defineComponent({
   align-items: center;
   left: 2vw;
   width: 5vw;
-  height: 2vw;
+  height: 4vh;
   font-family: Roboto;
   font-style: normal;
   color: #754d28;
@@ -470,7 +472,7 @@ export default defineComponent({
   &.left {
     left: 0vw;
     height: 38vh;
-    overflow: hidden;
+    overflow: auto;
 
     // background: black;
   }
@@ -525,10 +527,9 @@ export default defineComponent({
   background: #eed9d2;
   &.skill {
     padding-top: 1vh;
-    margin-top: 1vh;
-    height: 23vh;
+    margin-bottom: 1vh;
+    height: 22.5vh;
     overflow: auto;
-    padding-bottom: 1vh;
   }
 }
 .list-item {
