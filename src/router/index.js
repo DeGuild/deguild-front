@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import DeGuildSite from '../views/DeGuild.vue';
-import Sandbox from '../views/_Sandbox.vue';
 import MyTask from '../views/MyTask.vue';
 import NoProvider from '../views/NoProvider.vue';
 import History from '../views/History.vue';
@@ -31,11 +30,6 @@ const routes = [
     path: '/no-provider',
     name: 'no-provider',
     component: NoProvider,
-  },
-  {
-    path: '/test',
-    name: 'Sandbox',
-    component: Sandbox,
   },
 ];
 
