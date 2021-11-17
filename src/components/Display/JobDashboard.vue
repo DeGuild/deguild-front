@@ -418,6 +418,7 @@ export default defineComponent({
     }
     &.disabled {
       top: -0.1vw;
+      cursor:progress;
 
       background: #7a7a7a;
       &:hover {

@@ -13,6 +13,10 @@ import {
   faBalanceScale,
   faPaperclip,
   faEye,
+  faPlus,
+  faPlusCircle,
+  faExclamationCircle,
+  faProjectDiagram,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -28,6 +32,7 @@ import router from './router';
 import store from './store';
 
 library.add(faFire);
+library.add(faProjectDiagram);
 library.add(faDollarSign);
 library.add(faHashtag);
 library.add(faCog);
@@ -38,6 +43,9 @@ library.add(faBalanceScale);
 library.add(faStar);
 library.add(faEye);
 library.add(faUserClock);
+library.add(faPlus);
+library.add(faPlusCircle);
+library.add(faExclamationCircle);
 library.add(faPaperclip);
 const head = createHead();
 

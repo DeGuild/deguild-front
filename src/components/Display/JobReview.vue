@@ -131,6 +131,7 @@ export default defineComponent({
 
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
+      store.dispatch('User/setReviewJob', null);
     }
 
     async function rejectSubmission() {

@@ -5,8 +5,10 @@
   <div v-if="user !== null">
     <job-dashboard></job-dashboard>
     <profile />
+    <add-job/>
     <overlay v-if="overlay"> </overlay>
-    <job-review :job="reviewJob" v-if="overlay"></job-review>
+    <job-to-add v-if="overlay"></job-to-add>
+    <job-review :job="reviewJob" v-if="overlay && reviewJob"></job-review>
 
     <dialogue-box></dialogue-box>
 
@@ -33,6 +35,8 @@ import JobDashboard from '../components/Display/JobDashboard.vue';
 import Profile from '../components/Buttons/Profile.vue';
 import Overlay from '../components/General/Overlay.vue';
 import JobReview from '../components/Display/JobReview.vue';
+import JobToAdd from '../components/Display/JobToAdd.vue';
+import AddJob from '../components/Buttons/AddJob.vue';
 // @ is an alias to /src
 
 export default {
@@ -48,6 +52,8 @@ export default {
     Profile,
     Overlay,
     JobReview,
+    AddJob,
+    JobToAdd,
     // Navigation,
   },
   setup() {
