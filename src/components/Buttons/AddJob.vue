@@ -26,7 +26,7 @@ export default defineComponent({
     function add() {
       store.dispatch(
         'User/setDialog',
-        'Please wait, we are retrieving your posted job submission!',
+        'What can I do for you today?',
       );
       store.dispatch('User/setOverlay', true);
     }

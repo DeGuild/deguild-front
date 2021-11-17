@@ -74,13 +74,98 @@
             {{ '★'.repeat(0) + '☆'.repeat(5) }}
           </span>
         </div>
-        <div class="preview-block difficulty">
-          Difficulty:
-          {{ '★'.repeat(0) + '☆'.repeat(5) }}
+        <div class="job-info">
+          <div class="preview-block level">
+            <div class="icon">
+              <i class="fas fa-fire"></i>
+            </div>
+            <div class="icon value">5</div>
+            <div class="icon label">
+              <h5>LEVEL</h5>
+            </div>
+          </div>
+          <div class="preview-block time">
+            <div class="icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="icon value">5 D</div>
+            <div class="icon label">
+              <h5>TIME</h5>
+            </div>
+          </div>
+          <div class="preview-block reward">
+            <div class="icon">
+              <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="icon value">5</div>
+            <div class="icon label">
+              <h5>REWARD</h5>
+            </div>
+          </div>
         </div>
+
         <div @click="closeOverlay()" class="close">X</div>
         <div @click="navigateTo(2)" class="btn next">NEXT</div>
         <div @click="navigateTo(0)" class="btn previous">BACK</div>
+      </div>
+      <div class="job background" v-show="state.page === 2">
+        <!-- <div class="title">
+          <i class="fas fa-project-diagram"></i>
+
+          <span class="title header">Job Requirement</span>
+        </div> -->
+        <div class="title">
+          <i class="fa fa-info-circle"></i
+          ><span class="title header">Job Description</span>
+        </div>
+        <div class="info">
+          <img class="image" /><img />
+          <span>
+            <div class="text">
+              <h4>title</h4>
+            </div>
+            <div class="text client">
+              <p>client</p>
+            </div>
+          </span>
+          <span class="block difficulty">
+            Difficulty:
+            {{ '★'.repeat(0) + '☆'.repeat(5) }}
+          </span>
+        </div>
+        <div class="job-info">
+          <div class="preview-block level">
+            <div class="icon">
+              <i class="fas fa-fire"></i>
+            </div>
+            <div class="icon value">5</div>
+            <div class="icon label">
+              <h5>LEVEL</h5>
+            </div>
+          </div>
+          <div class="preview-block time">
+            <div class="icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="icon value">5 D</div>
+            <div class="icon label">
+              <h5>TIME</h5>
+            </div>
+          </div>
+          <div class="preview-block reward">
+            <div class="icon">
+              <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="icon value">5</div>
+            <div class="icon label">
+              <h5>REWARD</h5>
+            </div>
+          </div>
+        </div>
+
+        <div @click="closeOverlay()" class="close">X</div>
+        <!-- <div @click="navigateTo(3)" class="btn next">NEXT</div> -->
+        <div @click="navigateTo(1)" class="btn previous">BACK</div>
       </div>
     </div>
   </div>
@@ -117,11 +202,16 @@ export default defineComponent({
     function navigateTo(pageIdx) {
       state.page = pageIdx;
     }
+    function closeOverlay() {
+      store.dispatch('User/setOverlay', false);
+      store.dispatch('User/setReviewJob', null);
+    }
 
     return {
       state,
       userAddress,
       navigateTo,
+      closeOverlay,
     };
   },
 });
@@ -203,26 +293,14 @@ export default defineComponent({
 
 .preview-block {
   height: 7vw;
-  width: 6vw;
   top: 0vw;
-  position: absolute;
-  background: #eed9d2;
+  position: relative;
+  background: #dddddd;
   line-height: 0.4vw;
   color: #919191;
   font-family: Roboto;
   font-style: normal;
-  &.id {
-    left: 25.5vw;
-  }
-  &.level {
-    left: 32vw;
-  }
-  &.time {
-    left: 38.5vw;
-  }
-  &.reward {
-    left: 45vw;
-  }
+  margin-left: 1vw;
 }
 .job {
   &.background {
@@ -234,9 +312,19 @@ export default defineComponent({
 }
 .info {
   width: 65vw;
-  height: 4vw;
-  top: 7vw;
+  height: 10vh;
+  top: 12vh;
   position: absolute;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.job-info {
+  height: 4vw;
+  top: 28vh;
+  position: absolute;
+  width: 65vw;
 
   display: flex;
   justify-content: center;
