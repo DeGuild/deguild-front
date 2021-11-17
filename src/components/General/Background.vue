@@ -30,7 +30,7 @@ export default defineComponent({
   left: -2vw;
   bottom: 0vw;
 
-  background: url('../../assets/counter.webp');
+  background: url('../../assets/counter.png');
   background-size: cover;
 }
 .npc {

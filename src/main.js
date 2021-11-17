@@ -21,6 +21,7 @@ import '@fontsource/roboto';
 import 'viewerjs/dist/viewer.css';
 import VueSocialSharing from 'vue-social-sharing';
 import '@/plugins/firebase';
+import { createHead } from '@vueuse/head';
 
 import App from './App.vue';
 import router from './router';
@@ -38,8 +39,10 @@ library.add(faStar);
 library.add(faEye);
 library.add(faUserClock);
 library.add(faPaperclip);
+const head = createHead();
 
 createApp(App)
+  .use(head)
   .use(store)
   .use(router)
   .use(VueSocialSharing)

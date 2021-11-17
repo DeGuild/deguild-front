@@ -31,11 +31,14 @@
         placeholder="Search job title"
       />
     </div>
-    <div class="display">
+    <div class="display" v-if="!state.fetching">
       <br />
       <div v-for="job in state.jobs" :key="job.id">
         <job :job="job"></job>
       </div>
+    </div>
+    <div class="display" v-show="state.fetching">
+      <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
 </template>
@@ -181,7 +184,8 @@ export default defineComponent({
         description: infoOffChain.description,
         submitted: infoOffChain.submission.length > 0,
         deadline: addDays(timestamp, 7),
-        status: infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
+        status:
+          infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
       };
 
       // console.log(jobObject);
@@ -194,17 +198,21 @@ export default defineComponent({
       selectedSort: 'id',
       searchTitle: null,
       level: 5,
+      fetching: computed(() => store.state.User.fetching),
     });
 
     async function getJobsCompleted() {
       store.dispatch('User/setDialog', 'Please wait!');
+      store.dispatch('User/setFetching', true);
 
       const caller = await deGuild.getPastEvents('JobCompleted', {
         filter: { taker: userAddress.value.user },
         fromBlock: 0,
         toBlock: 'latest',
       });
-      const history = await Promise.all(caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)));
+      const history = await Promise.all(
+        caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
+      );
       // console.log(history);
       store.dispatch('User/setFetching', false);
 

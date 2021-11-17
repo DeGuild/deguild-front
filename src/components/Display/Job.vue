@@ -61,14 +61,21 @@
         </div>
         <h3
           class="btn"
-          @click="review()"
+          @click.stop="review()"
           v-if="this.job.client === state.user && this.job.state === 2"
         >
           REVIEW
         </h3>
         <h3
           class="btn"
-          @click="take()"
+          @click.stop="review()"
+          v-if="this.job.client === state.user && this.job.state === 3"
+        >
+          CHECK
+        </h3>
+        <h3
+          class="btn"
+          @click.stop="take()"
           v-if="this.job.state === 1 && this.job.client !== state.user"
         >
           TAKE
@@ -115,7 +122,6 @@ export default defineComponent({
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
     async function take() {
-      state.smaller = !state.smaller;
       store.dispatch(
         'User/setDialog',
         'Please wait and I will tell the client that you will be taking this job!',
@@ -146,7 +152,6 @@ export default defineComponent({
         this.job,
       );
       store.dispatch('User/setOverlay', true);
-      state.smaller = !state.smaller;
     }
 
     return {
@@ -168,6 +173,8 @@ export default defineComponent({
   top: 0.4vw;
   left: 1vw;
   position: absolute;
+  background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
+
 }
 .block {
   height: 7vw;

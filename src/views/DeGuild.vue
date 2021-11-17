@@ -21,7 +21,8 @@
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
+import { useHead } from '@vueuse/head';
 import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
@@ -57,6 +58,19 @@ export default {
     const reviewJob = computed(() => store.state.User.reviewJob);
     // console.log(store.state.User.user);
     // console.log(user);
+    const siteData = reactive({
+      title: 'DeGuild - Dashboard',
+      description: 'Freelancer platform for everyone',
+    });
+    useHead({
+      title: computed(() => siteData.title),
+      meta: [
+        {
+          name: 'description',
+          content: computed(() => siteData.description),
+        },
+      ],
+    });
     return {
       user, wallet, overlay, reviewJob,
     };

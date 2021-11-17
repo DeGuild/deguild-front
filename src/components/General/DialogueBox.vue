@@ -28,7 +28,7 @@ export default defineComponent({
 <style scoped lang="scss">
 .dialog {
   position: absolute;
-  background: url('../../assets/dialog.webp');
+  background: url('../../assets/dialog.png');
   filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 
   width: 58vw;

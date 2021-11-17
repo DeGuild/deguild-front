@@ -3,24 +3,24 @@
     <div class="search">
       <div
         class="search button recommend"
-        v-bind:class="{ selected: state.recommend }"
-        @click="selectRecommend()"
+        v-bind:class="{ selected: state.recommend, disabled: state.fetching }"
+        @click="state.fetching ? null : selectRecommend()"
       >
         <div class="search icon"><i class="fa fa-star"></i></div>
         Recommend
       </div>
       <div
         class="search button available"
-        v-bind:class="{ selected: state.available }"
-        @click="selectAvailable()"
+        v-bind:class="{ selected: state.available, disabled: state.fetching }"
+        @click="state.fetching ? null : selectAvailable()"
       >
         <div class="search icon"><i class="fas fa-balance-scale"></i></div>
         Available
       </div>
       <div
         class="search button check-post"
-        v-bind:class="{ selected: state.posted }"
-        @click="selectPosted()"
+        v-bind:class="{ selected: state.posted, disabled: state.fetching }"
+        @click="state.fetching ? null : selectPosted()"
       >
         <div class="search icon"><i class="fa fa-user-clock"></i></div>
         Posted
@@ -51,15 +51,18 @@
       <input
         class="searcher"
         v-model="state.searchTitle"
-        @keyup.enter="findJobs()"
+        @keyup.enter="state.fetching ? null :findJobs()"
         placeholder="Search job title"
       />
     </div>
-    <div class="display">
+    <div class="display" v-show="!state.fetching">
       <br />
       <div v-for="job in state.jobs" :key="job.id">
         <job :job="job"></job>
       </div>
+    </div>
+    <div class="display" v-show="state.fetching">
+      <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
 </template>
@@ -149,6 +152,7 @@ export default defineComponent({
       selectedSort: 'id',
       searchTitle: null,
       level: 5,
+      fetching: computed(() => store.state.User.fetching),
     });
 
     async function isOccupied(address) {
@@ -283,7 +287,7 @@ export default defineComponent({
       state.posted = false;
       store.dispatch('User/setFetching', true);
 
-      fetchRecommend();
+      await fetchRecommend();
       store.dispatch('User/setFetching', false);
     }
     async function selectPosted() {
@@ -386,6 +390,9 @@ export default defineComponent({
         top: -0.1vw;
 
         background: #6c421b;
+        &:hover {
+          background: #6c421b;
+        }
       }
     }
     &.recommend {
@@ -393,6 +400,9 @@ export default defineComponent({
         top: -0.1vw;
 
         background: #6c421b;
+        &:hover {
+          background: #6c421b;
+        }
       }
     }
     &.check-post {
@@ -401,6 +411,17 @@ export default defineComponent({
         top: -0.1vw;
 
         background: #6c421b;
+        &:hover {
+          background: #6c421b;
+        }
+      }
+    }
+    &.disabled {
+      top: -0.1vw;
+
+      background: #7a7a7a;
+      &:hover {
+        background: #7a7a7a;
       }
     }
   }
