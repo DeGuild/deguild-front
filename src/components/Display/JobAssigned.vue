@@ -227,7 +227,10 @@ export default defineComponent({
             requestOptions,
           );
 
-          console.log('File available at', `zipfile/${userAddress.value.user}/${state.zipData.name}`);
+          console.log(
+            'File available at',
+            `zipfile/${userAddress.value.user}/${state.zipData.name}`,
+          );
           const data = await response.json();
           console.log(data);
 
@@ -256,6 +259,7 @@ export default defineComponent({
   top: 0.4vw;
   left: 1vw;
   position: absolute;
+  background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
 }
 .block {
   height: 7vw;

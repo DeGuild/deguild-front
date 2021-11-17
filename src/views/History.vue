@@ -18,7 +18,9 @@
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
+import { useHead } from '@vueuse/head';
+
 import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
@@ -46,6 +48,19 @@ export default {
     const store = useStore();
     const user = computed(() => store.state.User.user);
     const wallet = computed(() => store.state.User.approval);
+    const siteData = reactive({
+      title: 'DeGuild - History',
+      description: 'Freelancer platform for everyone',
+    });
+    useHead({
+      title: computed(() => siteData.title),
+      meta: [
+        {
+          name: 'description',
+          content: computed(() => siteData.description),
+        },
+      ],
+    });
     // console.log(store.state.User.user);
     // console.log(user);
     return { user, wallet };

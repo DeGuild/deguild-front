@@ -12,7 +12,7 @@
 /* eslint-disable no-unused-vars */
 
 import { useStore } from 'vuex';
-// import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import {
   reactive, onBeforeMount, computed, defineComponent,
@@ -39,7 +39,7 @@ export default defineComponent({
   name: 'ConnectWallet',
   setup() {
     const store = useStore();
-    // const route = useRoute();
+    const router = useRouter();
 
     const user = computed(() => store.state.User.user);
 
@@ -132,10 +132,14 @@ export default defineComponent({
      * Connect to the Rinkeby Network
      */
     async function connectToRinkeby() {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x4' }],
-      });
+      if (window.ethereum) {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x4' }],
+        });
+      } else {
+        router.push('/no-provider');
+      }
     }
 
     /**
@@ -196,10 +200,7 @@ export default defineComponent({
           return true;
         } catch (error) {
           console.log(error);
-          state.primary = 'ERROR!';
         }
-      } else {
-        // this.$route.push('/no-provider');
       }
       return false;
     }
@@ -275,7 +276,7 @@ export default defineComponent({
   top: 0vw;
 
   /* standart theme/error */
-  background: url('../../assets/wallet-board.png');
+  background: url('../../assets/wallet-board.webp');
   border-radius: 4px;
   background-size: contain;
   background-repeat: no-repeat;

@@ -168,6 +168,8 @@ export default defineComponent({
   top: 0.4vw;
   left: 1vw;
   position: absolute;
+  background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
+
 }
 .block {
   height: 7vw;
