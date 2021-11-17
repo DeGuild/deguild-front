@@ -42,7 +42,7 @@
         <div class="file" v-if="state.zipUrl">
           <a class="btn" :href="state.zipUrl" download>Download </a>
         </div>
-        <div class="decision">
+        <div class="decision" v-if="this.job.state === 2">
           <span>
             <textarea
               class="decision comment"
