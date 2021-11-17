@@ -145,7 +145,7 @@ export default defineComponent({
     const minutes = computed(() => (props.job.deadline.getMinutes() <= 9
       ? `0${props.job.deadline.getMinutes()}`
       : props.job.deadline.getMinutes()));
-    console.log(isSubmitted);
+    // console.log(isSubmitted);
     const state = reactive({
       user: userAddress.value.user,
       uploadValue: 0,
@@ -194,10 +194,10 @@ export default defineComponent({
           // eslint-disable-next-line default-case
           switch (snapshot.state) {
             case 'paused':
-              console.log('Upload is paused');
+              // console.log('Upload is paused');
               break;
             case 'running':
-              console.log('Upload is running');
+              // console.log('Upload is running');
               break;
           }
         },
@@ -227,16 +227,16 @@ export default defineComponent({
             requestOptions,
           );
 
-          console.log(
-            'File available at',
-            `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-          );
+          // console.log(
+          //   'File available at',
+          //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
+          // );
           const data = await response.json();
-          console.log(data);
+          // console.log(data);
 
           state.submitted = true;
-
-          // state.uploading = false;
+          state.uploading = false;
+          store.dispatch('User/setDialog', 'Thank you! We will notice your client about your submission!');
         },
       );
     }

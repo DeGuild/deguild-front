@@ -1,8 +1,11 @@
 <template>
   <div class="background">
-    <div class="display" v-if="state.job">
+    <div class="display" v-if="!state.fetching && state.job">
       <br />
       <job :job="state.job"></job>
+    </div>
+    <div class="display" v-show="state.fetching">
+      <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
 </template>
@@ -113,6 +116,7 @@ export default defineComponent({
       selectedSort: 'id',
       searchTitle: null,
       level: 5,
+      fetching: computed(() => store.state.User.fetching),
     });
 
     async function getCurrentJob() {
