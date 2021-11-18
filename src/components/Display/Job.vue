@@ -67,11 +67,18 @@
           REVIEW
         </h3>
         <h3
-          class="btn"
+          class="btn check"
           @click.stop="review()"
           v-if="this.job.client === state.user && this.job.state === 3"
         >
           CHECK
+        </h3>
+        <h3
+          class="btn delete"
+          @click.stop="cancel()"
+          v-if="this.job.client === state.user && this.job.state === 1"
+        >
+          CANCEL
         </h3>
         <h3
           class="btn"
@@ -137,6 +144,21 @@ export default defineComponent({
       this.$router.push('/task');
     }
 
+    async function cancel() {
+      store.dispatch(
+        'User/setDialog',
+        'Please wait and I will tell the client that you will be taking this job!',
+      );
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+      const caller = await deGuild.methods.cancel(this.job.id).send({ from: realAddress });
+
+      store.dispatch(
+        'User/setDialog',
+        'Done! Please start working on your job early and contact your client as soon as possible',
+      );
+    }
+
     function extend() {
       state.smaller = !state.smaller;
     }
@@ -160,6 +182,7 @@ export default defineComponent({
       take,
       extend,
       review,
+      cancel,
     };
   },
 });
@@ -374,6 +397,14 @@ export default defineComponent({
   border-radius: 10%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
+  &.delete{
+    color: #fdf1e3;
+  background: #754d28;
+  }
+  &.check{
+    color: #fdf1e3;
+  background: #ca7a30;
+  }
   &:hover {
     background: #ffd19d;
   }

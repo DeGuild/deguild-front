@@ -51,7 +51,7 @@
       <input
         class="searcher"
         v-model="state.searchTitle"
-        @keyup.enter="state.fetching ? null :findJobs()"
+        @keyup.enter="state.fetching ? null : findJobs()"
         placeholder="Search job title"
       />
     </div>
@@ -106,42 +106,45 @@ export default defineComponent({
     }
 
     async function idToJob(tokenId, blockNumber) {
-      const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
-      const URI = await deGuild.methods.jobURI(tokenId).call();
-      const responseOffChain = await fetch(URI, { mode: 'cors' });
-      const infoOffChain = await responseOffChain.json();
-      const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
-      const block = await web3.eth.getBlock(blockNumber);
-      const { timestamp } = block;
+      try {
+        const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
+        const URI = await deGuild.methods.jobURI(tokenId).call();
+        const responseOffChain = await fetch(URI, { mode: 'cors' });
+        const infoOffChain = await responseOffChain.json();
+        const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
+        const block = await web3.eth.getBlock(blockNumber);
+        const { timestamp } = block;
+        // TODO: Fetch user picture profile, and add time given since job is posted
+        const jobObject = {
+          id: tokenId,
+          time: 7,
+          reward: web3.utils.fromWei(infoOnChain[0]),
+          client: infoOnChain[1],
+          taker: infoOnChain[2],
+          skills: skillsFetched,
+          state: parseInt(infoOnChain[5], 10),
+          difficulty: infoOnChain[6],
+          level: parseInt(infoOffChain.level, 10),
+          image:
+            'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
+          title: infoOffChain.title,
+          note: infoOffChain.note,
+          submission: infoOffChain.submission,
+          description: infoOffChain.description,
+          submitted: infoOffChain.submission.length > 0,
+          deadline: addDays(timestamp, 7),
+          status:
+            infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
+        };
+
+        // console.log(jobObject);
+        return jobObject;
+      } catch (err) {
+        return {};
+      }
 
       // console.log(infoOffChain);
       // console.log(infoOnChain);
-
-      // TODO: Fetch user picture profile, and add time given since job is posted
-      const jobObject = {
-        id: tokenId,
-        time: 7,
-        reward: web3.utils.fromWei(infoOnChain[0]),
-        client: infoOnChain[1],
-        taker: infoOnChain[2],
-        skills: skillsFetched,
-        state: parseInt(infoOnChain[5], 10),
-        difficulty: infoOnChain[6],
-        level: parseInt(infoOffChain.level, 10),
-        image:
-          'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
-        title: infoOffChain.title,
-        note: infoOffChain.note,
-        submission: infoOffChain.submission,
-        description: infoOffChain.description,
-        submitted: infoOffChain.submission.length > 0,
-        deadline: addDays(timestamp, 7),
-        status:
-          infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
-      };
-
-      // console.log(jobObject);
-      return jobObject;
     }
     const state = reactive({
       jobs: null,
@@ -169,10 +172,26 @@ export default defineComponent({
     async function getJobsAdded() {
       store.dispatch('User/setDialog', 'Please wait!');
       const caller = await deGuild.getPastEvents('JobAdded', {
-        filter: { taker: userAddress.value },
         fromBlock: 0,
         toBlock: 'latest',
       });
+      const history = await Promise.all(
+        caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
+      );
+      console.log(history);
+      state.jobs = history;
+
+      return history;
+    }
+
+    async function getJobsPosted() {
+      store.dispatch('User/setDialog', 'Please wait!');
+      const caller = await deGuild.getPastEvents('JobAdded', {
+        filter: { client: userAddress.value },
+        fromBlock: 0,
+        toBlock: 'latest',
+      });
+      console.log(caller);
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
@@ -244,7 +263,7 @@ export default defineComponent({
     }
 
     async function fetchPosted() {
-      const jobsAdded = await getJobsAdded();
+      const jobsAdded = await getJobsPosted();
       state.jobs = jobsAdded.filter((job) => job.client === userAddress.value);
       changedSort();
       store.dispatch(
@@ -418,7 +437,7 @@ export default defineComponent({
     }
     &.disabled {
       top: -0.1vw;
-      cursor:progress;
+      cursor: progress;
 
       background: #7a7a7a;
       &:hover {
