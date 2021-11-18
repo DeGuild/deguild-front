@@ -8,8 +8,8 @@
       <div class="text client">
         {{ this.skill.shopName }}
       </div>
-      <h3 v-if="this.skill.added" class="btn">REMOVE</h3>
-      <h3 v-if="!this.skill.added" class="btn">ADD</h3>
+      <h3 v-if="this.skill.added" @click="remove()" class="btn">REMOVE</h3>
+      <h3 v-if="!this.skill.added" @click="add()" class="btn">ADD</h3>
     </div>
   </div>
 </template>
@@ -24,7 +24,7 @@ import { useStore } from 'vuex';
 export default defineComponent({
   name: 'SkillDisplay',
   props: ['skill'],
-  setup() {
+  setup(props) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
@@ -32,9 +32,49 @@ export default defineComponent({
       user: userAddress.value.user,
     });
 
+    function add() {
+      // console.log(store.state.User.selectedSkills);
+      const current = store.state.User.selectedSkills;
+      const added = {
+        name: props.skill.name,
+        image: props.skill.image,
+        address: props.skill.address,
+        tokenId: props.skill.tokenId,
+        shopName: props.skill.shopName,
+        added: !props.skill.added,
+      };
+      let found = false;
+      current.forEach((skill) => {
+        if (
+          skill.address === props.skill.address
+          && skill.tokenId === props.skill.tokenId
+        ) {
+          found = true;
+        }
+      });
+      if (!found) current.add(added);
+      console.log(added);
+
+      store.dispatch('User/setChosenSkills', current);
+    }
+    function remove() {
+      const current = store.state.User.selectedSkills;
+      current.forEach((skill) => {
+        if (
+          skill.address === props.skill.address
+          && skill.tokenId === props.skill.tokenId
+        ) {
+          current.delete(skill);
+        }
+      });
+      store.dispatch('User/setChosenSkills', current);
+    }
+
     return {
       state,
       userAddress,
+      add,
+      remove,
     };
   },
 });

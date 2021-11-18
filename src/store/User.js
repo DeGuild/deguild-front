@@ -12,6 +12,7 @@ export const UserModule = {
     dialog: 'Welcome to DeGuild!',
     overlay: false,
     reviewJob: null,
+    selectedSkills: new Set(),
   },
   mutations: {
     SET_USER(state, user) {
@@ -43,6 +44,9 @@ export const UserModule = {
     },
     SET_REVIEW_JOB(state, job) {
       state.reviewJob = job;
+    },
+    SET_SELECTED_SKILL(state, array) {
+      state.selectedSkills = array;
     },
   },
   actions: {
@@ -87,6 +91,9 @@ export const UserModule = {
     },
     setReviewJob({ commit }, job) {
       commit('SET_REVIEW_JOB', job);
+    },
+    setChosenSkills({ commit }, skills) {
+      commit('SET_SELECTED_SKILL', skills);
     },
   },
   modules: {},

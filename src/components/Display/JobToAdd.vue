@@ -177,15 +177,22 @@
               ><input
                 type="text"
                 class="box address-skill"
+                v-model="state.skillAdd"
                 placeholder="Please specify certificate manager address"
             /></span>
             <span
               ><input
                 type="number"
                 class="box address-skill"
+                v-model="state.skillId"
                 placeholder="Please specify token id"
             /></span>
-            <span class="btn skill-add">Add skill</span>
+            <span
+              @click="customAdd()"
+              class="btn skill-add"
+              v-show="state.skillAdd && state.skillId"
+              >Add skill</span
+            >
           </div>
         </span>
         <div class="title skill-added">TAKER'S SKILLS</div>
@@ -210,15 +217,14 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import Web3 from 'web3';
-// import Web3Token from 'web3-token';
+import Web3Token from 'web3-token';
 import Skill from './Skill.vue';
 
 require('dotenv').config();
 
-// const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
-// const deGuildABI = require('../../../../DeGuild-
-// MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
 
 export default defineComponent({
@@ -233,8 +239,10 @@ export default defineComponent({
 
     const state = reactive({
       skills: [],
-      skillsAdded: [],
+      skillsAdded: computed(() => store.state.User.selectedSkills),
       skillSearch: null,
+      skillAdd: null,
+      skillId: null,
       user: userAddress.value.user,
       page: 0,
       custom: false,
@@ -258,9 +266,103 @@ export default defineComponent({
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
-    function send() {
-      store.dispatch('User/setOverlay', false);
+    async function send() {
+      // store.dispatch('User/setOverlay', false);
+      const current = store.state.User.selectedSkills;
+      const certificateSet = new Set();
+      current.forEach((ele) => certificateSet.add(ele.address));
+      const certificateArr = Array.from(certificateSet);
+      let skillSet = certificateArr.map((ele) => Array.from(current)
+        .filter((skill) => skill.address === ele)
+        .map((answer) => answer.tokenId));
+      if (skillSet.length === 1) {
+        skillSet = [skillSet];
+      }
+      const address = (await web3.eth.getAccounts())[0];
+      const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+      const count = await deGuild.methods.jobsCount().call();
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
+      const tokenId = parseInt(count, 10) + 1;
+
+      console.log(parseInt(count, 10) + 1);
+      const requestOptions = {
+        method: 'POST',
+        headers: { Authorization: token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: job.title,
+          address: deGuildAddress,
+          level: job.level,
+          tokenId: tokenId.toString(),
+          description: job.desc,
+          name: 'Parm',
+          time: job.duration,
+        }),
+      };
+
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/guild/addJob',
+        requestOptions,
+      );
+      const data = await response.json();
+      console.log(data);
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      const taker = web3.utils.isAddress(job.assignee)
+        ? web3.utils.toChecksumAddress(job.assignee)
+        : '0x0000000000000000000000000000000000000000';
+      console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
+      const transaction = await deGuild.methods
+        .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
+        .send({ from: realAddress });
+      console.log(transaction);
       store.dispatch('User/setReviewJob', null);
+    }
+
+    async function customAdd() {
+      console.log(state.skillAdd, state.skillId);
+      if (!state.skillAdd || !state.skillId) return;
+      try {
+        const manager = new web3.eth.Contract(certificateABI, state.skillAdd);
+        const URI = await manager.methods.tokenURI(state.skillId).call();
+        // console.log(URI);
+        const response = await fetch(URI, { mode: 'cors' });
+        const infoOffChain = await response.json();
+        const caller = await manager.methods.shop().call();
+        const shop = new web3.eth.Contract(certificateABI, caller);
+        const shopCaller = await shop.methods.name().call();
+        const toAdd = {
+          name: infoOffChain.title,
+          image: infoOffChain.url,
+          address: infoOffChain.address,
+          tokenId: infoOffChain.tokenId,
+          shopName: shopCaller,
+          added: true,
+        };
+
+        console.log(toAdd);
+
+        const current = store.state.User.selectedSkills;
+        let found = false;
+        current.forEach((skill) => {
+          if (
+            skill.address === toAdd.skill.address
+            && skill.tokenId === toAdd.skill.tokenId
+          ) {
+            found = true;
+          }
+        });
+        if (!found) current.add(toAdd);
+        // console.log(added);
+
+        store.dispatch('User/setChosenSkills', current);
+      } catch (err) {
+        store.dispatch(
+          'User/setDialog',
+          'Seems like that skill does not exist...',
+        );
+      }
     }
 
     async function fetchAllSkills() {
@@ -278,7 +380,13 @@ export default defineComponent({
       infoOffChain.forEach((doc) => {
         doc.forEach((element) => {
           console.log(element.title);
-          if (element.title.toLowerCase().startsWith(state.skillSearch ? state.skillSearch.toLowerCase() : '')) {
+          if (
+            element.title
+              .toLowerCase()
+              .startsWith(
+                state.skillSearch ? state.skillSearch.toLowerCase() : '',
+              )
+          ) {
             skills.push(element);
           }
         });
@@ -320,6 +428,7 @@ export default defineComponent({
       changeMode,
       send,
       dummy,
+      customAdd,
       fetchAllSkills,
     };
   },
