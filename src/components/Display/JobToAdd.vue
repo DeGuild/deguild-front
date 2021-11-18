@@ -46,6 +46,18 @@
             class="box desc"
           ></textarea>
         </span>
+        <div class="assign-field">
+          <div class="title assign-ask">
+            Do you want to assign to specific user?
+          </div>
+          <input class="box checkbox" type="checkbox" />
+          <input
+            type="text"
+            class="box addTitle"
+            placeholder="Please specify taker address"
+            disabled
+          />
+        </div>
         <div @click="navigateTo(1)" class="btn next">NEXT</div>
       </div>
 
@@ -110,9 +122,7 @@
           <span class="title header">Job Requirement</span>
         </div>
         <span class="fields left">
-          <span @click="changeMode()" class="btn skill"
-            >SWITCH INPUT MODE</span
-          >
+          <span @click="changeMode()" class="btn skill">SWITCH INPUT MODE</span>
           <div v-show="!state.custom">
             <span
               ><input
@@ -124,8 +134,8 @@
               <div v-for="skill in state.skills" :key="skill">
                 <skill :skill="skill"></skill>
               </div>
-              <br/>
-              <br/>
+              <br />
+              <br />
             </div>
           </div>
           <div v-show="state.custom">
@@ -289,6 +299,11 @@ export default defineComponent({
   cursor: pointer;
   border-radius: 10%;
 }
+.assign-field {
+  position: absolute;
+  bottom: 5vh;
+  left: 1vw;
+}
 .title {
   font-family: Roboto;
   font-style: normal;
@@ -302,6 +317,13 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   text-align: center;
+  &.assign-ask {
+    top: unset;
+    left: -3vw;
+    font-size: 1.5vw;
+    color: #754d28;
+    margin-bottom: 2vh;
+  }
   &.header {
     font-size: 2.5vw;
     top: unset;
@@ -495,6 +517,13 @@ export default defineComponent({
   font-size: 1vw;
   font-weight: 500;
   padding: 0.5vw 0.5vw 0.5vw 0.5vw;
+
+  &.checkbox {
+    position: relative;
+    top: 1vh;
+    width: 3vw;
+    height: 3vh;
+  }
 
   &.addTitle {
     width: 29.5vw;

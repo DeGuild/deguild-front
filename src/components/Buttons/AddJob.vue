@@ -54,7 +54,7 @@ export default defineComponent({
   bottom: 18vw;
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   cursor: pointer;
   :hover {
     cursor: pointer;
