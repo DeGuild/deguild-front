@@ -108,7 +108,7 @@ export default defineComponent({
 
   background-size: cover;
   &.client {
-    top: 2.7vw;
+    top: 2.9vw;
     font-size: 0.7vw;
     opacity: 60%;
   }

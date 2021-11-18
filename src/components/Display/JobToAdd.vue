@@ -157,6 +157,8 @@
               ><input
                 type="text"
                 class="box search-skill"
+                v-model="state.skillSearch"
+                @keyup.enter="state.fetching ? null : fetchAllSkills()"
                 placeholder="Please specify skill name"
             /></span>
             <div class="listing skill" v-if="state.fetching">
@@ -207,7 +209,7 @@ import {
   defineComponent, reactive, computed, ref,
 } from 'vue';
 import { useStore } from 'vuex';
-// import Web3 from 'web3';
+import Web3 from 'web3';
 // import Web3Token from 'web3-token';
 import Skill from './Skill.vue';
 
@@ -217,6 +219,7 @@ require('dotenv').config();
 
 // const deGuildABI = require('../../../../DeGuild-
 // MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
 
 export default defineComponent({
   components: { Skill },
@@ -226,12 +229,12 @@ export default defineComponent({
     const dummy = ref();
     const store = useStore();
     const userAddress = computed(() => store.state.User);
-    // const web3 = new Web3(window.ethereum);
-    // const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+    const web3 = new Web3(window.ethereum);
 
     const state = reactive({
       skills: [],
       skillsAdded: [],
+      skillSearch: null,
       user: userAddress.value.user,
       page: 0,
       custom: false,
@@ -270,21 +273,33 @@ export default defineComponent({
       const infoOffChain = await response.json();
       store.dispatch('User/setFetching', false);
 
-      console.log(infoOffChain);
+      console.log(infoOffChain, state.skillSearch);
       const skills = [];
       infoOffChain.forEach((doc) => {
         doc.forEach((element) => {
-          skills.push(element);
+          console.log(element.title);
+          if (element.title.toLowerCase().startsWith(state.skillSearch ? state.skillSearch.toLowerCase() : '')) {
+            skills.push(element);
+          }
         });
       });
-      state.skills = skills.map((ele) => ({
-        name: ele.title,
-        image: ele.url,
-        address: ele.address,
-        tokenId: ele.tokenId,
-        shopName: 'shop',
-        added: false,
-      }));
+
+      state.skills = await Promise.all(
+        skills.map(async (ele) => {
+          const manager = new web3.eth.Contract(certificateABI, ele.address);
+          const caller = await manager.methods.shop().call();
+          const shop = new web3.eth.Contract(certificateABI, caller);
+          const shopCaller = await shop.methods.name().call();
+          return {
+            name: ele.title,
+            image: ele.url,
+            address: ele.address,
+            tokenId: ele.tokenId,
+            shopName: shopCaller,
+            added: false,
+          };
+        }),
+      );
       return skills;
     }
 
