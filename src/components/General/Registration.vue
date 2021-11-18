@@ -135,6 +135,8 @@ export default {
   left: 45.990vw;
   top: 17.906vw;
 
+  border-radius: 50%;
+
 }
 
 .upload {
@@ -204,6 +206,7 @@ export default {
   left: 45.990vw;
   top: 17.906vw;
   background: grey;
+  border-radius: 50%;
 
   display: flex;
   flex-direction: row;
