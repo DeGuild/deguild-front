@@ -7,7 +7,7 @@
     <profile />
     <add-job/>
     <overlay v-if="overlay"> </overlay>
-    <job-to-add v-if="overlay"></job-to-add>
+    <job-to-add v-if="overlay && !reviewJob"></job-to-add>
     <job-review :job="reviewJob" v-if="overlay && reviewJob"></job-review>
 
     <dialogue-box></dialogue-box>
