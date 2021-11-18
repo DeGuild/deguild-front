@@ -96,7 +96,7 @@
           <h2 class="job-description">{{ this.job.description }}</h2>
           <br />
 
-          <h1 v-if="this.job.skills ? this.job.skills.length > 0 : false">SKILL REQUIRES:</h1>
+          <h1 v-if="this.job.skills ? this.job.skills.length > 0 : false">SKILLS REQUIRED:</h1>
           <div v-for="skill in this.job.skills" :key="skill">
             <skill :skill="skill"></skill>
           </div>
@@ -142,6 +142,8 @@ export default defineComponent({
         'User/setDialog',
         'Please wait and I will tell the client that you will be taking this job!',
       );
+      store.dispatch('User/setFetching', true);
+
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
       const caller = await deGuild.methods
@@ -152,14 +154,18 @@ export default defineComponent({
         'User/setDialog',
         'Done! Please start working on your job early and contact your client as soon as possible',
       );
+      store.dispatch('User/setFetching', false);
+
       this.$router.push('/task');
     }
 
     async function cancel() {
       store.dispatch(
         'User/setDialog',
-        'Please wait and I will tell the client that you will be taking this job!',
+        'Please wait, we are cancelling this!',
       );
+      store.dispatch('User/setFetching', true);
+
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
       const caller = await deGuild.methods
@@ -168,8 +174,9 @@ export default defineComponent({
 
       store.dispatch(
         'User/setDialog',
-        'Done! Please start working on your job early and contact your client as soon as possible',
+        'Done! Please think twice before posting any job because it will cost you some gas fees.',
       );
+      store.dispatch('User/setFetching', false);
     }
 
     function extend() {
@@ -181,7 +188,7 @@ export default defineComponent({
         'User/setDialog',
         'Please wait, we are retrieving your posted job submission!',
       );
-      console.log(this.job);
+      // console.log(this.job);
       store.dispatch('User/setReviewJob', this.job);
       store.dispatch('User/setOverlay', true);
     }
@@ -436,6 +443,7 @@ export default defineComponent({
 .job-description{
   font-family: Roboto;
   font-style: normal;
+  font-weight: 100;
   font-size: 1.7vw;
   line-height: 2.2vw;
   white-space: pre-wrap;

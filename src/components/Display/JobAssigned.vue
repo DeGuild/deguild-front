@@ -56,17 +56,18 @@
           <p>{{ this.job.client }}</p>
         </div>
         <div class="text description">
-          <h3>JOB TITLE:</h3>
-          <h4>{{ this.job.title }}</h4>
-          <h3>SKILL REQUIRES:</h3>
-          <h5>{{ this.job.skills }}</h5>
-          <h3>JOB DESCRIPTION:</h3>
-          <h5>{{ this.job.description }}</h5>
-          <h3>FEEDBACK FROM CLIENT:</h3>
-          <h5>{{ this.job.note }}</h5>
+          <h1 v-if="this.job.note">FEEDBACK FROM CLIENT:</h1>
+          <h5 v-if="this.job.note">{{ this.job.note }}</h5>
+          <br />
+
+          <h1>JOB TITLE: {{ this.job.title }}</h1>
+          <br />
+          <h1>JOB DESCRIPTION:</h1>
+          <h2 class="job-description">{{ this.job.description }}</h2>
+          <br />
         </div>
         <h3 class="badge" v-if="state.submitted">
-          <h1 class="fas fa-user-clock"></h1>
+          <i class="fa fa-check-circle" aria-hidden="true"></i>
         </h3>
         <div class="text status">
           <h4>STATUS: {{ this.job.status }}</h4>
@@ -78,6 +79,7 @@
           </h4>
         </div>
         <div class="custom-file-upload">
+          <div class="label-upload">Only accept .zip file</div>
           <label for="file-upload" class="custom-file-upload button">
             <i class="fas fa-paperclip"></i>
             <span class="custom-file-upload text">{{ state.fileName }}</span>
@@ -157,10 +159,10 @@ export default defineComponent({
     });
 
     function previewZipName(event) {
-      console.log('File changed!');
+      // console.log('File changed!');
       state.uploadValue = 0;
       const file = event.target.files[0];
-      console.log(file);
+      // console.log(file);
       state.zipData = file;
       state.fileName = file.name;
     }
@@ -236,7 +238,10 @@ export default defineComponent({
 
           state.submitted = true;
           state.uploading = false;
-          store.dispatch('User/setDialog', 'Thank you! We will notice your client about your submission!');
+          store.dispatch(
+            'User/setDialog',
+            'Thank you! We will notice your client about your submission!',
+          );
         },
       );
     }
@@ -252,6 +257,11 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.label-upload {
+  position: inherit;
+  top: 5vh;
+  left: 1.6vw;
+}
 .image {
   border-radius: 50%;
   height: 3vw;
@@ -300,6 +310,14 @@ export default defineComponent({
     color: #6c421b;
   }
 }
+.job-description {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 100;
+  font-size: 1.7vw;
+  line-height: 2.2vw;
+  white-space: pre-wrap;
+}
 .job {
   position: relative;
   // padding-top: 1vw;
@@ -343,13 +361,13 @@ export default defineComponent({
   }
   &.background {
     width: 55.3vw;
-    height: 65vh;
+    height: 70vh;
     position: static;
     background: #593a2d;
     padding-left: unset;
     &.light {
       top: 1vw;
-      height: 61vh;
+      height: 66vh;
       position: relative;
       overflow: auto;
       background: #cfb7a1;
@@ -470,20 +488,20 @@ export default defineComponent({
 .badge {
   position: absolute;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
   right: 1vw;
-  top: 1vw;
+  top: 0vw;
   width: 4vw;
   height: 4vw;
   font-family: Roboto;
-  color: #754d28;
-  background: #f8d7b0;
-  font-size: 0.8vw;
+  color: #00ff95;
+  background: #ffffff;
+  font-size: 3vw;
   font-weight: 500;
 
   cursor: unset;
+  margin: 2vw 0vw 0vw 0vw;
   border-radius: 50%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 }
@@ -549,13 +567,13 @@ input[type='file'] {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: wait;
+
   &.text {
     left: 2vw;
     height: 2vw;
     top: -1vw;
     width: 7vw;
-
-    cursor: pointer;
   }
   &.bar {
     left: 9vw;

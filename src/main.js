@@ -17,6 +17,7 @@ import {
   faPlusCircle,
   faExclamationCircle,
   faProjectDiagram,
+  faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -32,6 +33,7 @@ import router from './router';
 import store from './store';
 
 library.add(faFire);
+library.add(faCheckCircle);
 library.add(faProjectDiagram);
 library.add(faDollarSign);
 library.add(faHashtag);
