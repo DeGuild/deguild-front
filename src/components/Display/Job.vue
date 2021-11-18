@@ -1,10 +1,19 @@
 <template>
   <div class="job">
-    <div class="job background dark" v-bind:class="{ smaller: state.smaller }">
+    <div
+      class="job background dark"
+      v-bind:class="{
+        smaller: state.smaller,
+        exclusive: this.job.taker === state.user,
+      }"
+    >
       <div
         class="job background light"
         @click="extend()"
-        v-bind:class="{ smaller: state.smaller }"
+        v-bind:class="{
+          smaller: state.smaller,
+          exclusive: this.job.taker === state.user,
+        }"
       >
         <div v-if="state.smaller">
           <div class="block id">
@@ -96,7 +105,9 @@
           <h2 class="job-description">{{ this.job.description }}</h2>
           <br />
 
-          <h1 v-if="this.job.skills ? this.job.skills.length > 0 : false">SKILLS REQUIRED:</h1>
+          <h1 v-if="this.job.skills ? this.job.skills.length > 0 : false">
+            SKILLS REQUIRED:
+          </h1>
           <div v-for="skill in this.job.skills" :key="skill">
             <skill :skill="skill"></skill>
           </div>
@@ -127,7 +138,8 @@ export default defineComponent({
   name: 'JobDisplay',
   components: { Skill },
   props: ['job'],
-  setup() {
+  emits: ['cancel'],
+  setup(_, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
@@ -160,10 +172,7 @@ export default defineComponent({
     }
 
     async function cancel() {
-      store.dispatch(
-        'User/setDialog',
-        'Please wait, we are cancelling this!',
-      );
+      store.dispatch('User/setDialog', 'Please wait, we are cancelling this!');
       store.dispatch('User/setFetching', true);
 
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
@@ -176,7 +185,9 @@ export default defineComponent({
         'User/setDialog',
         'Done! Please think twice before posting any job because it will cost you some gas fees.',
       );
-      store.dispatch('User/setFetching', false);
+      setTimeout(() => {
+        emit('cancel');
+      }, 1000);
     }
 
     function extend() {
@@ -301,6 +312,9 @@ export default defineComponent({
     background: #593a2d;
     padding-left: unset;
     &.dark {
+      &.exclusive {
+        background: #c59d52;
+      }
       &.smaller {
         height: 9vw;
       }
@@ -312,6 +326,9 @@ export default defineComponent({
       cursor: pointer;
 
       background: #cfb7a1;
+      &.exclusive {
+        background: #ffd381;
+      }
       &.smaller {
         height: 7vw;
       }
@@ -386,7 +403,6 @@ export default defineComponent({
     left: 1vw;
     padding-left: 1vw;
     overflow: auto;
-    background-color: #bba693;
     &.smaller {
       height: 0vw;
     }
@@ -440,7 +456,7 @@ export default defineComponent({
     font-size: 0.75vw;
   }
 }
-.job-description{
+.job-description {
   font-family: Roboto;
   font-style: normal;
   font-weight: 100;

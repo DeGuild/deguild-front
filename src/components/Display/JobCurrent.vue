@@ -2,7 +2,7 @@
   <div class="background">
     <div class="display" v-if="!state.fetching && state.job">
       <br />
-      <job :job="state.job"></job>
+      <job :job="state.job" @submit="dummy()"></job>
     </div>
     <div class="display" v-show="state.fetching">
       <img src="@/assets/Spinner-1s-200px.svg" />
@@ -76,12 +76,11 @@ export default defineComponent({
       // console.log(block);
       const { timestamp } = block;
       let statusMessage = '';
-      if (infoOffChain.submission.length > 0) {
+      if (infoOffChain.note.length > 0) {
+        statusMessage = 'Rejected';
+      } else if (infoOffChain.submission.length > 0) {
         statusMessage = 'Submitted';
       } else {
-        if (infoOffChain.note.length > 0) {
-          statusMessage = 'Rejected';
-        }
         statusMessage = 'No Submission';
       }
 
@@ -128,6 +127,8 @@ export default defineComponent({
     });
 
     async function getCurrentJob() {
+      store.dispatch('User/setFetching', true);
+
       store.dispatch('User/setDialog', 'Please wait!');
       const realAddress = web3.utils.toChecksumAddress(userAddress.value);
       const caller = await deGuild.methods.jobOf(realAddress).call();
@@ -148,8 +149,11 @@ export default defineComponent({
       } else {
         store.dispatch('User/setDialog', 'You have nothing to do right now.');
       }
+      store.dispatch('User/setFetching', false);
     }
-
+    function dummy() {
+      getCurrentJob();
+    }
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
 
@@ -159,6 +163,7 @@ export default defineComponent({
     return {
       state,
       userAddress,
+      dummy,
     };
   },
 });

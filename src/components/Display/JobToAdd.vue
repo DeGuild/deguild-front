@@ -251,7 +251,8 @@ const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifa
 export default defineComponent({
   components: { Skill },
   name: 'JobToAdd',
-  setup() {
+  emits: ['submit'],
+  setup(_, { emit }) {
     // magic dummy, don't delete :P
     const dummy = ref();
     const store = useStore();
@@ -352,6 +353,7 @@ export default defineComponent({
         store.dispatch('User/setOverlay', false);
         store.dispatch('User/setReviewJob', null);
         store.dispatch('User/setFetching', false);
+        emit('submit');
       } catch (err) {
         console.error(err);
         store.dispatch('User/setFetching', false);

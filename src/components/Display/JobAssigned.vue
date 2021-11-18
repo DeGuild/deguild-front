@@ -69,6 +69,9 @@
         <h3 class="badge" v-if="state.submitted">
           <i class="fa fa-check-circle" aria-hidden="true"></i>
         </h3>
+        <h3 class="badge dislike" v-if="state.rejected">
+          <i class="fas fa-thumbs-down" aria-hidden="true"></i>
+        </h3>
         <div class="text status">
           <h4>STATUS: {{ this.job.status }}</h4>
           <h4 class="text due-date">
@@ -135,7 +138,8 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 export default defineComponent({
   name: 'JobAssigned',
   props: ['job'],
-  setup(props) {
+  emits: ['submit'],
+  setup(props, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
@@ -155,6 +159,7 @@ export default defineComponent({
       zipData: null,
       uploading: false,
       submitted: isSubmitted.value,
+      rejected: props.job.note,
       time: `${hour.value}:${minutes.value}`,
     });
 
@@ -242,6 +247,7 @@ export default defineComponent({
             'User/setDialog',
             'Thank you! We will notice your client about your submission!',
           );
+          emit('submit');
         },
       );
     }
@@ -504,6 +510,11 @@ export default defineComponent({
   margin: 2vw 0vw 0vw 0vw;
   border-radius: 50%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
+  &.dislike {
+    color: #ffffff;
+    background: #ff0000;
+    font-size: 2.4vw;
+  }
 }
 .icon {
   // background-color: red;
