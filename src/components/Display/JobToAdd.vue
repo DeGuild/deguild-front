@@ -11,6 +11,7 @@
           <div>
             <input
               type="text"
+              v-model="job.title"
               class="box addTitle"
               placeholder="Please specify Job Title"
             />
@@ -18,21 +19,36 @@
           <div class="listing">
             <div class="list-item">
               <span class="number-text">Taker Level Recommended</span>
-              <input class="number-input" placeholder="level" type="number" />
+              <input
+                v-model="job.level"
+                class="number-input"
+                placeholder="level"
+                type="number"
+              />
             </div>
             <div class="list-item">
               <span class="number-text">Duration - How long can you wait?</span>
-              <input class="number-input" placeholder="days" type="number" />
+              <input
+                v-model="job.duration"
+                class="number-input"
+                placeholder="days"
+                type="number"
+              />
             </div>
             <div class="list-item">
               <span class="number-text">Bonus - Every taker loves bonus</span>
-              <input class="number-input" placeholder="20 DGC" type="number" />
+              <input
+                v-model="job.bonus"
+                class="number-input"
+                placeholder="20 DGC"
+                type="number"
+              />
             </div>
             <div class="list-item">
               <span class="number-text"
                 >Difficulty - The harder, the more you pay</span
               >
-              <select class="number-input">
+              <select class="number-input" v-model="job.difficulty">
                 <option v-for="i in 5" :key="i">
                   {{ i }}
                 </option>
@@ -42,10 +58,28 @@
         </span>
         <span class="fields right">
           <textarea
+            v-model="job.desc"
             placeholder="Please specify Job Description"
             class="box desc"
           ></textarea>
         </span>
+        <div class="assign-field">
+          <div class="title assign-ask">
+            Do you want to assign to specific user?
+          </div>
+          <input
+            v-model="state.hasAssign"
+            class="box checkbox"
+            type="checkbox"
+          />
+          <input
+            type="text"
+            v-model="job.assignee"
+            class="box addTitle"
+            placeholder="Please specify taker address"
+            :disabled="!state.hasAssign"
+          />
+        </div>
         <div @click="navigateTo(1)" class="btn next">NEXT</div>
       </div>
 
@@ -58,7 +92,7 @@
           <img class="image" /><img />
           <span>
             <div class="text">
-              <h4>title</h4>
+              <h4>{{ job.title }}</h4>
             </div>
             <div class="text client">
               <p>client</p>
@@ -66,7 +100,7 @@
           </span>
           <span class="block difficulty">
             Difficulty:
-            {{ '★'.repeat(0) + '☆'.repeat(5) }}
+            {{ '★'.repeat(job.difficulty) + '☆'.repeat(5 - job.difficulty) }}
           </span>
         </div>
         <div class="job-info">
@@ -74,7 +108,7 @@
             <div class="icon">
               <i class="fas fa-fire"></i>
             </div>
-            <div class="icon value">5</div>
+            <div class="icon value">{{ job.level }}</div>
             <div class="icon label">
               <h5>LEVEL</h5>
             </div>
@@ -83,7 +117,7 @@
             <div class="icon">
               <i class="fas fa-stopwatch"></i>
             </div>
-            <div class="icon value">5 D</div>
+            <div class="icon value">{{ job.duration }} D</div>
             <div class="icon label">
               <h5>TIME</h5>
             </div>
@@ -92,10 +126,17 @@
             <div class="icon">
               <i class="fas fa-hand-holding-usd"></i>
             </div>
-            <div class="icon value">5</div>
+            <div class="icon value">
+              {{ job.difficulty ** 2 * 100 + job.bonus }}
+            </div>
             <div class="icon label">
               <h5>REWARD</h5>
             </div>
+          </div>
+        </div>
+        <div class="assignnee-info" v-if="state.hasAssign">
+          <div class="title assignnee-text">
+            Assigned to: {{ job.assignee }}
           </div>
         </div>
 
@@ -110,22 +151,25 @@
           <span class="title header">Job Requirement</span>
         </div>
         <span class="fields left">
-          <span @click="changeMode()" class="btn skill"
-            >SWITCH INPUT MODE</span
-          >
+          <span @click="changeMode()" class="btn skill">SWITCH INPUT MODE</span>
           <div v-show="!state.custom">
             <span
               ><input
                 type="text"
                 class="box search-skill"
+                v-model="state.skillSearch"
+                @keyup.enter="state.fetching ? null : fetchAllSkills()"
                 placeholder="Please specify skill name"
             /></span>
-            <div class="listing skill">
+            <div class="listing skill" v-if="state.fetching">
+              <img src="@/assets/Spinner-1s-200px.svg" />
+            </div>
+            <div class="listing skill" v-if="!state.fetching">
               <div v-for="skill in state.skills" :key="skill">
                 <skill :skill="skill"></skill>
               </div>
-              <br/>
-              <br/>
+              <br />
+              <br />
             </div>
           </div>
           <div v-show="state.custom">
@@ -133,17 +177,26 @@
               ><input
                 type="text"
                 class="box address-skill"
+                v-model="state.skillAdd"
                 placeholder="Please specify certificate manager address"
             /></span>
             <span
               ><input
                 type="number"
                 class="box address-skill"
+                v-model="state.skillId"
                 placeholder="Please specify token id"
             /></span>
-            <span class="btn skill-add">Add skill</span>
+            <span
+              @click="customAdd()"
+              class="btn skill-add"
+              v-show="state.skillAdd && state.skillId"
+              >Add skill</span
+            >
           </div>
         </span>
+        <div class="title skill-added">TAKER'S SKILLS</div>
+
         <span class="fields right-added">
           <div v-for="skill in state.skillsAdded" :key="skill">
             <skill :skill="skill"></skill>
@@ -159,10 +212,9 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
-
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import Web3 from 'web3';
 import Web3Token from 'web3-token';
@@ -173,77 +225,40 @@ require('dotenv').config();
 const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
 
 export default defineComponent({
   components: { Skill },
   name: 'JobToAdd',
   setup() {
+    // magic dummy, don't delete :P
+    const dummy = ref();
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const web3 = new Web3(window.ethereum);
-    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
-    const mockSkills = [
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-      {
-        name: 'abc',
-        image:
-          'https://firebasestorage.googleapis.com/v0/b/deguild-2021.appspot.com/o/images%2F30.png?alt=media',
-        address: '123',
-        tokenId: '12',
-        shopName: 'shop',
-      },
-    ];
 
     const state = reactive({
-      skills: mockSkills,
-      skillsAdded: mockSkills,
+      skills: [],
+      skillsAdded: computed(() => store.state.User.selectedSkills),
+      skillSearch: null,
+      skillAdd: null,
+      skillId: null,
       user: userAddress.value.user,
       page: 0,
       custom: false,
+      hasAssign: false,
     });
 
-    function navigateTo(pageIdx) {
-      state.page = pageIdx;
-    }
+    const job = reactive({
+      title: null,
+      desc: null,
+      level: null,
+      duration: null,
+      bonus: null,
+      difficulty: null,
+      assignee: null,
+    });
+
     function changeMode() {
       state.custom = !state.custom;
     }
@@ -251,18 +266,170 @@ export default defineComponent({
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
-    function send() {
-      store.dispatch('User/setOverlay', false);
+    async function send() {
+      // store.dispatch('User/setOverlay', false);
+      const current = store.state.User.selectedSkills;
+      const certificateSet = new Set();
+      current.forEach((ele) => certificateSet.add(ele.address));
+      const certificateArr = Array.from(certificateSet);
+      let skillSet = certificateArr.map((ele) => Array.from(current)
+        .filter((skill) => skill.address === ele)
+        .map((answer) => answer.tokenId));
+      if (skillSet.length === 1) {
+        skillSet = [skillSet];
+      }
+      const address = (await web3.eth.getAccounts())[0];
+      const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+      const count = await deGuild.methods.jobsCount().call();
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
+      const tokenId = parseInt(count, 10) + 1;
+
+      console.log(parseInt(count, 10) + 1);
+      const requestOptions = {
+        method: 'POST',
+        headers: { Authorization: token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: job.title,
+          address: deGuildAddress,
+          level: job.level,
+          tokenId: tokenId.toString(),
+          description: job.desc,
+          name: 'Parm',
+          time: job.duration,
+        }),
+      };
+
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/guild/addJob',
+        requestOptions,
+      );
+      const data = await response.json();
+      console.log(data);
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      const taker = web3.utils.isAddress(job.assignee)
+        ? web3.utils.toChecksumAddress(job.assignee)
+        : '0x0000000000000000000000000000000000000000';
+      console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
+      const transaction = await deGuild.methods
+        .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
+        .send({ from: realAddress });
+      console.log(transaction);
       store.dispatch('User/setReviewJob', null);
+    }
+
+    async function customAdd() {
+      console.log(state.skillAdd, state.skillId);
+      if (!state.skillAdd || !state.skillId) return;
+      try {
+        const manager = new web3.eth.Contract(certificateABI, state.skillAdd);
+        const URI = await manager.methods.tokenURI(state.skillId).call();
+        // console.log(URI);
+        const response = await fetch(URI, { mode: 'cors' });
+        const infoOffChain = await response.json();
+        const caller = await manager.methods.shop().call();
+        const shop = new web3.eth.Contract(certificateABI, caller);
+        const shopCaller = await shop.methods.name().call();
+        const toAdd = {
+          name: infoOffChain.title,
+          image: infoOffChain.url,
+          address: infoOffChain.address,
+          tokenId: infoOffChain.tokenId,
+          shopName: shopCaller,
+          added: true,
+        };
+
+        console.log(toAdd);
+
+        const current = store.state.User.selectedSkills;
+        let found = false;
+        current.forEach((skill) => {
+          if (
+            skill.address === toAdd.skill.address
+            && skill.tokenId === toAdd.skill.tokenId
+          ) {
+            found = true;
+          }
+        });
+        if (!found) current.add(toAdd);
+        // console.log(added);
+
+        store.dispatch('User/setChosenSkills', current);
+      } catch (err) {
+        store.dispatch(
+          'User/setDialog',
+          'Seems like that skill does not exist...',
+        );
+      }
+    }
+
+    async function fetchAllSkills() {
+      store.dispatch('User/setFetching', true);
+
+      const response = await fetch(
+        'https://us-central1-deguild-2021.cloudfunctions.net/app/allCertificates',
+        { mode: 'cors' },
+      );
+      const infoOffChain = await response.json();
+      store.dispatch('User/setFetching', false);
+
+      console.log(infoOffChain, state.skillSearch);
+      const skills = [];
+      infoOffChain.forEach((doc) => {
+        doc.forEach((element) => {
+          console.log(element.title);
+          if (
+            element.title
+              .toLowerCase()
+              .startsWith(
+                state.skillSearch ? state.skillSearch.toLowerCase() : '',
+              )
+          ) {
+            skills.push(element);
+          }
+        });
+      });
+
+      state.skills = await Promise.all(
+        skills.map(async (ele) => {
+          const manager = new web3.eth.Contract(certificateABI, ele.address);
+          const caller = await manager.methods.shop().call();
+          const shop = new web3.eth.Contract(certificateABI, caller);
+          const shopCaller = await shop.methods.name().call();
+          return {
+            name: ele.title,
+            image: ele.url,
+            address: ele.address,
+            tokenId: ele.tokenId,
+            shopName: shopCaller,
+            added: false,
+          };
+        }),
+      );
+      return skills;
+    }
+
+    async function navigateTo(pageIdx) {
+      state.page = pageIdx;
+      if (pageIdx === 2) {
+        console.log('yo');
+        await fetchAllSkills();
+      }
     }
 
     return {
       state,
+      job,
       userAddress,
       navigateTo,
       closeOverlay,
       changeMode,
       send,
+      dummy,
+      customAdd,
+      fetchAllSkills,
     };
   },
 });
@@ -289,6 +456,11 @@ export default defineComponent({
   cursor: pointer;
   border-radius: 10%;
 }
+.assign-field {
+  position: absolute;
+  bottom: 5vh;
+  left: 1vw;
+}
 .title {
   font-family: Roboto;
   font-style: normal;
@@ -302,6 +474,31 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   text-align: center;
+  &.skill-added {
+    position: absolute;
+    font-weight: 900;
+    top: 13vh;
+    right: 11vw;
+    font-size: 1.5vw;
+    color: #754d28;
+    margin-bottom: 2vh;
+  }
+
+  &.assignnee-text {
+    position: absolute;
+    font-size: 1.2vw;
+    top: 4vh;
+
+    color: #754d28;
+    margin-bottom: 2vh;
+  }
+  &.assign-ask {
+    top: unset;
+    left: -3vw;
+    font-size: 1.5vw;
+    color: #754d28;
+    margin-bottom: 2vh;
+  }
   &.header {
     font-size: 2.5vw;
     top: unset;
@@ -374,6 +571,16 @@ export default defineComponent({
 .job-info {
   height: 4vw;
   top: 30vh;
+  position: absolute;
+  width: 65vw;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.assignnee-info {
+  height: 4vw;
+  top: 40vh;
   position: absolute;
   width: 65vw;
 
@@ -482,6 +689,9 @@ export default defineComponent({
   }
   &.right-added {
     left: 31vw;
+    top: 16vh;
+    height: 33vh;
+
     overflow: auto;
 
     // background: red;
@@ -495,6 +705,13 @@ export default defineComponent({
   font-size: 1vw;
   font-weight: 500;
   padding: 0.5vw 0.5vw 0.5vw 0.5vw;
+
+  &.checkbox {
+    position: relative;
+    top: 1vh;
+    width: 3vw;
+    height: 3vh;
+  }
 
   &.addTitle {
     width: 29.5vw;

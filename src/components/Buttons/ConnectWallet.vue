@@ -44,19 +44,21 @@ export default defineComponent({
     const user = computed(() => store.state.User.user);
 
     function shortenedAddress(address) {
+      if (!address) {
+        return "<i class='fas fa-spinner fa-spin'></i>";
+      }
       const accountLength = address.length;
       const connectedAddress = `${address.substring(
         0,
         5,
-      )}...${address.substring(
-        accountLength - 4,
-        accountLength,
-      )}`;
+      )}...${address.substring(accountLength - 4, accountLength)}`;
       return connectedAddress;
     }
 
     const state = reactive({
-      primary: computed(() => (store.state.User.user ? shortenedAddress(store.state.User.user) : 'CONNECT WALLET')),
+      primary: computed(() => (store.state.User.fetching || store.state.User.user
+        ? shortenedAddress(store.state.User.user)
+        : 'CONNECT WALLET')),
       network: '',
       magicScrollsData: [],
     });
@@ -146,7 +148,6 @@ export default defineComponent({
      * Disconnect user from the dapp
      */
     function disconnected() {
-      state.primary = 'CONNECT WALLET';
       store.dispatch('User/setUser', null);
     }
 
@@ -161,21 +162,19 @@ export default defineComponent({
         try {
           store.dispatch('User/setFetching', true);
 
-          const accounts = await window.ethereum.send('eth_requestAccounts');
-          const ownership = await isOwner(accounts.result[0]);
-          const approve = await hasApproval(accounts.result[0]);
-          const canTakeJob = await isOccupied(accounts.result[0]);
+          const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          const ownership = await isOwner(accounts[0]);
+          const approve = await hasApproval(accounts[0]);
+          const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
 
           store.dispatch(
             'User/setUser',
-            web3.utils.toChecksumAddress(accounts.result[0]),
+            web3.utils.toChecksumAddress(accounts[0]),
           );
-          store.dispatch(
-            'User/setOccupied',
-            canTakeJob,
-          );
-          console.log(canTakeJob);
+          store.dispatch('User/setOccupied', canTakeJob);
           store.dispatch('User/setOwner', ownership);
           store.dispatch(
             'User/setDialog',
@@ -220,10 +219,12 @@ export default defineComponent({
      * @param {address} address The addresses of connect wallets
      */
     function handleAccountsChanged(accounts) {
-      const current = accounts[0];
       if (accounts.length === 0) {
         disconnected();
-      } else if (current !== store.state.User.user) {
+        return;
+      }
+      const current = accounts[0];
+      if (current !== store.state.User.user) {
         connectWallet();
       }
     }
@@ -232,7 +233,6 @@ export default defineComponent({
      * Connect to the Ethereum network
      */
     async function ethEnabled() {
-      state.primary = "<i class='fas fa-spinner fa-spin'></i>";
       if (state.network !== 'rinkeby') {
         await connectToRinkeby();
         return false;
@@ -242,9 +242,6 @@ export default defineComponent({
     }
 
     onBeforeMount(async () => {
-      if (!store.state.User.user && window.ethereum) {
-        state.primary = 'CONNECT WALLET';
-      }
       await verifyNetwork();
 
       window.ethereum.on('accountsChanged', handleAccountsChanged);

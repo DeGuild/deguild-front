@@ -3,13 +3,13 @@
     <div class="job background light" v-bind:class="{ smaller: state.smaller }">
       <img class="image" :src="this.skill.image" />
       <div class="text">
-        <h4>{{ this.skill.name }}</h4>
+        {{ this.skill.name }}
       </div>
       <div class="text client">
-        <p>{{ this.skill.shopName }}</p>
+        {{ this.skill.shopName }}
       </div>
-      <h3 class="btn">REMOVE</h3>
-      <h3 class="btn">ADD</h3>
+      <h3 v-if="this.skill.added" @click="remove()" class="btn">REMOVE</h3>
+      <h3 v-if="!this.skill.added" @click="add()" class="btn">ADD</h3>
     </div>
   </div>
 </template>
@@ -24,7 +24,7 @@ import { useStore } from 'vuex';
 export default defineComponent({
   name: 'SkillDisplay',
   props: ['skill'],
-  setup() {
+  setup(props) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
@@ -32,9 +32,49 @@ export default defineComponent({
       user: userAddress.value.user,
     });
 
+    function add() {
+      // console.log(store.state.User.selectedSkills);
+      const current = store.state.User.selectedSkills;
+      const added = {
+        name: props.skill.name,
+        image: props.skill.image,
+        address: props.skill.address,
+        tokenId: props.skill.tokenId,
+        shopName: props.skill.shopName,
+        added: !props.skill.added,
+      };
+      let found = false;
+      current.forEach((skill) => {
+        if (
+          skill.address === props.skill.address
+          && skill.tokenId === props.skill.tokenId
+        ) {
+          found = true;
+        }
+      });
+      if (!found) current.add(added);
+      console.log(added);
+
+      store.dispatch('User/setChosenSkills', current);
+    }
+    function remove() {
+      const current = store.state.User.selectedSkills;
+      current.forEach((skill) => {
+        if (
+          skill.address === props.skill.address
+          && skill.tokenId === props.skill.tokenId
+        ) {
+          current.delete(skill);
+        }
+      });
+      store.dispatch('User/setChosenSkills', current);
+    }
+
     return {
       state,
       userAddress,
+      add,
+      remove,
     };
   },
 });
@@ -87,13 +127,14 @@ export default defineComponent({
 }
 .text {
   position: absolute;
-  width: 20vw;
+  width: 16vw;
   height: 2.5vw;
   left: 5vw;
-  top: 0vw;
+  top: 1.2vw;
 
   font-family: Roboto;
   font-style: normal;
+  font-weight: 900;
   font-size: 1.1vw;
   line-height: 1vw;
 
@@ -102,11 +143,12 @@ export default defineComponent({
   text-align: left;
 
   text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 
   background-size: cover;
-  overflow: hidden;
   &.client {
-    top: 2.2vw;
+    top: 2.9vw;
     font-size: 0.7vw;
     opacity: 60%;
   }
