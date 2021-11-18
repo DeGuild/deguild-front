@@ -109,7 +109,7 @@ export default defineComponent({
           .allowance(realAddress, deGuildAddress)
           .call();
         // console.log(caller, balance, address);
-        return caller <= balance && caller > 0;
+        return caller <= balance && caller >= 0;
       } catch (error) {
         return false;
       }
