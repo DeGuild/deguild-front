@@ -3,13 +3,13 @@
     <div class="job background light" v-bind:class="{ smaller: state.smaller }">
       <img class="image" :src="this.skill.image" />
       <div class="text">
-        <h4>{{ this.skill.name }}</h4>
+        {{ this.skill.name }}
       </div>
       <div class="text client">
-        <p>{{ this.skill.shopName }}</p>
+        {{ this.skill.shopName }}
       </div>
-      <h3 class="btn">REMOVE</h3>
-      <h3 class="btn">ADD</h3>
+      <h3 v-if="this.skill.added" class="btn">REMOVE</h3>
+      <h3 v-if="!this.skill.added" class="btn">ADD</h3>
     </div>
   </div>
 </template>
@@ -87,13 +87,14 @@ export default defineComponent({
 }
 .text {
   position: absolute;
-  width: 20vw;
+  width: 16vw;
   height: 2.5vw;
   left: 5vw;
-  top: 0vw;
+  top: 1.2vw;
 
   font-family: Roboto;
   font-style: normal;
+  font-weight: 900;
   font-size: 1.1vw;
   line-height: 1vw;
 
@@ -102,11 +103,12 @@ export default defineComponent({
   text-align: left;
 
   text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 
   background-size: cover;
-  overflow: hidden;
   &.client {
-    top: 2.2vw;
+    top: 2.7vw;
     font-size: 0.7vw;
     opacity: 60%;
   }

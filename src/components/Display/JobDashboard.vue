@@ -430,43 +430,6 @@ export default defineComponent({
     background: rgba(108, 66, 27, 0.4);
   }
 }
-.half-circle-spinner {
-  box-sizing: border-box;
-  width: 5vw;
-  height: 5vw;
-  top: 1.1vw;
-  left: 1.1vw;
-  border-radius: 100%;
-  position: absolute;
-
-  &.circle {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 100%;
-    border: calc(60px / 10) solid transparent;
-  }
-
-  &.circle.circle-1 {
-    border-top-color: #ff1d5e;
-    animation: half-circle-spinner-animation 1s infinite;
-  }
-
-  &.circle.circle-2 {
-    border-bottom-color: #ff1d5e;
-    animation: half-circle-spinner-animation 1s infinite alternate;
-  }
-
-  @keyframes half-circle-spinner-animation {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-}
 
 .searcher {
   position: absolute;
