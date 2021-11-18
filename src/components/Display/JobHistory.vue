@@ -59,6 +59,7 @@ const Web3 = require('web3');
 const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
 
 export default defineComponent({
   components: { Job },
@@ -142,9 +143,37 @@ export default defineComponent({
     ];
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
-
+    function thumbThis(url) {
+      const original = url.slice(0, 80);
+      const file = url.slice(80);
+      return `${original}thumb_${file}`;
+    }
     async function fetchSkills(addresses, tokenIds) {
-      return ['skilla', 'skillb'];
+      const skillsOnChain = [];
+      for (let index = 0; index < addresses.length; index += 1) {
+        const address = addresses[index];
+        tokenIds[index].forEach((id) => skillsOnChain.push([address, id]));
+      }
+      const displayableSkills = await Promise.all(skillsOnChain.map(async (pair) => {
+        const manager = new web3.eth.Contract(certificateABI, pair[0]);
+        const URI = await manager.methods.tokenURI(pair[1]).call();
+        const response = await fetch(URI, { mode: 'cors' });
+        const caller = await manager.methods.shop().call();
+        const shop = new web3.eth.Contract(certificateABI, caller);
+        const shopCaller = await shop.methods.name().call();
+        const data = await response.json();
+
+        return {
+          name: data.title,
+          image: thumbThis(data.url),
+          address: data.address,
+          tokenId: data.tokenId,
+          shopName: shopCaller,
+          added: false,
+        };
+      }));
+
+      return displayableSkills;
     }
 
     function addDays(date, days) {

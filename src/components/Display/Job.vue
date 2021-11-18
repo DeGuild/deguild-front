@@ -6,94 +6,101 @@
         @click="extend()"
         v-bind:class="{ smaller: state.smaller }"
       >
-        <div class="block id">
-          <div class="icon">
-            <i class="fa fa-hashtag" aria-hidden="true"></i>
+        <div v-if="state.smaller">
+          <div class="block id">
+            <div class="icon">
+              <i class="fa fa-hashtag" aria-hidden="true"></i>
+            </div>
+            <div class="icon value">{{ this.job.id }}</div>
+            <div class="icon label">
+              <h5>ID</h5>
+            </div>
           </div>
-          <div class="icon value">{{ this.job.id }}</div>
-          <div class="icon label">
-            <h5>ID</h5>
-          </div>
-        </div>
 
-        <div class="block level">
-          <div class="icon">
-            <i class="fas fa-fire"></i>
+          <div class="block level">
+            <div class="icon">
+              <i class="fas fa-fire"></i>
+            </div>
+            <div class="icon value">{{ this.job.level }}</div>
+            <div class="icon label">
+              <h5>LEVEL</h5>
+            </div>
           </div>
-          <div class="icon value">{{ this.job.level }}</div>
-          <div class="icon label">
-            <h5>LEVEL</h5>
+          <div class="block time">
+            <div class="icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="icon value">{{ this.job.time }} D</div>
+            <div class="icon label">
+              <h5>TIME</h5>
+            </div>
           </div>
-        </div>
-        <div class="block time">
-          <div class="icon">
-            <i class="fas fa-stopwatch"></i>
+          <div class="block reward">
+            <div class="icon">
+              <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="icon value">{{ this.job.reward }}</div>
+            <div class="icon label">
+              <h5>REWARD</h5>
+            </div>
           </div>
-          <div class="icon value">{{ this.job.time }} D</div>
-          <div class="icon label">
-            <h5>TIME</h5>
+          <div class="block difficulty">
+            <p>
+              Difficulty:
+              {{
+                '★'.repeat(this.job.difficulty) +
+                '☆'.repeat(5 - this.job.difficulty)
+              }}
+            </p>
           </div>
-        </div>
-        <div class="block reward">
-          <div class="icon">
-            <i class="fas fa-hand-holding-usd"></i>
+          <img class="image" :src="this.job.image" />
+          <div class="text">
+            <h4>{{ this.job.title }}</h4>
           </div>
-          <div class="icon value">{{ this.job.reward }}</div>
-          <div class="icon label">
-            <h5>REWARD</h5>
+          <div class="text client">
+            <p>{{ this.job.client }}</p>
           </div>
+          <h3
+            class="btn"
+            @click.stop="review()"
+            v-if="this.job.client === state.user && this.job.state === 2"
+          >
+            REVIEW
+          </h3>
+          <h3
+            class="btn check"
+            @click.stop="review()"
+            v-if="this.job.client === state.user && this.job.state === 3"
+          >
+            CHECK
+          </h3>
+          <h3
+            class="btn delete"
+            @click.stop="cancel()"
+            v-if="this.job.client === state.user && this.job.state === 1"
+          >
+            CANCEL
+          </h3>
+          <h3
+            class="btn"
+            @click.stop="take()"
+            v-if="this.job.state === 1 && this.job.client !== state.user"
+          >
+            TAKE
+          </h3>
         </div>
-        <div class="block difficulty">
-          <p>
-            Difficulty:
-            {{
-              '★'.repeat(this.job.difficulty) +
-              '☆'.repeat(5 - this.job.difficulty)
-            }}
-          </p>
-        </div>
-        <img class="image" :src="this.job.image" />
-        <div class="text">
-          <h4>{{ this.job.title }}</h4>
-        </div>
-        <div class="text client">
-          <p>{{ this.job.client }}</p>
-        </div>
-        <h3
-          class="btn"
-          @click.stop="review()"
-          v-if="this.job.client === state.user && this.job.state === 2"
-        >
-          REVIEW
-        </h3>
-        <h3
-          class="btn check"
-          @click.stop="review()"
-          v-if="this.job.client === state.user && this.job.state === 3"
-        >
-          CHECK
-        </h3>
-        <h3
-          class="btn delete"
-          @click.stop="cancel()"
-          v-if="this.job.client === state.user && this.job.state === 1"
-        >
-          CANCEL
-        </h3>
-        <h3
-          class="btn"
-          @click.stop="take()"
-          v-if="this.job.state === 1 && this.job.client !== state.user"
-        >
-          TAKE
-        </h3>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
-          <h2>JOB TITLE:</h2>
-          <h4>{{ this.job.title }}</h4>
-          <h3>SKILL REQUIRES:</h3>
-          <h5>{{ this.job.skills }}</h5>
-          <h4>JOB DESCRIPTION:</h4>
-          <h5>{{ this.job.description }}</h5>
+          <h1>JOB TITLE: {{ this.job.title }}</h1>
+          <br />
+          <h1>JOB DESCRIPTION:</h1>
+          <h2 class="job-description">{{ this.job.description }}</h2>
+          <br />
+
+          <h1 v-if="this.job.skills ? this.job.skills.length > 0 : false">SKILL REQUIRES:</h1>
+          <div v-for="skill in this.job.skills" :key="skill">
+            <skill :skill="skill"></skill>
+          </div>
+          <br />
         </div>
       </div>
     </div>
@@ -106,6 +113,7 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
+import Skill from './SkillThumb.vue';
 
 require('dotenv').config();
 
@@ -117,6 +125,7 @@ const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/
 
 export default defineComponent({
   name: 'JobDisplay',
+  components: { Skill },
   props: ['job'],
   setup() {
     const store = useStore();
@@ -135,7 +144,9 @@ export default defineComponent({
       );
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
-      const caller = await deGuild.methods.take(this.job.id).send({ from: realAddress });
+      const caller = await deGuild.methods
+        .take(this.job.id)
+        .send({ from: realAddress });
 
       store.dispatch(
         'User/setDialog',
@@ -151,7 +162,9 @@ export default defineComponent({
       );
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
-      const caller = await deGuild.methods.cancel(this.job.id).send({ from: realAddress });
+      const caller = await deGuild.methods
+        .cancel(this.job.id)
+        .send({ from: realAddress });
 
       store.dispatch(
         'User/setDialog',
@@ -169,10 +182,7 @@ export default defineComponent({
         'Please wait, we are retrieving your posted job submission!',
       );
       console.log(this.job);
-      store.dispatch(
-        'User/setReviewJob',
-        this.job,
-      );
+      store.dispatch('User/setReviewJob', this.job);
       store.dispatch('User/setOverlay', true);
     }
 
@@ -197,7 +207,6 @@ export default defineComponent({
   left: 1vw;
   position: absolute;
   background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
-
 }
 .block {
   height: 7vw;
@@ -280,7 +289,7 @@ export default defineComponent({
   }
   &.background {
     width: 55vw;
-    height: 24vw;
+    height: 30vw;
     position: static;
     background: #593a2d;
     padding-left: unset;
@@ -291,7 +300,7 @@ export default defineComponent({
     }
     &.light {
       top: 1vw;
-      height: 22vw;
+      height: 28vw;
       position: relative;
       cursor: pointer;
 
@@ -361,12 +370,12 @@ export default defineComponent({
   &.client {
     top: 1.7vw;
     font-size: 0.7vw;
-    opacity: 60%;
+    opacity: 100%;
   }
   &.description {
     width: 54vw;
-    height: 13vw;
-    top: 8vw;
+    height: 26vw;
+    top: 1vw;
     left: 1vw;
     padding-left: 1vw;
     overflow: auto;
@@ -397,13 +406,13 @@ export default defineComponent({
   border-radius: 10%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
-  &.delete{
+  &.delete {
     color: #fdf1e3;
-  background: #754d28;
+    background: #754d28;
   }
-  &.check{
+  &.check {
     color: #fdf1e3;
-  background: #ca7a30;
+    background: #ca7a30;
   }
   &:hover {
     background: #ffd19d;
@@ -423,5 +432,12 @@ export default defineComponent({
   &.label {
     font-size: 0.75vw;
   }
+}
+.job-description{
+  font-family: Roboto;
+  font-style: normal;
+  font-size: 1.7vw;
+  line-height: 2.2vw;
+  white-space: pre-wrap;
 }
 </style>
