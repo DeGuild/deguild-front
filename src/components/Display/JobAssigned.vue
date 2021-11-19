@@ -210,7 +210,7 @@ export default defineComponent({
         },
         (error) => {
           // Handle unsuccessful uploads
-          console.log(error.message);
+          // console.log(error.message);
           state.uploading = false;
         },
         async () => {
