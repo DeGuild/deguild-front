@@ -142,10 +142,22 @@ export default defineComponent({
       if (selected.length > 0) {
         const history = await idToJob(caller, selected[0].blockNumber);
         state.job = history;
-        store.dispatch(
-          'User/setDialog',
-          'Please carefully read the description. \n Once you have finished your work, upload the zipped file.',
-        );
+        if (state.job.submitted) {
+          store.dispatch(
+            'User/setDialog',
+            'Submission completed. Your submission is now being reviewed.',
+          );
+        } else if (!state.job.submitted && state.job.note.length > 0) {
+          store.dispatch(
+            'User/setDialog',
+            'Oh! It appears your submission is not quite right.\nPlease look at the feedbacks.',
+          );
+        } else {
+          store.dispatch(
+            'User/setDialog',
+            'Please carefully read the description. \n Once you have finished your work, upload the zipped file.',
+          );
+        }
       } else {
         store.dispatch('User/setDialog', 'You have nothing to do right now.');
       }

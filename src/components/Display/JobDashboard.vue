@@ -322,7 +322,7 @@ export default defineComponent({
       changedSort();
       store.dispatch(
         'User/setDialog',
-        'You should contact your job taker as soon as possible.',
+        'Your jobs are now being worked on. Please kindly wait for submissions.',
       );
     }
 

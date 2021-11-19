@@ -277,7 +277,7 @@ export default defineComponent({
       changedSort();
       store.dispatch(
         'User/setDialog',
-        `Here is the list of job titles starting with ${state.searchTitle}.`,
+        `Here is the list of jobs related to ${state.searchTitle}.`,
       );
     }
 

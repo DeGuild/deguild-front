@@ -57,7 +57,7 @@
         </div>
         <div class="text description">
           <h1 v-if="this.job.note">FEEDBACK FROM CLIENT:</h1>
-          <h5 v-if="this.job.note">{{ this.job.note }}</h5>
+          <h2 class="job-description" v-if="this.job.note">{{ this.job.note }}</h2>
           <br />
 
           <h1>JOB TITLE: {{ this.job.title }}</h1>
@@ -82,7 +82,7 @@
           </h4>
         </div>
         <div class="custom-file-upload">
-          <div class="label-upload">Only accept .zip file</div>
+          <div class="label-upload">Only accept .zip file of size less than 500 MB</div>
           <label for="file-upload" class="custom-file-upload button">
             <i class="fas fa-paperclip"></i>
             <span class="custom-file-upload text">{{ state.fileName }}</span>
@@ -265,8 +265,9 @@ export default defineComponent({
 <style scoped lang="scss">
 .label-upload {
   position: inherit;
+  cursor: default;
   top: 5vh;
-  left: 1.6vw;
+  left: 0.2vw;
 }
 .image {
   border-radius: 50%;

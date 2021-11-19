@@ -166,6 +166,7 @@ export default defineComponent({
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
+      emit('submit');
     }
 
     async function rejectSubmission() {
@@ -201,7 +202,6 @@ export default defineComponent({
           requestOptions,
         );
         const data = await response.json();
-        console.log(data);
         state.zipUrl = data.result;
         emit('submit');
 

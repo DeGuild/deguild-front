@@ -4,7 +4,7 @@
       class="job background dark"
       v-bind:class="{
         smaller: state.smaller,
-        exclusive: this.job.taker === state.user,
+        exclusive: this.job.taker === state.user && this.job.state === 1,
       }"
     >
       <div
@@ -12,7 +12,7 @@
         @click="extend()"
         v-bind:class="{
           smaller: state.smaller,
-          exclusive: this.job.taker === state.user,
+          exclusive: this.job.taker === state.user && this.job.state === 1,
         }"
       >
         <div v-if="state.smaller">
@@ -72,7 +72,11 @@
           <h3
             class="btn"
             @click.stop="review()"
-            v-if="this.job.client === state.user && this.job.state === 2"
+            v-if="
+              this.job.client === state.user &&
+              this.job.state === 2 &&
+              this.job.submitted
+            "
           >
             REVIEW
           </h3>
@@ -114,6 +118,27 @@
           <br />
         </div>
       </div>
+    </div>
+    <div class="badge" v-if="this.job.submitted && this.job.state === 2">
+      <!-- <i class="fas fa-clipboard-check"></i> -->
+    </div>
+    <div
+      class="badge correct"
+      v-if="this.job.client === state.user && this.job.state === 3"
+    >
+      <i class="fa fa-check-circle"></i>
+    </div>
+    <div class="badge wait" v-if="!this.job.submitted && this.job.state === 2">
+      <i class="fa fa-user-clock"></i>
+    </div>
+    <div
+      class="badge for-you"
+      v-if="
+        this.job.taker === state.user && this.job.state === 1 && state.smaller
+      "
+    >
+      <i class="badge for-you label fas fa-smile-wink"></i>
+      <span class="badge for-you label for-you-font">FOR YOU</span>
     </div>
   </div>
 </template>
@@ -197,7 +222,7 @@ export default defineComponent({
     function review() {
       store.dispatch(
         'User/setDialog',
-        'Please wait, we are retrieving your posted job submission!',
+        'Would you like to accept this submission?',
       );
       // console.log(this.job);
       store.dispatch('User/setReviewJob', this.job);
@@ -369,6 +394,60 @@ export default defineComponent({
 
     text-shadow: 0px 2px 4px rgba(91, 26, 26, 0.14),
       0px 3px 4px rgba(123, 12, 12, 0.12), 0px 1px 5px rgba(136, 13, 13, 0.2);
+  }
+}
+.badge {
+  position: absolute;
+  background: red;
+  width: 2vw;
+  height: 2vw;
+  border-radius: 50%;
+  left: 1vw;
+  top: -0.5vw;
+  font-size: 1.5vw;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  &.correct {
+    background: white;
+
+    color: green;
+  }
+  &.wait {
+    background: white;
+
+    color: brown;
+    font-size: 1.1vw;
+  }
+  &.for-you {
+    border-left: 2vw;
+    display: unset;
+    border-radius: unset;
+    height: 2vw;
+    width: 8vw;
+    background: rgb(158, 116, 0);
+    color: gold;
+    font-size: 1.9vw;
+    left: 14.5vw;
+    top: 5vw;
+
+    // margin: 0.2vw 0.2vw 0.2vw 0.2vw;
+    &.label {
+      position: relative;
+      display: unset;
+      left: -0.2vw;
+      top: -0.35vw;
+      // margin: 0.2vw 0.2vw 0.2vw 0.2vw;
+      background: unset;
+      font-size: 1.2vw;
+      margin-left: 0.4vw;
+      &.for-you-font {
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: 900;
+      }
+    }
   }
 }
 .text {

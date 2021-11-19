@@ -3,8 +3,9 @@
   <connect-wallet />
 
   <div v-if="user !== null">
+        <profile />
+
     <job-dashboard></job-dashboard>
-    <profile />
     <add-job  v-if="!overlay"/>
 
     <dialogue-box></dialogue-box>
