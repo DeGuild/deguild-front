@@ -3,10 +3,10 @@
   <connect-wallet />
 
   <div v-if="user !== null">
-        <profile />
+    <profile />
 
     <job-dashboard></job-dashboard>
-    <add-job  v-if="!overlay"/>
+    <add-job v-if="!overlay" />
 
     <dialogue-box></dialogue-box>
 
@@ -17,7 +17,6 @@
     </div>
   </div>
   <no-wallet v-if="user === null" />
-  <!-- <registration v-if="user === null"/> -->
 </template>
 
 <script>
@@ -72,7 +71,10 @@ export default {
       ],
     });
     return {
-      user, wallet, overlay, reviewJob,
+      user,
+      wallet,
+      overlay,
+      reviewJob,
     };
   },
 };

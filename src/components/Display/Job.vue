@@ -217,6 +217,7 @@ export default defineComponent({
 
     function extend() {
       state.smaller = !state.smaller;
+      console.log(this.job.client);
     }
 
     function review() {
