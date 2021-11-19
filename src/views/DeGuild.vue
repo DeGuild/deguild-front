@@ -19,6 +19,7 @@
     </div>
   </div>
   <no-wallet v-if="user === null" />
+  <!-- <registration v-if="user === null"/> -->
 </template>
 
 <script>
@@ -37,6 +38,7 @@ import Overlay from '../components/General/Overlay.vue';
 import JobReview from '../components/Display/JobReview.vue';
 import JobToAdd from '../components/Display/JobToAdd.vue';
 import AddJob from '../components/Buttons/AddJob.vue';
+// import Registration from '../components/General/Registration.vue';
 // @ is an alias to /src
 
 export default {
@@ -54,6 +56,7 @@ export default {
     JobReview,
     AddJob,
     JobToAdd,
+    // Registration,
     // Navigation,
   },
   setup() {
