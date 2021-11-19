@@ -24,6 +24,8 @@
                 class="number-input"
                 placeholder="level"
                 type="number"
+                min="0"
+                oninput="validity.valid||(value='');"
               />
             </div>
             <div class="list-item">
@@ -33,6 +35,8 @@
                 class="number-input"
                 placeholder="days"
                 type="number"
+                min="1"
+                oninput="validity.valid||(value='');"
               />
             </div>
             <div class="list-item">
@@ -42,6 +46,8 @@
                 class="number-input"
                 placeholder="20 DGC"
                 type="number"
+                min="0"
+                oninput="validity.valid||(value='');"
               />
             </div>
             <div class="list-item">
@@ -49,8 +55,8 @@
                 >Difficulty - The harder, the more you pay</span
               >
               <select class="number-input" v-model="job.difficulty">
-                <option v-for="i in 5" :key="i">
-                  {{ i }}
+                <option v-for="i in 5" :key="i" :value="i">
+                  {{ i > 4 ? i+' - Hard' : i === 1 ?  i+' - Easy' : i }}
                 </option>
               </select>
             </div>
@@ -185,6 +191,7 @@
                 type="number"
                 class="box address-skill"
                 v-model="state.skillId"
+                oninput="validity.valid||(value='');"
                 placeholder="Please specify token id"
             /></span>
             <span
@@ -203,9 +210,23 @@
           </div>
         </span>
 
-        <div @click="closeOverlay()" class="close">X</div>
-        <div @click="send()" class="btn next">DONE</div>
-        <div @click="navigateTo(1)" class="btn previous">BACK</div>
+        <div @click="state.fetching ? null : closeOverlay()" class="close">
+          X
+        </div>
+        <div
+          @click="state.fetching ? null : send()"
+          class="btn next"
+          v-bind:class="{ disabled: state.fetching }"
+        >
+          DONE
+        </div>
+        <div
+          @click="state.fetching ? null : navigateTo(1)"
+          class="btn previous"
+          v-bind:class="{ disabled: state.fetching }"
+        >
+          BACK
+        </div>
       </div>
     </div>
   </div>
@@ -230,7 +251,8 @@ const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifa
 export default defineComponent({
   components: { Skill },
   name: 'JobToAdd',
-  setup() {
+  emits: ['submit'],
+  setup(_, { emit }) {
     // magic dummy, don't delete :P
     const dummy = ref();
     const store = useStore();
@@ -247,6 +269,7 @@ export default defineComponent({
       page: 0,
       custom: false,
       hasAssign: false,
+      fetching: computed(() => store.state.User.fetching),
     });
 
     const job = reactive({
@@ -266,58 +289,75 @@ export default defineComponent({
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
+    function thumbThis(url) {
+      // console.log(url);
+
+      const original = url.slice(0, 80);
+      const file = url.slice(80);
+      // console.log(`${original}thumb_${file}`);
+      return `${original}thumb_${file}`;
+    }
     async function send() {
-      // store.dispatch('User/setOverlay', false);
-      const current = store.state.User.selectedSkills;
-      const certificateSet = new Set();
-      current.forEach((ele) => certificateSet.add(ele.address));
-      const certificateArr = Array.from(certificateSet);
-      let skillSet = certificateArr.map((ele) => Array.from(current)
-        .filter((skill) => skill.address === ele)
-        .map((answer) => answer.tokenId));
-      if (skillSet.length === 1) {
-        skillSet = [skillSet];
+      store.dispatch('User/setFetching', true);
+      try {
+        const current = store.state.User.selectedSkills;
+        const certificateSet = new Set();
+        current.forEach((ele) => certificateSet.add(ele.address));
+        const certificateArr = Array.from(certificateSet);
+        let skillSet = certificateArr.map((ele) => Array.from(current)
+          .filter((skill) => skill.address === ele)
+          .map((answer) => answer.tokenId));
+        if (skillSet.length === 1) {
+          skillSet = [skillSet];
+        }
+        const address = (await web3.eth.getAccounts())[0];
+        const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+        const count = await deGuild.methods.jobsCount().call();
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, address),
+          '1d',
+        );
+        const tokenId = parseInt(count, 10) + 1;
+
+        // console.log(parseInt(count, 10) + 1);
+        const requestOptions = {
+          method: 'POST',
+          headers: { Authorization: token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: job.title,
+            address: deGuildAddress,
+            level: job.level,
+            tokenId: tokenId.toString(),
+            description: job.desc,
+            name: 'Parm',
+            time: job.duration,
+          }),
+        };
+
+        await fetch(
+          'https://us-central1-deguild-2021.cloudfunctions.net/guild/addJob',
+          requestOptions,
+        );
+        // const data = await response.json();
+        // console.log(data);
+        const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+        const taker = web3.utils.isAddress(job.assignee)
+          ? web3.utils.toChecksumAddress(job.assignee)
+          : '0x0000000000000000000000000000000000000000';
+        // console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
+        const transaction = await deGuild.methods
+          .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
+          .send({ from: realAddress });
+        console.log(transaction);
+
+        store.dispatch('User/setOverlay', false);
+        store.dispatch('User/setReviewJob', null);
+        store.dispatch('User/setFetching', false);
+        emit('submit');
+      } catch (err) {
+        console.error(err);
+        store.dispatch('User/setFetching', false);
       }
-      const address = (await web3.eth.getAccounts())[0];
-      const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
-      const count = await deGuild.methods.jobsCount().call();
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      const tokenId = parseInt(count, 10) + 1;
-
-      console.log(parseInt(count, 10) + 1);
-      const requestOptions = {
-        method: 'POST',
-        headers: { Authorization: token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: job.title,
-          address: deGuildAddress,
-          level: job.level,
-          tokenId: tokenId.toString(),
-          description: job.desc,
-          name: 'Parm',
-          time: job.duration,
-        }),
-      };
-
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/guild/addJob',
-        requestOptions,
-      );
-      const data = await response.json();
-      console.log(data);
-      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-      const taker = web3.utils.isAddress(job.assignee)
-        ? web3.utils.toChecksumAddress(job.assignee)
-        : '0x0000000000000000000000000000000000000000';
-      console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
-      const transaction = await deGuild.methods
-        .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
-        .send({ from: realAddress });
-      console.log(transaction);
-      store.dispatch('User/setReviewJob', null);
     }
 
     async function customAdd() {
@@ -341,7 +381,7 @@ export default defineComponent({
           added: true,
         };
 
-        console.log(toAdd);
+        // console.log(toAdd);
 
         const current = store.state.User.selectedSkills;
         let found = false;
@@ -366,20 +406,17 @@ export default defineComponent({
     }
 
     async function fetchAllSkills() {
-      store.dispatch('User/setFetching', true);
-
       const response = await fetch(
         'https://us-central1-deguild-2021.cloudfunctions.net/app/allCertificates',
         { mode: 'cors' },
       );
       const infoOffChain = await response.json();
-      store.dispatch('User/setFetching', false);
 
-      console.log(infoOffChain, state.skillSearch);
+      // console.log(infoOffChain, state.skillSearch);
       const skills = [];
       infoOffChain.forEach((doc) => {
         doc.forEach((element) => {
-          console.log(element.title);
+          // console.log(element.title);
           if (
             element.title
               .toLowerCase()
@@ -400,7 +437,7 @@ export default defineComponent({
           const shopCaller = await shop.methods.name().call();
           return {
             name: ele.title,
-            image: ele.url,
+            image: thumbThis(ele.url),
             address: ele.address,
             tokenId: ele.tokenId,
             shopName: shopCaller,
@@ -408,13 +445,18 @@ export default defineComponent({
           };
         }),
       );
+      store.dispatch('User/setFetching', false);
+      // console.log(state.skills);
+
       return skills;
     }
 
     async function navigateTo(pageIdx) {
       state.page = pageIdx;
       if (pageIdx === 2) {
-        console.log('yo');
+        // console.log('yo');
+        store.dispatch('User/setFetching', true);
+
         await fetchAllSkills();
       }
     }
@@ -656,6 +698,14 @@ export default defineComponent({
     left: 11vw;
     margin-bottom: 2vh;
     width: 8vw;
+  }
+  &.disabled {
+    cursor: progress;
+    color: black;
+    background: #d8d8d8;
+    &:hover {
+      background: #d8d8d8;
+    }
   }
 }
 .icon {

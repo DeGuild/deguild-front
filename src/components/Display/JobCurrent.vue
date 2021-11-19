@@ -2,7 +2,7 @@
   <div class="background">
     <div class="display" v-if="!state.fetching && state.job">
       <br />
-      <job :job="state.job"></job>
+      <job :job="state.job" @submit="dummy()"></job>
     </div>
     <div class="display" v-show="state.fetching">
       <img src="@/assets/Spinner-1s-200px.svg" />
@@ -75,6 +75,14 @@ export default defineComponent({
       const block = await web3.eth.getBlock(blockNumber);
       // console.log(block);
       const { timestamp } = block;
+      let statusMessage = '';
+      if (infoOffChain.note.length > 0) {
+        statusMessage = 'Rejected';
+      } else if (infoOffChain.submission.length > 0) {
+        statusMessage = 'Submitted';
+      } else {
+        statusMessage = 'No Submission';
+      }
 
       // console.log(infoOffChain);
       // console.log(infoOnChain);
@@ -82,7 +90,7 @@ export default defineComponent({
       // TODO: Fetch user picture profile, and add time given since job is posted
       const jobObject = {
         id: tokenId,
-        time: 7,
+        time: infoOffChain.time,
         reward: web3.utils.fromWei(infoOnChain[0]),
         client: infoOnChain[1],
         taker: infoOnChain[2],
@@ -98,8 +106,7 @@ export default defineComponent({
         description: infoOffChain.description,
         submitted: infoOffChain.submission.length > 0,
         deadline: addDays(timestamp, 7),
-        status:
-          infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
+        status: statusMessage,
       };
 
       // console.log(jobObject);
@@ -120,6 +127,8 @@ export default defineComponent({
     });
 
     async function getCurrentJob() {
+      store.dispatch('User/setFetching', true);
+
       store.dispatch('User/setDialog', 'Please wait!');
       const realAddress = web3.utils.toChecksumAddress(userAddress.value);
       const caller = await deGuild.methods.jobOf(realAddress).call();
@@ -133,12 +142,30 @@ export default defineComponent({
       if (selected.length > 0) {
         const history = await idToJob(caller, selected[0].blockNumber);
         state.job = history;
-        store.dispatch('User/setDialog', 'Please carefully read the description. \n Once you have finished your work, upload the zipped file.');
+        if (state.job.submitted) {
+          store.dispatch(
+            'User/setDialog',
+            'Submission completed. Your submission is now being reviewed.',
+          );
+        } else if (!state.job.submitted && state.job.note.length > 0) {
+          store.dispatch(
+            'User/setDialog',
+            'Oh! It appears your submission is not quite right.\nPlease look at the feedbacks.',
+          );
+        } else {
+          store.dispatch(
+            'User/setDialog',
+            'Please carefully read the description. \n Once you have finished your work, upload the zipped file.',
+          );
+        }
       } else {
         store.dispatch('User/setDialog', 'You have nothing to do right now.');
       }
+      store.dispatch('User/setFetching', false);
     }
-
+    function dummy() {
+      getCurrentJob();
+    }
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
 
@@ -148,6 +175,7 @@ export default defineComponent({
     return {
       state,
       userAddress,
+      dummy,
     };
   },
 });

@@ -5,7 +5,9 @@
         <div class="title">
           <i class="fa fa-eye"></i><span class="title header">Job Review</span>
         </div>
-        <div @click="closeOverlay()" class="close">X</div>
+        <div @click="state.fetching ? null : closeOverlay()" class="close">
+          X
+        </div>
 
         <div class="info">
           <img class="image" :src="this.job.image" /><img />
@@ -36,26 +38,49 @@
             class="btn"
             @click="generateLink()"
             v-if="this.job.submission.length > 0"
+            v-show="!state.fetching && !state.zipUrl"
             >Get Link
           </span>
+          <img
+            class="btn disabled"
+            v-if="this.job.submission.length > 0"
+            v-show="state.fetching"
+            src="@/assets/Spinner-1s-200px.svg"
+          />
+          <a
+            class="btn"
+            v-if="this.job.submission.length > 0"
+            v-show="!state.fetching && state.zipUrl"
+            :href="state.zipUrl"
+            download
+            >Download
+          </a>
         </div>
-        <div class="file" v-if="state.zipUrl">
+        <!-- <div class="file" v-if="state.zipUrl">
           <a class="btn" :href="state.zipUrl" download>Download </a>
-        </div>
+        </div> -->
         <div class="decision" v-if="this.job.state === 2">
           <span>
             <textarea
               class="decision comment"
               type="text"
               v-model="state.comment"
-              placeholder="Leave your comment or private contact info"
+              placeholder="Leave your comment to reject or press accept to complete this job"
             />
           </span>
 
-          <button class="decision say accept" @click="complete()">
+          <button
+            v-if="!state.comment"
+            class="decision say accept"
+            @click="state.fetching ? null : complete()"
+          >
             ACCEPT
           </button>
-          <button class="decision say reject" @click="rejectSubmission()">
+          <button
+            v-if="state.comment"
+            class="decision say reject"
+            @click="state.fetching ? null : rejectSubmission()"
+          >
             REJECT
           </button>
         </div>
@@ -82,7 +107,8 @@ const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/
 export default defineComponent({
   name: 'JobReview',
   props: ['job'],
-  setup(props) {
+  emits: ['submit'],
+  setup(props, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
@@ -99,93 +125,113 @@ export default defineComponent({
     const state = reactive({
       user: userAddress.value.user,
       submitted: isSubmitted.value,
+      fetching: computed(() => store.state.User.fetching),
+
       time: `${hour.value}:${minutes.value}`,
       zipUrl: null,
     });
 
     async function generateLink() {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      store.dispatch('User/setFetching', true);
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-      // getting address from which we will sign message
-      const address = (await web3.eth.getAccounts())[0];
+        // getting address from which we will sign message
+        const address = (await web3.eth.getAccounts())[0];
 
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      const requestOptions = {
-        method: 'GET',
-        // eslint-disable-next-line quote-props
-        headers: { Authorization: token },
-      };
+        // generating a token with 1 day of expiration time
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, address),
+          '1d',
+        );
+        const requestOptions = {
+          method: 'GET',
+          // eslint-disable-next-line quote-props
+          headers: { Authorization: token },
+        };
 
-      const response = await fetch(
-        `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}/${this.job.id}`,
-        requestOptions,
-      );
-      const data = await response.json();
-      console.log(data);
-      state.zipUrl = data.result;
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}/${this.job.id}`,
+          requestOptions,
+        );
+        const data = await response.json();
+        console.log(data);
+        state.zipUrl = data.result;
+      } catch (err) {
+        store.dispatch('User/setFetching', false);
+      }
+      store.dispatch('User/setFetching', false);
     }
 
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
+      emit('submit');
     }
 
     async function rejectSubmission() {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      store.dispatch('User/setFetching', true);
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-      // getting address from which we will sign message
-      const address = (await web3.eth.getAccounts())[0];
+        // getting address from which we will sign message
+        const address = (await web3.eth.getAccounts())[0];
 
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      const requestOptions = {
-        method: 'PUT',
-        // eslint-disable-next-line quote-props
-        headers: {
-          Authorization: token,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          address: deGuildAddress,
-          tokenId: this.job.id,
-          submission: '',
-          note: state.comment,
-        }),
-      };
+        // generating a token with 1 day of expiration time
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, address),
+          '1d',
+        );
+        const requestOptions = {
+          method: 'PUT',
+          // eslint-disable-next-line quote-props
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            address: deGuildAddress,
+            tokenId: this.job.id,
+            submission: '',
+            note: state.comment,
+          }),
+        };
 
-      const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/guild/submit',
-        requestOptions,
-      );
-      const data = await response.json();
-      console.log(data);
-      state.zipUrl = data.result;
-      closeOverlay();
+        const response = await fetch(
+          'https://us-central1-deguild-2021.cloudfunctions.net/guild/submit',
+          requestOptions,
+        );
+        const data = await response.json();
+        state.zipUrl = data.result;
+        emit('submit');
+
+        closeOverlay();
+      } catch (err) {
+        store.dispatch('User/setFetching', false);
+      }
     }
 
     async function complete() {
-      state.smaller = !state.smaller;
-      store.dispatch(
-        'User/setDialog',
-        'Please wait! We are processing your transaction.',
-      );
-      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-      const caller = await deGuild.methods
-        .complete(this.job.id)
-        .send({ from: realAddress });
+      store.dispatch('User/setFetching', true);
 
-      store.dispatch(
-        'User/setDialog',
-        'Hope you like our service! Visit us again next time~',
-      );
-      closeOverlay();
+      try {
+        store.dispatch(
+          'User/setDialog',
+          'Please wait! We are processing your transaction.',
+        );
+        const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+        const caller = await deGuild.methods
+          .complete(this.job.id)
+          .send({ from: realAddress });
+        store.dispatch(
+          'User/setDialog',
+          'Hope you like our service! Visit us again next time~',
+        );
+        emit('submit');
+        closeOverlay();
+      } catch {
+        store.dispatch('User/setFetching', false);
+      }
     }
 
     return {
@@ -399,8 +445,8 @@ export default defineComponent({
   height: 2vw;
   font-family: Roboto;
   font-style: normal;
-  color: #754d28;
-  background: #fdf1e3;
+  color: #ffffff;
+  background: #754d28;
   font-size: 0.8vw;
   font-weight: 500;
   text-decoration: none;
@@ -410,7 +456,14 @@ export default defineComponent({
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
   &:hover {
-    background: #ffd19d;
+    background: #8d5d2f;
+  }
+  &.disabled {
+    cursor: wait;
+
+    &:hover {
+      background: #754d28;
+    }
   }
 }
 .icon {

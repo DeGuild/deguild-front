@@ -17,6 +17,10 @@ import {
   faPlusCircle,
   faExclamationCircle,
   faProjectDiagram,
+  faCheckCircle,
+  faThumbsDown,
+  faClipboardCheck,
+  faSmileWink,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fontsource/poppins';
@@ -31,7 +35,11 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+library.add(faSmileWink);
+library.add(faClipboardCheck);
+library.add(faThumbsDown);
 library.add(faFire);
+library.add(faCheckCircle);
 library.add(faProjectDiagram);
 library.add(faDollarSign);
 library.add(faHashtag);
@@ -47,6 +55,7 @@ library.add(faPlus);
 library.add(faPlusCircle);
 library.add(faExclamationCircle);
 library.add(faPaperclip);
+library.add(faCheckCircle);
 const head = createHead();
 
 createApp(App)
