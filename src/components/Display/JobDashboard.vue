@@ -243,11 +243,11 @@ export default defineComponent({
         fromBlock: 0,
         toBlock: 'latest',
       });
-      console.log(caller);
+      // console.log(caller);
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
-      console.log(history);
+      // console.log(history);
       state.jobs = history;
 
       return history;

@@ -196,7 +196,7 @@ export default defineComponent({
           // Observe state change events such as progress, pause, and resume
           state.uploading = true;
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
+          // console.log(`Upload is ${progress}% done`);
           state.uploadValue = progress;
           // eslint-disable-next-line default-case
           switch (snapshot.state) {
