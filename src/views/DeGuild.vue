@@ -33,7 +33,6 @@ import DialogueBox from '../components/General/DialogueBox.vue';
 import JobDashboard from '../components/Display/JobDashboard.vue';
 import Profile from '../components/Buttons/Profile.vue';
 import AddJob from '../components/Buttons/AddJob.vue';
-// import Registration from '../components/General/Registration.vue';
 // @ is an alias to /src
 
 export default {
@@ -48,7 +47,6 @@ export default {
     JobDashboard,
     Profile,
     AddJob,
-    // Registration,
   },
   setup() {
     const store = useStore();

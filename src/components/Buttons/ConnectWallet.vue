@@ -4,7 +4,7 @@
       <div class="text" v-html="state.primary"></div>
     </div>
   </div>
-  <div v-if="user && registeredUser">
+  <div v-if="user && registeredUser && state.userData">
     <div class="btn connected">
       <span>
         <div class="banner username">{{ state.userData.name }}</div>
@@ -14,7 +14,7 @@
               <div :style="levelBarStyle"></div>
             </div>
             <div class="banner progress-custom future">
-              Need {{state.userData.level % 1 * 10 }} xp to level up
+              Need {{ (state.userData.level % 1) * 10 }} xp to level up
             </div>
           </span>
         </div>
@@ -308,6 +308,17 @@ export default defineComponent({
 
     onBeforeMount(async () => {
       await verifyNetwork();
+      if (store.state.User.user) {
+        const registered = await isRegistered(store.state.User.user);
+        // console.log(registered);
+        if (registered) {
+          store.dispatch('User/setRegistration', true);
+          store.dispatch('User/setUserProfile', registered);
+          router.push('/');
+        } else {
+          router.push('/register');
+        }
+      }
 
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
@@ -429,7 +440,7 @@ export default defineComponent({
     width: 5vw;
     height: 5vw;
     border-radius: 50%;
-    background: url('../../assets/Spinner-1s-200px.svg');
+    background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
   }
 }
 </style>

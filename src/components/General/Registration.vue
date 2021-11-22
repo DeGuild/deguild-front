@@ -1,6 +1,6 @@
 <template>
   <div class="overlay">
-    <h2 class="text">Register</h2>
+    <h2 class="text">{{ this.title }}</h2>
     <!-- <p class="upload progress">
     Progress: {{ state.uploadValue.toFixed() + '%' }}
     <progress :value="state.uploadValue" max="100"></progress>
@@ -44,7 +44,7 @@
         @click="onUpload()"
         :disabled="!state.username || !state.imageData || state.uploading"
       >
-        Register
+        {{ this.title }}
       </button>
     </div>
   </div>
@@ -78,7 +78,9 @@ const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   name: 'Registration',
-  setup() {
+  props: ['title'],
+  emits: ['submit'],
+  setup(props, { emit }) {
     // console.log(store.state.User.user);
     // console.log(user);
     // Connection to MetaMask wallet
@@ -95,6 +97,7 @@ export default defineComponent({
       fileName: 'Please choose an image',
       uploading: false,
       username: null,
+      title: props.title,
     });
 
     function previewZipName(event) {
@@ -119,7 +122,7 @@ export default defineComponent({
       const storageRef = ref(storage, `images/${userStore.value.user}/profile`);
 
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
-
+      store.dispatch('User/setFetching', true);
       // Register three observers:
       // 1. 'state_changed' observer, called any time the state changes
       // 2. Error observer, called on failure
@@ -146,6 +149,7 @@ export default defineComponent({
           // Handle unsuccessful uploads
           console.error(error.message);
           state.uploading = false;
+          store.dispatch('User/setFetching', false);
         },
         async () => {
           let url = null;
@@ -180,13 +184,14 @@ export default defineComponent({
 
             state.uploading = false;
             store.dispatch('User/setRegistration', true);
+            store.dispatch(
+              'User/setDialog',
+              'Thank you! We will notice your client about your submission!',
+            );
+            store.dispatch('User/setFetching', false);
+            emit('submit');
             router.push('/');
           });
-
-          // store.dispatch(
-          //   'User/setDialog',
-          //   'Thank you! We will notice your client about your submission!',
-          // );
         },
       );
     }

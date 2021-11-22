@@ -15,6 +15,7 @@ export const UserModule = {
     reviewJob: null,
     selectedSkills: new Set(),
     registered: false,
+    update: false,
   },
   mutations: {
     SET_USER(state, user) {
@@ -28,6 +29,9 @@ export const UserModule = {
     },
     SET_REGISTRATION(state, status) {
       state.registered = status;
+    },
+    SET_UPDATE_USER_PROFILE(state, status) {
+      state.update = status;
     },
     SET_OWNER(state, bool) {
       state.owner = bool;
@@ -71,6 +75,7 @@ export const UserModule = {
       commit('SET_REVIEW_JOB', null);
       commit('SET_REGISTRATION', false);
       commit('SET_USER_PROFILE', null);
+      commit('SET_UPDATE_USER_PROFILE', false);
     },
     setUser({ commit }, user) {
       commit('SET_USER', user);
@@ -110,6 +115,9 @@ export const UserModule = {
     },
     setRegistration({ commit }, bool) {
       commit('SET_REGISTRATION', bool);
+    },
+    setUpdateProfile({ commit }, bool) {
+      commit('SET_UPDATE_USER_PROFILE', bool);
     },
   },
   modules: {},

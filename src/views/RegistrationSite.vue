@@ -10,7 +10,7 @@
       <approve-modal></approve-modal>
       <approve-wallet></approve-wallet>
     </div>
-    <registration />
+    <registration title="Register"/>
   </div>
   <no-wallet v-if="user === null" />
 </template>
