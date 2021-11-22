@@ -1,25 +1,10 @@
 <template>
   <div class="overlay">
     <h2 class="text">{{ this.title }}</h2>
-    <!-- <p class="upload progress">
-    Progress: {{ state.uploadValue.toFixed() + '%' }}
-    <progress :value="state.uploadValue" max="100"></progress>
-  </p> -->
-    <!-- <div class="noImg" >Avatar</div> -->
     <img class="noImg" :src="state.picture" />
-    <!--
-    <div>
-      <input
-        class="upload choose"
-        type="file"
-        @change="previewImage($event)"
-        accept="image/*"
-      />
-      <button class="upload button" @click="onUpload()">Upload</button>
-    </div> -->
     <div class="upload-pos">
       <div class="custom-file-upload">
-        <label for="file-upload" class="custom-file-upload button">
+        <label for="profile-upload" class="custom-file-upload button">
           <i class="fas fa-paperclip"></i>
           <span class="upload">{{ state.fileName }}</span>
         </label>
@@ -41,7 +26,7 @@
     <div>
       <button
         class="register"
-        @click="onUpload()"
+        @click="state.fetching ? null : onUpload()"
         :disabled="!state.username || !state.imageData || state.uploading"
       >
         {{ this.title }}
@@ -49,10 +34,10 @@
     </div>
   </div>
   <input
-    id="file-upload"
+    id="profile-upload"
     @change="previewZipName($event)"
     type="file"
-    accept="image/png, image/jpeg"
+    accept="image/jpeg"
   />
 </template>
 
@@ -66,7 +51,7 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import Web3Token from 'web3-token';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 require('dotenv').config();
 
@@ -79,13 +64,14 @@ const noImg = require('@/assets/no-url.jpg');
 export default defineComponent({
   name: 'Registration',
   props: ['title'],
-  emits: ['submit'],
-  setup(props, { emit }) {
+  emits: ['profileUpdated'],
+  setup(_, { emit }) {
     // console.log(store.state.User.user);
     // console.log(user);
     // Connection to MetaMask wallet
     const store = useStore();
     const router = useRouter();
+    const route = useRoute();
     const web3 = new Web3(window.ethereum);
     const userStore = computed(() => store.state.User);
 
@@ -97,7 +83,8 @@ export default defineComponent({
       fileName: 'Please choose an image',
       uploading: false,
       username: null,
-      title: props.title,
+      fetching: computed(() => store.state.User.fetching),
+
     });
 
     function previewZipName(event) {
@@ -113,6 +100,8 @@ export default defineComponent({
     }
 
     async function onUpload() {
+      store.dispatch('User/setFetching', true);
+
       // generating a token with 1 day of expiration time
       const token = await Web3Token.sign(
         (msg) => web3.eth.personal.sign(msg, userStore.value.user),
@@ -122,7 +111,6 @@ export default defineComponent({
       const storageRef = ref(storage, `images/${userStore.value.user}/profile`);
 
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
-      store.dispatch('User/setFetching', true);
       // Register three observers:
       // 1. 'state_changed' observer, called any time the state changes
       // 2. Error observer, called on failure
@@ -154,7 +142,7 @@ export default defineComponent({
         async () => {
           let url = null;
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            console.log('File available at', downloadURL);
+            // console.log('File available at', downloadURL);
             url = downloadURL;
             state.picture = downloadURL;
             const requestOptions = {
@@ -170,7 +158,7 @@ export default defineComponent({
                 address: deGuildAddress,
               }),
             };
-            const response = await fetch(
+            await fetch(
               'https://us-central1-deguild-2021.cloudfunctions.net/guild/register',
               requestOptions,
             );
@@ -179,19 +167,19 @@ export default defineComponent({
             //   'File available at',
             //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
             // );
-            const data = await response.json();
-            console.log(data);
+            // const data = await response.json();
+            // console.log(data);
 
             state.uploading = false;
             store.dispatch('User/setRegistration', true);
             store.dispatch(
               'User/setDialog',
-              'Thank you! We will notice your client about your submission!',
+              'Alright, we will change that for you!',
             );
             store.dispatch('User/setFetching', false);
-            emit('submit');
-            router.push('/');
+            if (route.name === 'registration') router.push('/');
           });
+          emit('profileUpdated');
         },
       );
     }

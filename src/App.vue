@@ -18,7 +18,7 @@
   <registration
     v-if="user && !overlay && update"
     title="Update Profile"
-    @submit="updateProfile()"
+    @profileUpdated="updateProfile()"
   ></registration>
 </template>
 <script>
@@ -47,19 +47,20 @@ export default {
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
     async function updateProfile() {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       try {
         const response = await fetch(
           `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
-            user,
+            user.value,
           )}`,
           { mode: 'cors' },
         );
         const info = await response.json();
-
+        console.log('REFRESH!!');
         if (response.status === 200) {
-          store.dispatch('User/setRegistration', false);
+          console.log(info);
+
           store.dispatch('User/setUserProfile', info);
-          setInterval(store.dispatch('User/setRegistration', true), 1000);
           return info;
         }
         return null;

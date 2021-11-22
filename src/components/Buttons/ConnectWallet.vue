@@ -314,7 +314,6 @@ export default defineComponent({
         if (registered) {
           store.dispatch('User/setRegistration', true);
           store.dispatch('User/setUserProfile', registered);
-          router.push('/');
         } else {
           router.push('/register');
         }

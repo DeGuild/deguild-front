@@ -99,6 +99,7 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
+const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   components: {
@@ -165,20 +166,35 @@ export default defineComponent({
         const infoOffChain = await responseOffChain.json();
         const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
         const block = await web3.eth.getBlock(blockNumber);
+        const clientProfile = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
+            infoOnChain[1],
+          )}`,
+          { mode: 'cors' },
+        );
+        let info = {
+          name: 'Unknown',
+          url: noImg,
+        };
+        if (clientProfile.status === 200) {
+          info = await clientProfile.json();
+          info.url = `${info.url.slice(0, 125)
+          }thumb_${
+            info.url.slice(125)}`;
+        }
         const { timestamp } = block;
-        // TODO: Fetch user picture profile, and add time given since job is posted
         const jobObject = {
           id: tokenId,
           time: infoOffChain.time,
           reward: web3.utils.fromWei(infoOnChain[0]),
           client: infoOnChain[1],
+          clientName: info.name,
           taker: infoOnChain[2],
           skills: skillsFetched,
           state: parseInt(infoOnChain[5], 10),
           difficulty: infoOnChain[6],
           level: parseInt(infoOffChain.level, 10),
-          image:
-            'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
+          image: info.url,
           title: infoOffChain.title,
           note: infoOffChain.note,
           submission: infoOffChain.submission,
