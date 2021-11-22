@@ -47,7 +47,7 @@ export default {
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
     async function updateProfile() {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       try {
         const response = await fetch(
           `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
@@ -56,9 +56,9 @@ export default {
           { mode: 'cors' },
         );
         const info = await response.json();
-        console.log('REFRESH!!');
+        // console.log('REFRESH!!');
         if (response.status === 200) {
-          console.log(info);
+          // console.log(info);
 
           store.dispatch('User/setUserProfile', info);
           return info;
