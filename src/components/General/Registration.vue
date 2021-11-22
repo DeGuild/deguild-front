@@ -23,9 +23,6 @@
           <i class="fas fa-paperclip"></i>
           <span class="upload">{{ state.fileName }}</span>
         </label>
-        <span>
-          <button class="upload button">Upload</button>
-        </span>
       </div>
     </div>
     <div class="label-upload">
@@ -33,11 +30,24 @@
     </div>
 
     <div>
-      <input class="username" type="text" placeholder="Username" />
+      <input
+        class="username"
+        type="text"
+        v-model="state.username"
+        placeholder="Username"
+      />
     </div>
 
     <div>
-      <button class="register">Register</button>
+      <button
+        class="register"
+        @click="onUpload()"
+        :disabled="
+          !state.username || !state.imageData
+        "
+      >
+        Register
+      </button>
     </div>
   </div>
   <input
@@ -49,43 +59,65 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { defineComponent, reactive, computed } from 'vue';
+import { useStore } from 'vuex';
 import {
   getStorage,
   ref,
   uploadBytesResumable,
   getDownloadURL,
 } from 'firebase/storage';
+import Web3Token from 'web3-token';
+
+require('dotenv').config();
+
+const Web3 = require('web3');
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const noImg = require('@/assets/no-url.jpg');
 
-export default {
+export default defineComponent({
   name: 'Registration',
   setup() {
     // console.log(store.state.User.user);
     // console.log(user);
     // Connection to MetaMask wallet
+    const store = useStore();
+    const web3 = new Web3(window.ethereum);
+    const userStore = computed(() => store.state.User);
+
     const state = reactive({
       imageData: null,
       picture: noImg,
       uploadValue: 0,
       error: null,
       fileName: 'Please choose an image',
+      uploading: false,
+      username: null,
     });
 
-    function previewImage(event) {
+    function previewZipName(event) {
+      // console.log('File changed!');
       state.uploadValue = 0;
-      state.picture = null;
       const file = event.target.files[0];
-      // console.log(file);
+      console.log(file);
       state.imageData = file;
+      state.fileName = file.name;
+
+      const previewing = URL.createObjectURL(event.target.files[0]);
+      state.picture = previewing;
     }
 
-    function onUpload() {
-      state.picture = null;
+    async function onUpload() {
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, userStore.value.user),
+        '1d',
+      );
       const storage = getStorage();
-      // const storageRef = ref(storage, `${state.imageData.name}`);
-      const storageRef = ref(storage, `images/${state.imageData.name}`);
+      const storageRef = ref(storage, `images/${state.fileName}`);
+
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
 
       // Register three observers:
@@ -96,6 +128,7 @@ export default {
         'state_changed',
         (snapshot) => {
           // Observe state change events such as progress, pause, and resume
+          state.uploading = true;
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           // console.log(`Upload is ${progress}% done`);
           state.uploadValue = progress;
@@ -111,23 +144,54 @@ export default {
         },
         (error) => {
           // Handle unsuccessful uploads
-          // console.log(error.message);
-          state.error = error;
+          console.error(error.message);
+          state.uploading = false;
         },
-        () => {
-          // Handle successful uploads on complete
-          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        async () => {
+          let url = null;
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            // console.log('File available at', downloadURL);
+            console.log('File available at', downloadURL);
+            url = downloadURL;
             state.picture = downloadURL;
           });
+          const requestOptions = {
+            method: 'POST',
+            // eslint-disable-next-line quote-props
+            headers: {
+              Authorization: token,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: state.username,
+              url,
+              address: deGuildAddress,
+            }),
+          };
+
+          const response = await fetch(
+            'https://us-central1-deguild-2021.cloudfunctions.net/guild/profile',
+            requestOptions,
+          );
+
+          // console.log(
+          //   'File available at',
+          //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
+          // );
+          const data = await response.json();
+          console.log(data);
+
+          state.uploading = false;
+          // store.dispatch(
+          //   'User/setDialog',
+          //   'Thank you! We will notice your client about your submission!',
+          // );
         },
       );
     }
 
-    return { state, previewImage, onUpload };
+    return { state, previewZipName, onUpload };
   },
-};
+});
 </script>
 <style scoped lang="scss">
 .overlay {

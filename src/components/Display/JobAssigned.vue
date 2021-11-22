@@ -129,7 +129,6 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
-  getDownloadURL,
 } from 'firebase/storage';
 import Web3Token from 'web3-token';
 
