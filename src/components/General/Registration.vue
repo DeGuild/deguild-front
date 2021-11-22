@@ -1,28 +1,51 @@
 <template>
   <div class="overlay">
-  </div>
-  <h2 class="text">Register</h2>
-  <input class="upload choose"
-  type="file" @change="previewImage($event)" accept="image/*" />
-  <p class="upload progress">
+    <h2 class="text">Register</h2>
+    <!-- <p class="upload progress">
     Progress: {{ state.uploadValue.toFixed() + '%' }}
     <progress :value="state.uploadValue" max="100"></progress>
-  </p>
-  <div class="noImg" v-if="state.picture == null">
-    Avatar
-  </div>
-  <img class="preview" v-else :src="state.picture" />
-  <br />
-  <button class="upload button"
-    @click="onUpload()"
-  >
-    Upload
-  </button>
-  <input class="username" type="text" placeholder="Username"/>
-  <button class="register">
-    Register
-  </button>
+  </p> -->
+    <!-- <div class="noImg" >Avatar</div> -->
+    <img class="noImg" :src="state.picture" />
+    <!--
+    <div>
+      <input
+        class="upload choose"
+        type="file"
+        @change="previewImage($event)"
+        accept="image/*"
+      />
+      <button class="upload button" @click="onUpload()">Upload</button>
+    </div> -->
+    <div class="upload-pos">
+      <div class="custom-file-upload">
+        <label for="file-upload" class="custom-file-upload button">
+          <i class="fas fa-paperclip"></i>
+          <span class="upload">{{ state.fileName }}</span>
+        </label>
+        <span>
+          <button class="upload button">Upload</button>
+        </span>
+      </div>
+    </div>
+    <div class="label-upload">
+      *Only accept .jpg or .png file (smaller than 5 MB)
+    </div>
 
+    <div>
+      <input class="username" type="text" placeholder="Username" />
+    </div>
+
+    <div>
+      <button class="register">Register</button>
+    </div>
+  </div>
+  <input
+    id="file-upload"
+    @change="previewZipName($event)"
+    type="file"
+    accept="image/png, image/jpeg"
+  />
 </template>
 
 <script>
@@ -34,6 +57,8 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 
+const noImg = require('@/assets/no-url.jpg');
+
 export default {
   name: 'Registration',
   setup() {
@@ -42,9 +67,10 @@ export default {
     // Connection to MetaMask wallet
     const state = reactive({
       imageData: null,
-      picture: null,
+      picture: noImg,
       uploadValue: 0,
       error: null,
+      fileName: 'Please choose an image',
     });
 
     function previewImage(event) {
@@ -117,12 +143,15 @@ export default {
 }
 
 .text {
-  position: absolute;
-  width: 19.688vw;
+  position: relative;
+  width: 53.802vw;
   height: 3.125vw;
-  left: 40.156vw;
-  top: 10.490vw;
-  font-family: Secular One;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 2.5vw;
@@ -131,95 +160,127 @@ export default {
 }
 
 .preview {
-  position: absolute;
-  width: 7.5vw;
-  height: 7.5vw;
-  left: 45.990vw;
+  position: relative;
+  width: 14vw;
+  height: 14vw;
+  left: 45.99vw;
   top: 17.906vw;
 
   border-radius: 50%;
-
 }
 
 .upload {
-  position: absolute;
+  position: relative;
   color: #ffffff;
-  font-family: Secular One;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 1vw;
+  margin: 1vw 1vw 1vw 1vw;
 
   &.choose {
     width: 15vw;
-    left: 38.490vw;
-    top: 30.792vw;
-
-  }
-
-  &.progress {
-    left: 40vw;
-    top: 26.4vw;
   }
 
   &.button {
     color: black;
     width: 6.927vw;
-    height: 1.5vw;
-    left: 54.635vw;
-    top: 30.792vw;
+    height: 2vw;
     line-height: 1vw;
+    padding: 0.5vw 0.5vw 0.5vw 0.5vw;
   }
 }
 
 .username {
-  position: absolute;
-  width: 11.688vw;
-  height: 3.125vw;
-  left: 38.490vw;
-  top: 34.490vw;
-  font-family: Secular One;
+  position: relative;
+  width: 22vw;
+  height: 2.125vw;
+  margin-top: 1vw;
+  padding: 0vw 0.5vw 0vw 0.5vw;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 2vw;
+  font-size: 1vw;
   color: black;
 }
 
 .register {
-  font-family: Secular One;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 2vw;
+  font-size: 1.5vw;
+  margin-top: 2vw;
 
   padding: 0.2vw 0.833vw;
 
-  position: absolute;
-  left: 51.689vw;
-  top: 34.490vw;
+  position: relative;
 
-  background: #FDF1E3;
+  background: #fdf1e3;
 
   border-radius: 0.208vw;
 }
 
 .noImg {
-  position: absolute;
-  width: 7.5vw;
-  height: 7.5vw;
-  left: 45.990vw;
-  top: 17.906vw;
+  position: relative;
+  width: 11vw;
+  height: 11vw;
   background: grey;
   border-radius: 50%;
 
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  font-family: Secular One;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 2vw;
   color: #ffffff;
+}
 
+input[type='file'] {
+  display: none;
+}
+
+.custom-file-upload {
+  position: relative;
+  width: 30vw;
+  height: 2vw;
+  margin-top: 1vw;
+  padding-bottom: 1vw;
+  padding-left: 1vw;
+  // background: red;
+
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1vw;
+  color: #000000;
+  cursor: pointer;
+
+  &.button {
+    padding-bottom: 0vw;
+    padding: 0.5vw 0.5vw 0.5vw 0.5vw;
+
+    background: rgba(224, 224, 224, 0.6);
+    overflow: hidden;
+  }
+}
+.label-upload {
+  position: absolute;
+  cursor: default;
+  color: white;
+  bottom: 1vw;
+  right: 1vw;
+  font-size: 1vw;
+}
+.upload-pos {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  left: 30vw;
+}
+.fas {
+  color: rgb(92, 92, 92);
 }
 </style>
