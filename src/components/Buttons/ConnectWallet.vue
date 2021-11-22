@@ -1,9 +1,40 @@
 <template>
   <div v-if="!user">
-    <div class="btn" @click="ethEnabled" v-html="state.primary"></div>
+    <div class="btn" @click="ethEnabled">
+      <div class="text" v-html="state.primary"></div>
+    </div>
   </div>
-  <div v-if="user">
-    <div class="btn connected" v-html="state.primary"></div>
+  <div v-if="user && registeredUser && state.userData">
+    <div class="btn connected">
+      <span>
+        <div class="banner username">{{ state.userData.name }}</div>
+        <div>
+          <span>
+            <div class="banner progress-custom">
+              <div :style="levelBarStyle"></div>
+            </div>
+            <div class="banner progress-custom future">
+              Need {{ (state.userData.level % 1) * 10 }} xp to level up
+            </div>
+          </span>
+        </div>
+      </span>
+      <span
+        ><div class="banner level">Level</div>
+        <div class="banner level number">
+          {{ Math.floor(state.userData.level) }}
+        </div>
+      </span>
+      <span
+        ><img
+          class="banner img"
+          :src="
+            state.userData.url.slice(0, 125) +
+            'thumb_' +
+            state.userData.url.slice(125)
+          "
+      /></span>
+    </div>
   </div>
 </template>
 
@@ -42,6 +73,7 @@ export default defineComponent({
     const router = useRouter();
 
     const user = computed(() => store.state.User.user);
+    const registeredUser = computed(() => store.state.User.registered);
 
     function shortenedAddress(address) {
       if (!address) {
@@ -61,7 +93,12 @@ export default defineComponent({
         : 'CONNECT WALLET')),
       network: '',
       magicScrollsData: [],
+      userData: computed(() => store.state.User.userProfile),
     });
+
+    const levelBarStyle = computed(() => (state.userData
+      ? { color: 'black', width: `${(state.userData.level % 1) * 10}vw` }
+      : {}));
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
     /**
@@ -144,6 +181,25 @@ export default defineComponent({
       }
     }
 
+    async function isRegistered(address) {
+      try {
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
+            address,
+          )}`,
+          { mode: 'cors' },
+        );
+        const info = await response.json();
+
+        if (response.status === 200) {
+          return info;
+        }
+        return null;
+      } catch (err) {
+        return null;
+      }
+    }
+
     /**
      * Disconnect user from the dapp
      */
@@ -166,6 +222,15 @@ export default defineComponent({
             method: 'eth_requestAccounts',
           });
           const ownership = await isOwner(accounts[0]);
+          const registered = await isRegistered(accounts[0]);
+          // console.log(registered);
+          if (registered) {
+            store.dispatch('User/setRegistration', true);
+            store.dispatch('User/setUserProfile', registered);
+            router.push('/');
+          } else {
+            router.push('/register');
+          }
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
@@ -198,7 +263,7 @@ export default defineComponent({
 
           return true;
         } catch (error) {
-          console.log(error);
+          // console.log(error);
         }
       }
       return false;
@@ -243,6 +308,16 @@ export default defineComponent({
 
     onBeforeMount(async () => {
       await verifyNetwork();
+      if (store.state.User.user) {
+        const registered = await isRegistered(store.state.User.user);
+        // console.log(registered);
+        if (registered) {
+          store.dispatch('User/setRegistration', true);
+          store.dispatch('User/setUserProfile', registered);
+        } else {
+          router.push('/register');
+        }
+      }
 
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
@@ -251,6 +326,8 @@ export default defineComponent({
     return {
       state,
       user,
+      registeredUser,
+      levelBarStyle,
       ethEnabled,
     };
   },
@@ -258,6 +335,9 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.text {
+  margin-top: 1.5vw;
+}
 .btn {
   /* Small button */
 
@@ -281,11 +361,9 @@ export default defineComponent({
   font-family: Secular One;
   font-style: normal;
   font-weight: normal;
-  font-size: 0.7vw;
+  font-size: 1vw;
   display: flex;
   align-items: center;
-  letter-spacing: 0.00892857em;
-  text-transform: uppercase;
 
   /* shades/white */
   color: #ffffff;
@@ -299,6 +377,69 @@ export default defineComponent({
 
   &.connected {
     cursor: unset;
+    left: unset;
+    right: 8vw;
+    top: -2vw;
+    height: 12vw;
+    width: 22vw;
+  }
+}
+.banner {
+  position: relative;
+
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.9vw;
+  overflow: hidden;
+
+  &.username {
+    top: 1vw;
+    left: 0vw;
+    margin: 0.5vw 0.5vw 2vw 0.5vw;
+    font-family: Roboto;
+    font-weight: 900;
+    font-size: 1.2vw;
+    display: flex;
+    align-items: center;
+  }
+  &.progress-custom {
+    background: white;
+    width: 10vw;
+    height: 1vw;
+    margin: 0.5vw 0.5vw 0.5vw 0.5vw;
+    color: black;
+
+    border-radius: 10%;
+    & > div {
+      height: 1vw;
+      background: orange;
+    }
+    &.future {
+      background: unset;
+      position: absolute;
+      bottom: 3.3vw;
+    }
+  }
+  &.level {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 1.2vw;
+    width: 3vw;
+    &.number {
+      display: unset;
+      width: 3vw;
+
+      font-size: 1.3vw;
+    }
+  }
+  &.img {
+    margin: 1.5vw 0vw 0vw 1vw;
+    width: 5vw;
+    height: 5vw;
+    border-radius: 50%;
+    background: url('../../assets/Spinner-1s-200px.svg') no-repeat center;
   }
 }
 </style>

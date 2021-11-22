@@ -3,6 +3,7 @@ export const UserModule = {
   namespaced: true,
   state: {
     user: null,
+    userProfile: null,
     occupied: false,
     owner: false,
     jobList: null,
@@ -13,13 +14,24 @@ export const UserModule = {
     overlay: false,
     reviewJob: null,
     selectedSkills: new Set(),
+    registered: false,
+    update: false,
   },
   mutations: {
     SET_USER(state, user) {
       state.user = user;
     },
+    SET_USER_PROFILE(state, user) {
+      state.userProfile = user;
+    },
     SET_APPROVAL(state, status) {
       state.approval = status;
+    },
+    SET_REGISTRATION(state, status) {
+      state.registered = status;
+    },
+    SET_UPDATE_USER_PROFILE(state, status) {
+      state.update = status;
     },
     SET_OWNER(state, bool) {
       state.owner = bool;
@@ -61,9 +73,15 @@ export const UserModule = {
       commit('SET_FETCHING', false);
       commit('SET_DIALOG', 'Welcome to DeGuild!');
       commit('SET_REVIEW_JOB', null);
+      commit('SET_REGISTRATION', false);
+      commit('SET_USER_PROFILE', null);
+      commit('SET_UPDATE_USER_PROFILE', false);
     },
     setUser({ commit }, user) {
       commit('SET_USER', user);
+    },
+    setUserProfile({ commit }, user) {
+      commit('SET_USER_PROFILE', user);
     },
     setDialog({ commit }, text) {
       commit('SET_DIALOG', text);
@@ -94,6 +112,12 @@ export const UserModule = {
     },
     setChosenSkills({ commit }, skills) {
       commit('SET_SELECTED_SKILL', skills);
+    },
+    setRegistration({ commit }, bool) {
+      commit('SET_REGISTRATION', bool);
+    },
+    setUpdateProfile({ commit }, bool) {
+      commit('SET_UPDATE_USER_PROFILE', bool);
     },
   },
   modules: {},

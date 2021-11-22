@@ -1,31 +1,50 @@
 <template>
-  <h1 class="text" ><i class="fa fa-cog" aria-hidden="true"></i></h1>
+  <h1 class="text" @click="fetching ? null : showUpdate()">
+    <i class="fa fa-cog" aria-hidden="true"></i>
+  </h1>
 </template>
 
 <script>
-export default {
+/* eslint-disable no-await-in-loop */
+
+import { useStore } from 'vuex';
+// import { useRoute } from 'vue-router';
+
+import { computed, defineComponent } from 'vue';
+
+// eslint-disable-next-line no-unused-vars
+
+export default defineComponent({
   name: 'Profile',
-};
+  setup() {
+    const store = useStore();
+    // const route = useRoute();
+
+    const user = computed(() => store.state.User.user);
+    const current = computed(() => store.state.User.update);
+    const fetching = computed(() => store.state.User.fetching);
+
+    function showUpdate() {
+      store.dispatch('User/setUpdateProfile', !current.value);
+    }
+
+    return {
+      user,
+      current,
+      fetching,
+      showUpdate,
+    };
+  },
+});
 </script>
 <style scoped lang="scss">
-.overlay {
-  /* Rectangle 9939 */
-
-  position: absolute;
-  width: 53.802vw;
-  height: 25.313vw;
-  left: 23.125vw;
-  top: 16.458vw;
-
-  background: rgba(0, 0, 0, 0.5);
-}
 .text {
   color: #ffffff;
   position: absolute;
-  right: 20vw;
+  right: 2vw;
   font-size: 5vw;
   top: -1.5vw;
-  :hover{
+  :hover {
     cursor: pointer;
   }
 }

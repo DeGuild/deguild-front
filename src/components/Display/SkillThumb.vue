@@ -51,7 +51,7 @@ export default defineComponent({
         }
       });
       if (!found) current.add(added);
-      console.log(added);
+      // console.log(added);
 
       store.dispatch('User/setChosenSkills', current);
     }

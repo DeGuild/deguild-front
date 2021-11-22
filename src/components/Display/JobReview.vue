@@ -121,7 +121,7 @@ export default defineComponent({
     const minutes = computed(() => (props.job.deadline.getMinutes() <= 9
       ? `0${props.job.deadline.getMinutes()}`
       : props.job.deadline.getMinutes()));
-    console.log(isSubmitted);
+    // console.log(isSubmitted);
     const state = reactive({
       user: userAddress.value.user,
       submitted: isSubmitted.value,
@@ -155,7 +155,7 @@ export default defineComponent({
           requestOptions,
         );
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         state.zipUrl = data.result;
       } catch (err) {
         store.dispatch('User/setFetching', false);

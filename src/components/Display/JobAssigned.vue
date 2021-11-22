@@ -57,7 +57,9 @@
         </div>
         <div class="text description">
           <h1 v-if="this.job.note">FEEDBACK FROM CLIENT:</h1>
-          <h2 class="job-description" v-if="this.job.note">{{ this.job.note }}</h2>
+          <h2 class="job-description" v-if="this.job.note">
+            {{ this.job.note }}
+          </h2>
           <br />
 
           <h1>JOB TITLE: {{ this.job.title }}</h1>
@@ -82,7 +84,9 @@
           </h4>
         </div>
         <div class="custom-file-upload">
-          <div class="label-upload">Only accept .zip file of size less than 500 MB</div>
+          <div class="label-upload">
+            Only accept .zip file of size less than 500 MB
+          </div>
           <label for="file-upload" class="custom-file-upload button">
             <i class="fas fa-paperclip"></i>
             <span class="custom-file-upload text">{{ state.fileName }}</span>
@@ -125,7 +129,6 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
-  getDownloadURL,
 } from 'firebase/storage';
 import Web3Token from 'web3-token';
 
@@ -196,7 +199,7 @@ export default defineComponent({
           // Observe state change events such as progress, pause, and resume
           state.uploading = true;
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
+          // console.log(`Upload is ${progress}% done`);
           state.uploadValue = progress;
           // eslint-disable-next-line default-case
           switch (snapshot.state) {
@@ -210,7 +213,7 @@ export default defineComponent({
         },
         (error) => {
           // Handle unsuccessful uploads
-          console.log(error.message);
+          // console.log(error.message);
           state.uploading = false;
         },
         async () => {
@@ -268,6 +271,7 @@ export default defineComponent({
   cursor: default;
   top: 5vh;
   left: 0.2vw;
+  font-size: 1vw;
 }
 .image {
   border-radius: 50%;

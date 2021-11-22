@@ -345,10 +345,10 @@ export default defineComponent({
           ? web3.utils.toChecksumAddress(job.assignee)
           : '0x0000000000000000000000000000000000000000';
         // console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
-        const transaction = await deGuild.methods
+        await deGuild.methods
           .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
           .send({ from: realAddress });
-        console.log(transaction);
+        // console.log(transaction);
 
         store.dispatch('User/setOverlay', false);
         store.dispatch('User/setReviewJob', null);
@@ -361,7 +361,7 @@ export default defineComponent({
     }
 
     async function customAdd() {
-      console.log(state.skillAdd, state.skillId);
+      // console.log(state.skillAdd, state.skillId);
       if (!state.skillAdd || !state.skillId) return;
       try {
         const manager = new web3.eth.Contract(certificateABI, state.skillAdd);

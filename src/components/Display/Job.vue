@@ -67,7 +67,7 @@
             <h4>{{ this.job.title }}</h4>
           </div>
           <div class="text client">
-            <p>{{ this.job.client }}</p>
+            <p>{{ this.job.clientName }}</p>
           </div>
           <h3
             class="btn"
@@ -103,6 +103,9 @@
           </h3>
         </div>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
+          <h1>CLIENT: {{ this.job.client }}</h1>
+          <br />
+
           <h1>JOB TITLE: {{ this.job.title }}</h1>
           <br />
           <h1>JOB DESCRIPTION:</h1>
@@ -217,6 +220,7 @@ export default defineComponent({
 
     function extend() {
       state.smaller = !state.smaller;
+      // console.log(this.job.client);
     }
 
     function review() {

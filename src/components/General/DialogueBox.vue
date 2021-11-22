@@ -44,7 +44,7 @@ export default defineComponent({
   height: 8vw;
   left: 3.5vw;
 
-  font-family: Secular One;
+  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 1.5vw;

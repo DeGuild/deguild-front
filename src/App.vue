@@ -14,28 +14,71 @@
   <!-- <footer></footer> -->
 
   <router-view />
-  <navigation v-if="user && !overlay"></navigation>
+  <navigation v-if="user && !overlay && registered"></navigation>
+  <registration
+    v-if="user && !overlay && update"
+    title="Update Profile"
+    @profileUpdated="updateProfile()"
+  ></registration>
 </template>
 <script>
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 import Navigation from '@/components/General/Navigation.vue';
+import Registration from '@/components/General/Registration.vue';
+
+const Web3 = require('web3');
+
 // @ is an alias to /src
 
 export default {
   name: 'App',
   components: {
     Navigation,
+    Registration,
   },
   setup() {
     const store = useStore();
     const user = computed(() => store.state.User.user);
     const wallet = computed(() => store.state.User.approval);
     const overlay = computed(() => store.state.User.overlay);
+    const update = computed(() => store.state.User.update);
+    const registered = computed(() => store.state.User.registered);
+    const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
+
+    async function updateProfile() {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      try {
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
+            user.value,
+          )}`,
+          { mode: 'cors' },
+        );
+        const info = await response.json();
+        // console.log('REFRESH!!');
+        if (response.status === 200) {
+          // console.log(info);
+
+          store.dispatch('User/setUserProfile', info);
+          return info;
+        }
+        return null;
+      } catch (err) {
+        return null;
+      }
+    }
 
     // console.log(store.state.User.user);
     // console.log(user);
-    return { user, wallet, overlay };
+    return {
+      user,
+      wallet,
+      overlay,
+      update,
+      registered,
+      updateProfile,
+    };
   },
 };
 </script>
