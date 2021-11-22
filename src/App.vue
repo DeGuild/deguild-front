@@ -14,7 +14,7 @@
   <!-- <footer></footer> -->
 
   <router-view />
-  <navigation v-if="user && !overlay"></navigation>
+  <navigation v-if="user && !overlay && registered"></navigation>
 </template>
 <script>
 import { useStore } from 'vuex';
@@ -32,10 +32,13 @@ export default {
     const user = computed(() => store.state.User.user);
     const wallet = computed(() => store.state.User.approval);
     const overlay = computed(() => store.state.User.overlay);
+    const registered = computed(() => store.state.User.registered);
 
     // console.log(store.state.User.user);
     // console.log(user);
-    return { user, wallet, overlay };
+    return {
+      user, wallet, overlay, registered,
+    };
   },
 };
 </script>

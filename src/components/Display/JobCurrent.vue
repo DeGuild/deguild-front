@@ -34,25 +34,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const userAddress = computed(() => store.state.User.user);
-    const mockJob = {
-      id: 0,
-      level: 5,
-      time: 365,
-      reward: 800,
-      difficulty: 1,
-      image:
-        'https://media.kapowtoys.co.uk/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/h/sh-figuarts-chichi-1.jpg',
-      title: 'Do something!',
-      client: userAddress.value.user,
-      description:
-        'I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!I have no idea you have to figure this out!',
-      skills: ['skilla', 'skillb'],
-      state: 2,
-      taker: '',
-      submitted: false,
-      deadline: new Date(1555650125 * 1000),
-      status: 'No submission',
-    };
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 

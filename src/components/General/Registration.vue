@@ -42,9 +42,7 @@
       <button
         class="register"
         @click="onUpload()"
-        :disabled="
-          !state.username || !state.imageData
-        "
+        :disabled="!state.username || !state.imageData || state.uploading"
       >
         Register
       </button>
@@ -68,6 +66,7 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import Web3Token from 'web3-token';
+import { useRouter } from 'vue-router';
 
 require('dotenv').config();
 
@@ -84,6 +83,7 @@ export default defineComponent({
     // console.log(user);
     // Connection to MetaMask wallet
     const store = useStore();
+    const router = useRouter();
     const web3 = new Web3(window.ethereum);
     const userStore = computed(() => store.state.User);
 
@@ -116,7 +116,7 @@ export default defineComponent({
         '1d',
       );
       const storage = getStorage();
-      const storageRef = ref(storage, `images/${state.fileName}`);
+      const storageRef = ref(storage, `images/${userStore.value.user}/profile`);
 
       const uploadTask = uploadBytesResumable(storageRef, state.imageData);
 
@@ -149,38 +149,40 @@ export default defineComponent({
         },
         async () => {
           let url = null;
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
             console.log('File available at', downloadURL);
             url = downloadURL;
             state.picture = downloadURL;
+            const requestOptions = {
+              method: 'POST',
+              // eslint-disable-next-line quote-props
+              headers: {
+                Authorization: token,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: state.username,
+                url,
+                address: deGuildAddress,
+              }),
+            };
+            const response = await fetch(
+              'https://us-central1-deguild-2021.cloudfunctions.net/guild/register',
+              requestOptions,
+            );
+
+            // console.log(
+            //   'File available at',
+            //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
+            // );
+            const data = await response.json();
+            console.log(data);
+
+            state.uploading = false;
+            store.dispatch('User/setRegistration', true);
+            router.push('/');
           });
-          const requestOptions = {
-            method: 'POST',
-            // eslint-disable-next-line quote-props
-            headers: {
-              Authorization: token,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: state.username,
-              url,
-              address: deGuildAddress,
-            }),
-          };
 
-          const response = await fetch(
-            'https://us-central1-deguild-2021.cloudfunctions.net/guild/profile',
-            requestOptions,
-          );
-
-          // console.log(
-          //   'File available at',
-          //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-          // );
-          const data = await response.json();
-          console.log(data);
-
-          state.uploading = false;
           // store.dispatch(
           //   'User/setDialog',
           //   'Thank you! We will notice your client about your submission!',

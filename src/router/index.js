@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import DeGuildSite from '../views/DeGuild.vue';
+import RegistrationSite from '../views/RegistrationSite.vue';
 // import Sandbox from '../views/_Sandbox.vue';
 import MyTask from '../views/MyTask.vue';
 import NoProvider from '../views/NoProvider.vue';
@@ -32,6 +33,7 @@ const routes = [
     name: 'no-provider',
     component: NoProvider,
   },
+  { path: '/register', name: 'registration', component: RegistrationSite },
   // {
   //   path: '/test',
   //   name: 'Sandbox',
