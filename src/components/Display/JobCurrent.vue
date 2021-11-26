@@ -127,7 +127,7 @@ export default defineComponent({
             infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
         };
 
-        console.log(jobObject);
+        // console.log(jobObject);
         return jobObject;
       } catch (err) {
         return {};

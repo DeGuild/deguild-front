@@ -414,7 +414,7 @@ export default defineComponent({
         { mode: 'cors' },
       );
       const result = await response.json();
-      console.log(result);
+      // console.log(result);
 
       // console.log(infoOffChain, state.skillSearch);
       state.skills = result;
