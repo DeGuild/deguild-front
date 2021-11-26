@@ -118,8 +118,8 @@ export default defineComponent({
     const overlay = computed(() => store.state.User.overlay);
     const reviewJob = computed(() => store.state.User.reviewJob);
     function thumbThis(url) {
-      const original = url.slice(0, 80);
-      const file = url.slice(80);
+      const original = url.slice(0, 125);
+      const file = url.slice(125);
       return `${original}thumb_${file}`;
     }
     async function fetchSkills(addresses, tokenIds) {

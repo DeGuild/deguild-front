@@ -56,7 +56,7 @@
               >
               <select class="number-input" v-model="job.difficulty">
                 <option v-for="i in 5" :key="i" :value="i">
-                  {{ i > 4 ? i+' - Hard' : i === 1 ?  i+' - Easy' : i }}
+                  {{ i > 4 ? i + ' - Hard' : i === 1 ? i + ' - Easy' : i }}
                 </option>
               </select>
             </div>
@@ -86,7 +86,15 @@
             :disabled="!state.hasAssign"
           />
         </div>
-        <div @click="navigateTo(1)" class="btn next">NEXT</div>
+        <button
+          @click="navigateTo(1)"
+          class="btn next"
+          :disabled="
+            !job.desc || !job.duration || !job.bonus || !job.level || !job.title
+          "
+        >
+          NEXT
+        </button>
       </div>
 
       <div class="job background" v-show="state.page === 1">
@@ -400,7 +408,9 @@ export default defineComponent({
 
     async function fetchAllSkills() {
       const response = await fetch(
-        `https://us-central1-deguild-2021.cloudfunctions.net/app/guildCertificates/${state.skillSearch ? state.skillSearch : ''}`,
+        `https://us-central1-deguild-2021.cloudfunctions.net/app/guildCertificates/${
+          state.skillSearch ? state.skillSearch : ''
+        }`,
         { mode: 'cors' },
       );
       const result = await response.json();
