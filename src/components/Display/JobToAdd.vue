@@ -253,7 +253,7 @@ export default defineComponent({
   name: 'JobToAdd',
   emits: ['submit'],
   setup(_, { emit }) {
-    // magic dummy, don't delete :P
+    // magic dummy, it makes emit works
     const dummy = ref();
     const store = useStore();
     const userAddress = computed(() => store.state.User);
@@ -289,14 +289,7 @@ export default defineComponent({
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
-    function thumbThis(url) {
-      // console.log(url);
 
-      const original = url.slice(0, 80);
-      const file = url.slice(80);
-      // console.log(`${original}thumb_${file}`);
-      return `${original}thumb_${file}`;
-    }
     async function send() {
       store.dispatch('User/setFetching', true);
       try {
@@ -407,48 +400,18 @@ export default defineComponent({
 
     async function fetchAllSkills() {
       const response = await fetch(
-        'https://us-central1-deguild-2021.cloudfunctions.net/app/allCertificates',
+        `https://us-central1-deguild-2021.cloudfunctions.net/app/guildCertificates/${state.skillSearch ? state.skillSearch : ''}`,
         { mode: 'cors' },
       );
-      const infoOffChain = await response.json();
+      const result = await response.json();
+      console.log(result);
 
       // console.log(infoOffChain, state.skillSearch);
-      const skills = [];
-      infoOffChain.forEach((doc) => {
-        doc.forEach((element) => {
-          // console.log(element.title);
-          if (
-            element.title
-              .toLowerCase()
-              .startsWith(
-                state.skillSearch ? state.skillSearch.toLowerCase() : '',
-              )
-          ) {
-            skills.push(element);
-          }
-        });
-      });
-
-      state.skills = await Promise.all(
-        skills.map(async (ele) => {
-          const manager = new web3.eth.Contract(certificateABI, ele.address);
-          const caller = await manager.methods.shop().call();
-          const shop = new web3.eth.Contract(certificateABI, caller);
-          const shopCaller = await shop.methods.name().call();
-          return {
-            name: ele.title,
-            image: thumbThis(ele.url),
-            address: ele.address,
-            tokenId: ele.tokenId,
-            shopName: shopCaller,
-            added: false,
-          };
-        }),
-      );
+      state.skills = result;
       store.dispatch('User/setFetching', false);
       // console.log(state.skills);
 
-      return skills;
+      return result;
     }
 
     async function navigateTo(pageIdx) {
