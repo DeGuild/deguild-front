@@ -178,9 +178,7 @@ export default defineComponent({
         };
         if (clientProfile.status === 200) {
           info = await clientProfile.json();
-          info.url = `${info.url.slice(0, 125)
-          }thumb_${
-            info.url.slice(125)}`;
+          info.url = `${info.url.slice(0, 125)}thumb_${info.url.slice(125)}`;
         }
         const { timestamp } = block;
         const jobObject = {
@@ -321,8 +319,10 @@ export default defineComponent({
       }
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
-        (job) => job.state === 1 && job.client !== userAddress.value && (job.taker === userAddress.value || job.taker === '0x0000000000000000000000000000000000000000'
-        ),
+        (job) => job.state === 1
+          && job.client !== userAddress.value
+          && (job.taker === userAddress.value
+            || job.taker === '0x0000000000000000000000000000000000000000'),
       );
       changedSort();
       store.dispatch(
@@ -332,6 +332,18 @@ export default defineComponent({
     }
 
     async function fetchPosted() {
+      // const test = await fetch(
+      //   `https://us-central1-deguild-2021.cloudfunctions.net/app/postedJobs/${deGuildAddress}/${web3.utils.toChecksumAddress(
+      //     userAddress.value,
+      //   )}/0/${state.selectedSort}/${state.selectedOrder}/${
+      //     state.searchTitle ? state.searchTitle : ''
+      //   }`,
+      //   { mode: 'cors' },
+      // );
+
+      // const testResult = await test.json();
+      // console.log(testResult);
+
       state.jobs = [];
       const jobsAdded = await getJobsPosted();
       state.jobs = jobsAdded.filter((job) => job.client === userAddress.value);
