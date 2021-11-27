@@ -66,7 +66,7 @@
           <div class="text">
             <h4>{{ this.job.title }}</h4>
           </div>
-          <div class="text client">
+          <div class="text client-name">
             <p>{{ this.job.clientName }}</p>
           </div>
           <h3
@@ -474,10 +474,9 @@ export default defineComponent({
 
   background-size: cover;
   overflow: hidden;
-  &.client {
+  &.client-name {
     top: 1.7vw;
     font-size: 0.7vw;
-    opacity: 100%;
   }
   &.description {
     width: 54vw;
