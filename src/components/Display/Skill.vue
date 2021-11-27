@@ -5,7 +5,7 @@
       <div class="text">
         {{ this.skill.name }}
       </div>
-      <div class="text client">
+      <div class="text skill-name">
         {{ this.skill.shopName }}
       </div>
       <h3 v-if="this.skill.added" @click="remove()" class="btn">REMOVE</h3>
@@ -147,7 +147,7 @@ export default defineComponent({
   white-space: nowrap;
 
   background-size: cover;
-  &.client {
+  &.skill-name {
     top: 2.9vw;
     font-size: 0.7vw;
   }

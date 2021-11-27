@@ -108,8 +108,8 @@
             <div class="text">
               <h4>{{ job.title }}</h4>
             </div>
-            <div class="text client">
-              <p>client</p>
+            <div class="text client-added">
+              <p>{{job.client}}</p>
             </div>
           </span>
           <span class="block difficulty">
@@ -622,7 +622,7 @@ export default defineComponent({
 
   background-size: cover;
   overflow: hidden;
-  &.client {
+  &.client-added {
     // top: 7.5vw;
     font-size: 1vw;
   }

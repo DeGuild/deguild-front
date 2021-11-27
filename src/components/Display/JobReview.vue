@@ -15,7 +15,7 @@
             <div class="text">
               <h4>{{ this.job.title }}</h4>
             </div>
-            <div class="text client">
+            <div class="text client-review">
               <p>{{ this.job.client }}</p>
             </div>
           </span>
@@ -403,7 +403,7 @@ export default defineComponent({
 
   background-size: cover;
   overflow: hidden;
-  &.client {
+  &.client-review {
     // top: 7.5vw;
     font-size: 1vw;
   }

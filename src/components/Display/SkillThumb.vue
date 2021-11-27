@@ -5,7 +5,7 @@
       <div class="text">
         {{ this.skill.name }}
       </div>
-      <div class="text client">
+      <div class="text skill-name">
         {{ this.skill.shopName }}
       </div>
     </div>
@@ -144,7 +144,7 @@ export default defineComponent({
   white-space: nowrap;
 
   background-size: cover;
-  &.client {
+  &.skill-name {
     top: 2.9vw;
     font-size: 0.7vw;
   }
