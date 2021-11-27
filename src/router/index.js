@@ -6,11 +6,18 @@ import MyTask from '../views/MyTask.vue';
 import NoProvider from '../views/NoProvider.vue';
 import History from '../views/History.vue';
 
+const AdminPage = () => import('../views/Admin.vue');
+
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: DeGuildSite,
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: AdminPage,
   },
   {
     path: '/task',
