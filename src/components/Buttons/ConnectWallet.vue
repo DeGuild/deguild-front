@@ -43,7 +43,7 @@
 /* eslint-disable no-unused-vars */
 
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 import {
   reactive, onBeforeMount, computed, defineComponent,
@@ -71,7 +71,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const router = useRouter();
-
+    const route = useRoute();
     const user = computed(() => store.state.User.user);
     const registeredUser = computed(() => store.state.User.registered);
 
@@ -146,7 +146,7 @@ export default defineComponent({
           .allowance(realAddress, deGuildAddress)
           .call();
         // console.log(caller, balance, address);
-        return caller <= balance && caller >= 0;
+        return caller <= balance && caller > 0;
       } catch (error) {
         return false;
       }
@@ -223,14 +223,6 @@ export default defineComponent({
           });
           const ownership = await isOwner(accounts[0]);
           const registered = await isRegistered(accounts[0]);
-          // console.log(registered);
-          if (registered) {
-            store.dispatch('User/setRegistration', true);
-            store.dispatch('User/setUserProfile', registered);
-            router.push('/');
-          } else {
-            router.push('/register');
-          }
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
@@ -260,6 +252,17 @@ export default defineComponent({
             'User/setDialog',
             'Hi there! So, what would you like to take?',
           );
+          // console.log(registered);
+
+          if (registered) {
+            store.dispatch('User/setRegistration', true);
+            store.dispatch('User/setUserProfile', registered);
+          } else {
+            router.push('/register');
+          }
+          if (route.name === 'Admin' && !ownership) {
+            router.push('/');
+          }
 
           return true;
         } catch (error) {
