@@ -103,13 +103,20 @@
           ><span class="title header">Job Preview</span>
         </div>
         <div class="info">
-          <img class="image" /><img />
+          <img
+            class="image"
+            :src="
+              state.userData.url.slice(0, 125) +
+              'thumb_' +
+              state.userData.url.slice(125)
+            "
+          /><img />
           <span>
             <div class="text">
               <h4>{{ job.title }}</h4>
             </div>
             <div class="text client-added">
-              <p>{{job.client}}</p>
+              <p>{{ job.client }}</p>
             </div>
           </span>
           <span class="block difficulty">
@@ -268,6 +275,7 @@ export default defineComponent({
     const web3 = new Web3(window.ethereum);
 
     const state = reactive({
+      userData: computed(() => store.state.User.userProfile),
       skills: [],
       skillsAdded: computed(() => store.state.User.selectedSkills),
       skillSearch: null,
