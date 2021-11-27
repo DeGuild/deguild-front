@@ -116,7 +116,7 @@
               <h4>{{ job.title }}</h4>
             </div>
             <div class="text client-added">
-              <p>{{ job.client }}</p>
+              <p>{{ state.userData.name }}</p>
             </div>
           </span>
           <span class="block difficulty">
