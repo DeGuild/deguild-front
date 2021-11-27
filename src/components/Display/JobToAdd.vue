@@ -356,7 +356,7 @@ export default defineComponent({
         store.dispatch('User/setFetching', false);
         emit('submit');
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         store.dispatch('User/setFetching', false);
       }
     }
@@ -625,7 +625,6 @@ export default defineComponent({
   &.client {
     // top: 7.5vw;
     font-size: 1vw;
-    opacity: 60%;
   }
 }
 .btn {

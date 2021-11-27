@@ -406,7 +406,6 @@ export default defineComponent({
   &.client {
     // top: 7.5vw;
     font-size: 1vw;
-    opacity: 60%;
   }
 }
 .file {

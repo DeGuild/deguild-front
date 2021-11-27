@@ -147,7 +147,6 @@ export default defineComponent({
   &.client {
     top: 2.9vw;
     font-size: 0.7vw;
-    opacity: 60%;
   }
 }
 .btn {
