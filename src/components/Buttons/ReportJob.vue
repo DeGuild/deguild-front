@@ -1,7 +1,7 @@
 <template>
-  <div class="addJob" @click="report">
+  <div class="addJob" @click="report" v-if="this.job.state !== 0">
     <span class="text">
-      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+      <i class="fas fa-bomb" aria-hidden="true"></i>
     </span>
     <span class="text desc">Report Job</span>
   </div>
@@ -38,14 +38,14 @@ export default defineComponent({
 
       store.dispatch(
         'User/setDialog',
-        'Please confirm your action, make sure you contact the DeGuild master',
+        'Please confirm your action...',
       );
       try {
         const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
         const realAddress = web3.utils.toChecksumAddress(state.user);
 
         await deGuild.methods.report(props.job.id).send({ from: realAddress });
-        store.dispatch('User/setDialog', `Job ID${props.job.id} is reported!`);
+        store.dispatch('User/setDialog', `Job ID${props.job.id} is reported! Make sure you contact the DeGuild master later.`);
 
         store.dispatch('User/setFetching', false);
         emit('submit');

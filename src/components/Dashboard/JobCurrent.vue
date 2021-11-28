@@ -167,15 +167,20 @@ export default defineComponent({
       if (selected.length > 0) {
         const history = await idToJob(caller, selected[0].blockNumber);
         state.job = history;
-        if (state.job.submitted) {
+        if (state.job.state === 0) {
           store.dispatch(
             'User/setDialog',
-            'Submission completed. Your submission is now being reviewed.',
+            'This is being investigated, please wait for DeGuild master to manage this job.',
           );
         } else if (!state.job.submitted && state.job.note.length > 0) {
           store.dispatch(
             'User/setDialog',
             'Oh! It appears your submission is not quite right.\nPlease look at the feedbacks.',
+          );
+        } else if (state.job.submitted) {
+          store.dispatch(
+            'User/setDialog',
+            'Submission completed. Your submission is now being reviewed.',
           );
         } else {
           store.dispatch(
