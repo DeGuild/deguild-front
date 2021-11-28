@@ -1,6 +1,6 @@
 <template>
   <div class="overlay">
-    <h2 class="text">Final Judgement of #{{ reasoning.client }}</h2>
+    <h2 class="text">Final Judgement of JOB #{{ state.judging.id }}</h2>
     <button class="back" @click="goBack">X</button>
     <span class="radio-side">
       <div>
@@ -86,6 +86,7 @@
           oninput="validity.valid||(value='');"
           min="0"
           max="100"
+          step=".01"
           @change="mathForReturn(true)"
           :readonly="reasoning.fixed"
         />
@@ -100,6 +101,7 @@
           oninput="validity.valid||(value='');"
           min="0"
           max="100"
+          step=".01"
           @change="mathForReturn(false)"
           :readonly="reasoning.fixed"
         />
@@ -120,7 +122,7 @@
     <div v-if="reasoning.pattern === 'abandon'">
       <button
         class="last-decision cancel"
-        @click="state.fetching ? null : cancelJob()"
+        @click="state.fetching ? null : decided()"
       >
         CANCEL JOB
       </button>
@@ -175,6 +177,7 @@ export default defineComponent({
       uploading: false,
       username: null,
       fetching: computed(() => store.state.User.fetching),
+      judging: computed(() => store.state.User.reportedJob),
     });
 
     const reasoning = reactive({
@@ -185,22 +188,90 @@ export default defineComponent({
       fixed: false,
     });
 
-    async function decided() {
-      const address = (await web3.eth.getAccounts())[0];
-
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
+    async function judge(
+      id,
+      decision,
+      isCompleted,
+      feeRate,
+      clientRate,
+      takerRate,
+    ) {
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
       const caller = await deGuild.methods
-        .cancel(this.job.id)
+        .judge(id, decision, isCompleted, feeRate, clientRate, takerRate)
         .send({ from: realAddress });
-      console.log(token);
       console.log(caller);
       emit('decided');
+    }
+
+    async function forceCancel(id) {
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+      const caller = await deGuild.methods
+        .forceCancel(id)
+        .send({ from: realAddress });
+      console.log(caller);
+      emit('decided');
+    }
+
+    async function decided() {
+      switch (reasoning.pattern) {
+        case 'not-talented':
+          await judge(
+            state.judging.id,
+            false,
+            true,
+            reasoning.deGuildFees * 100,
+            reasoning.client * 100,
+            reasoning.freelancer * 100,
+          );
+          break;
+        case 'perma-lock':
+          await judge(
+            state.judging.id,
+            true,
+            true,
+            reasoning.deGuildFees * 100,
+            reasoning.client * 100,
+            reasoning.freelancer * 100,
+          );
+          break;
+        case 'perfection':
+          await judge(
+            state.judging.id,
+            false,
+            true,
+            reasoning.deGuildFees * 100,
+            reasoning.client * 100,
+            reasoning.freelancer * 100,
+          );
+          break;
+        case 'abandon':
+          await forceCancel(state.judging.id);
+          break;
+        case 'freelancer-g':
+          await judge(
+            state.judging.id,
+            true,
+            false,
+            reasoning.deGuildFees * 100,
+            reasoning.client * 100,
+            reasoning.freelancer * 100,
+          );
+          break;
+        case 'client-g':
+          await judge(
+            state.judging.id,
+            true,
+            true,
+            reasoning.deGuildFees * 100,
+            reasoning.client * 100,
+            reasoning.freelancer * 100,
+          );
+          break;
+        default:
+      }
     }
 
     async function cancelJob() {
@@ -259,7 +330,7 @@ export default defineComponent({
   left: 10vw;
   top: 10.823vw;
 
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .text {
@@ -285,7 +356,7 @@ export default defineComponent({
   padding-top: 5vh;
   width: 35vw;
   height: 27vh;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgb(128, 128, 128);
   input[type='radio'] {
     position: absolute;
     left: 3vw;
@@ -309,7 +380,7 @@ export default defineComponent({
   padding-top: 5vh;
   width: 35vw;
   height: 27vh;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgb(128, 128, 128);
 
   div {
     margin-left: 1vw;

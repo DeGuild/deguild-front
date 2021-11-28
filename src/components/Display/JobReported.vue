@@ -553,11 +553,11 @@ export default defineComponent({
     right: 11vw;
     top: 1.5vw;
 
-    color: #000000;
-    background: #ffffff;
+    color: #ff0000;
+    background: #634e4e;
 
     &:hover {
-    background: #ffffff;}
+    background: #634e4e;}
   }
   &.download {
     top: 1.5vw;

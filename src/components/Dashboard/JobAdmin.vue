@@ -45,7 +45,7 @@
     <div class="display" v-show="!state.fetching">
       <br />
       <div v-for="job in state.jobs" :key="job.id">
-        <job :job="job" @cancel="selectPosted()"></job>
+        <job :job="job" ></job>
       </div>
     </div>
     <div class="display" v-show="state.fetching">
@@ -57,7 +57,7 @@
     v-if="overlay && reviewJob"
     @submit="selectPosted()"
   ></job-review> -->
-  <job-court :title="'Judge'" v-if="state.reportedJob"></job-court>
+  <job-court :title="'Judge'" v-if="state.reportedJob" @decided="selectAvailable()"></job-court>
 </template>
 
 <script>
