@@ -5,16 +5,10 @@
     integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
     crossorigin="anonymous"
   />
-  <!-- <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link> |
-    <router-link to="/buttons">Buttons</router-link> |
-    <router-link to="/connectWallet">Wallet</router-link>
-  </div> -->
-  <!-- <footer></footer> -->
 
   <router-view />
   <navigation v-if="user && !overlay && registered"></navigation>
+  <connect-wallet></connect-wallet>
   <registration
     v-if="user && !overlay && update"
     title="Update Profile"
@@ -25,7 +19,8 @@
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 import Navigation from '@/components/General/Navigation.vue';
-import Registration from '@/components/General/Registration.vue';
+import Registration from '@/components/Forms/Registration.vue';
+import ConnectWallet from './components/Buttons/ConnectWallet.vue';
 
 const Web3 = require('web3');
 
@@ -36,6 +31,7 @@ export default {
   components: {
     Navigation,
     Registration,
+    ConnectWallet,
   },
   setup() {
     const store = useStore();

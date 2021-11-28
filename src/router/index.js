@@ -5,8 +5,10 @@ import RegistrationSite from '../views/RegistrationSite.vue';
 import MyTask from '../views/MyTask.vue';
 import NoProvider from '../views/NoProvider.vue';
 import History from '../views/History.vue';
+import store from '../store';
 
 const AdminPage = () => import('../views/Admin.vue');
+const Instructions = () => import('../views/Instruction.vue');
 
 const routes = [
   {
@@ -18,6 +20,23 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminPage,
+    beforeEnter() {
+      if (!store.state.User.owner) {
+        store.dispatch('User/reset');
+      }
+    },
+  },
+  {
+    // UserProfile will be rendered inside User's <router-view>
+    // when /user/:id/profile is matched
+    path: '/admin/instructions',
+    name: 'Instructions',
+    component: Instructions,
+    beforeEnter() {
+      if (!store.state.User.owner) {
+        store.dispatch('User/reset');
+      }
+    },
   },
   {
     path: '/task',

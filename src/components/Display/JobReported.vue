@@ -69,38 +69,31 @@
           <div class="text client-name">
             <p>{{ this.job.clientName }}</p>
           </div>
+          <h3 class="btn" @click.stop="judge">JUDGE</h3>
           <h3
-            class="btn"
-            @click.stop="review()"
-            v-if="
-              this.job.client === state.user &&
-              this.job.state === 2 &&
-              this.job.submitted
-            "
+            class="btn submission"
+            v-show="!state.fetching && !state.notFound"
+            v-if="!state.zipUrl"
+            @click.stop="adminInvestigate"
           >
-            REVIEW
+            CHECK SUBMISSION
           </h3>
-          <h3
-            class="btn check"
-            @click.stop="review()"
-            v-if="this.job.client === state.user && this.job.state === 3"
+
+          <a
+            class="btn download"
+            v-show="!state.fetching && state.zipUrl"
+            :href="state.zipUrl"
+            @click.stop=""
+            download
+            >Download
+          </a>
+          <div
+            class="btn no-submission"
+            v-show="!state.fetching && state.notFound"
+            disabled
           >
-            CHECK
-          </h3>
-          <h3
-            class="btn delete"
-            @click.stop="cancel()"
-            v-if="this.job.client === state.user && this.job.state === 1"
-          >
-            CANCEL
-          </h3>
-          <h3
-            class="btn"
-            @click.stop="take()"
-            v-if="this.job.state === 1 && this.job.client !== state.user"
-          >
-            TAKE
-          </h3>
+            NO SUBMISSION
+          </div>
         </div>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
           <h1>CLIENT: {{ this.job.client }}</h1>
@@ -122,30 +115,6 @@
         </div>
       </div>
     </div>
-    <div class="badge" v-if="this.job.submitted && this.job.state === 2">
-      <!-- <i class="fas fa-clipboard-check"></i> -->
-    </div>
-    <div class="badge reported" v-if="this.job.state === 0">
-          <i class="fas fa-bomb" aria-hidden="true"></i>
-        </div>
-    <div
-      class="badge correct"
-      v-if="this.job.client === state.user && this.job.state === 3"
-    >
-      <i class="fa fa-check-circle"></i>
-    </div>
-    <div class="badge wait" v-if="!this.job.submitted && this.job.state === 2">
-      <i class="fa fa-user-clock"></i>
-    </div>
-    <div
-      class="badge for-you"
-      v-if="
-        this.job.taker === state.user && this.job.state === 1 && state.smaller
-      "
-    >
-      <i class="badge for-you label fas fa-smile-wink"></i>
-      <span class="badge for-you label for-you-font">FOR YOU</span>
-    </div>
   </div>
 </template>
 
@@ -155,6 +124,7 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
+import Web3Token from 'web3-token';
 import Skill from './SkillThumb.vue';
 
 require('dotenv').config();
@@ -166,16 +136,17 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 export default defineComponent({
-  name: 'JobDisplay',
+  name: 'JobReportedDisplay',
   components: { Skill },
   props: ['job'],
   emits: ['cancel'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
       smaller: true,
       user: userAddress.value.user,
+      zipUrl: null,
     });
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
@@ -226,14 +197,67 @@ export default defineComponent({
       // console.log(this.job.client);
     }
 
-    function review() {
-      store.dispatch(
-        'User/setDialog',
-        'Would you like to accept this submission?',
-      );
+    function judge() {
       // console.log(this.job);
-      store.dispatch('User/setReviewJob', this.job);
-      store.dispatch('User/setOverlay', true);
+      store.dispatch('User/setReportedJob', this.job);
+    }
+
+    // async function adminInvestigate() {
+    //   const address = (await web3.eth.getAccounts())[0];
+
+    //   // generating a token with 1 day of expiration time
+    //   const token = await Web3Token.sign(
+    //     (msg) => web3.eth.personal.sign(msg, address),
+    //     '1d',
+    //   );
+    //   const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+    //   console.log(token);
+    //   emit('decided');
+    // }
+
+    async function adminInvestigate() {
+      store.dispatch('User/setFetching', true);
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        // getting address from which we will sign message
+        const address = (await web3.eth.getAccounts())[0];
+
+        // generating a token with 1 day of expiration time
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, address),
+          '1d',
+        );
+        const requestOptions = {
+          method: 'POST',
+          // eslint-disable-next-line quote-props
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            addressTaker: props.job.taker,
+            title: props.job.title,
+          }),
+        };
+
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}`,
+          requestOptions,
+        );
+        if (response.status === 200) {
+          const data = await response.json();
+          console.log(data);
+          state.zipUrl = data.result;
+        } else {
+          state.notFound = true;
+        }
+      } catch (err) {
+        console.error(err);
+        store.dispatch('User/setFetching', false);
+      }
+      store.dispatch('User/setFetching', false);
     }
 
     return {
@@ -241,8 +265,9 @@ export default defineComponent({
       userAddress,
       take,
       extend,
-      review,
+      judge,
       cancel,
+      adminInvestigate,
     };
   },
 });
@@ -269,16 +294,16 @@ export default defineComponent({
   font-family: Roboto;
   font-style: normal;
   &.id {
-    left: 25.5vw;
+    left: 30.5vw;
   }
   &.level {
-    left: 32vw;
+    left: 37vw;
   }
   &.time {
-    left: 38.5vw;
+    left: 43.5vw;
   }
   &.reward {
-    left: 45vw;
+    left: 50vw;
   }
   &.difficulty {
     background: #fdf1e3;
@@ -338,7 +363,7 @@ export default defineComponent({
     }
   }
   &.background {
-    width: 55vw;
+    width: 90vw;
     height: 30vw;
     position: static;
     background: #593a2d;
@@ -456,11 +481,6 @@ export default defineComponent({
       }
     }
   }
-  &.reported{
-    color: #a676ff;
-    background: #330085 ;
-    font-size: 1.1vw;
-  }
 }
 .text {
   position: absolute;
@@ -504,31 +524,53 @@ export default defineComponent({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 4vw;
-  height: 2vw;
-  top: 1.4vw;
+  width: 9vw;
+  height: 4vw;
+  top: 0vw;
   right: 1vw;
   font-family: Roboto;
-  font-style: normal;
   color: #754d28;
   background: #fdf1e3;
-  font-size: 0.8vw;
-  font-weight: 500;
+  font-size: 1.5vw;
+  font-weight: 800;
 
   cursor: pointer;
   border-radius: 10%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
-  &.delete {
-    color: #fdf1e3;
-    background: #754d28;
+  &:hover {
+    background: #ffd19d;
+  }
+  &.submission {
+    width: 18vw;
+    right: 11vw;
+
+    color: #000000;
+    background: #ffffff;
+  }
+  &.no-submission {
+    width: 18vw;
+    right: 11vw;
+    top: 1.5vw;
+
+    color: #ff0000;
+    background: #634e4e;
+
+    &:hover {
+    background: #634e4e;}
+  }
+  &.download {
+    top: 1.5vw;
+    width: 11vw;
+    right: 11vw;
+    text-decoration: none;
+
+    color: #000000;
+    background: #ffffff;
   }
   &.check {
     color: #fdf1e3;
     background: #ca7a30;
-  }
-  &:hover {
-    background: #ffd19d;
   }
 }
 .icon {

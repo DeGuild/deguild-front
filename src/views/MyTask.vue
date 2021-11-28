@@ -1,6 +1,5 @@
 <template>
   <background />
-  <connect-wallet />
   <div v-if="user !== null">
     <dialogue-box></dialogue-box>
     <job-current></job-current>
@@ -19,21 +18,19 @@
 import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
-import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
 import Profile from '../components/Buttons/Profile.vue';
-import JobCurrent from '../components/Display/JobCurrent.vue';
+import JobCurrent from '../components/Dashboard/JobCurrent.vue';
 // import Navigation from '../components/Display/Navigation.vue';
 // @ is an alias to /src
 
 export default {
   name: 'MyTaskSite',
   components: {
-    ConnectWallet,
     Background,
     NoWallet,
     ApproveModal,

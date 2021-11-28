@@ -1,16 +1,16 @@
 <template>
   <background v-if="!overlay" />
-  <connect-wallet />
 
   <div v-if="user !== null">
     <dialogue-box></dialogue-box>
 
-    <div v-if="wallet === true"></div>
+    <div v-if="wallet === true">
+      <registration title="Register" />
+    </div>
     <div v-if="wallet !== true">
       <approve-modal></approve-modal>
       <approve-wallet></approve-wallet>
     </div>
-    <registration title="Register"/>
   </div>
   <no-wallet v-if="user === null" />
 </template>
@@ -19,19 +19,17 @@
 import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
-import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
-import Registration from '../components/General/Registration.vue';
+import Registration from '../components/Forms/Registration.vue';
 // @ is an alias to /src
 
 export default {
   name: 'RegistrationSite',
   components: {
-    ConnectWallet,
     Background,
     NoWallet,
     ApproveModal,

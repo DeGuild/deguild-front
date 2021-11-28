@@ -254,7 +254,7 @@ import {
 import { useStore } from 'vuex';
 import Web3 from 'web3';
 import Web3Token from 'web3-token';
-import Skill from './Skill.vue';
+import Skill from '../Display/Skill.vue';
 
 require('dotenv').config();
 

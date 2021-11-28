@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div class="background" v-if="!state.owner || !state.admin">
     <div class="nav">
       <div
         class="nav nav-select job-list icon"
@@ -24,18 +24,39 @@
       </div>
     </div>
   </div>
+
+  <ul v-if="state.owner && state.admin">
+    <li>
+      <a :class="state.adminClass" @click="this.$router.push('/admin')"
+        >Admin Page</a
+      >
+    </li>
+    <li>
+      <a :class="state.instructionClass" @click="this.$router.push('/admin/instructions')"
+        >Instructions</a
+      >
+    </li>
+    <li><a @click="this.$router.push('/')">Back to DeGuild</a></li>
+  </ul>
 </template>
 
 <script>
 import { defineComponent, reactive, computed } from 'vue';
+import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 
 export default defineComponent({
   setup() {
+    const store = useStore();
+
     const state = reactive({
       jobList: computed(() => useRoute().name === 'Home'),
       myTasks: computed(() => useRoute().name === 'Task'),
       jobHistory: computed(() => useRoute().name === 'History'),
+      adminClass: computed(() => (useRoute().name === 'Admin' ? 'active' : null)),
+      instructionClass: computed(() => (useRoute().name === 'Instructions' ? 'active' : null)),
+      owner: computed(() => store.state.User.owner),
+      admin: computed(() => useRoute().name === 'Admin' || useRoute().name === 'Instructions'),
     });
 
     // console.log(useRoute().name);
@@ -61,6 +82,39 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+li {
+  float: left;
+  & > a {
+    display: block;
+    color: white;
+    text-align: center;
+    font-family: Secular One;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 1vw;
+    padding: 1.5vw 1.5vw;
+    text-decoration: none;
+  }
+  &:hover:not(.active) {
+    background-color: #111;
+  }
+}
+
+.active {
+  background-color: #aa7e04;
+}
 .background {
   background: url('../../assets/navigation-frame.webp');
   width: 18.646vw;
@@ -119,13 +173,13 @@ export default defineComponent({
       }
     }
 
-    &.text{
+    &.text {
       position: absolute;
       width: 9vw;
       left: 3vw;
       top: 0vw;
 
-      &:hover{
+      &:hover {
         background: unset;
       }
     }

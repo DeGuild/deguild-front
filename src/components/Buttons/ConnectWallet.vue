@@ -4,36 +4,41 @@
       <div class="text" v-html="state.primary"></div>
     </div>
   </div>
-  <div v-if="user && registeredUser && state.userData">
-    <div class="btn connected">
-      <span>
-        <div class="banner username">{{ state.userData.name }}</div>
-        <div>
-          <span>
-            <div class="banner progress-custom">
-              <div :style="levelBarStyle"></div>
-            </div>
-            <div class="banner progress-custom future">
-              Need {{ (state.userData.level % 1) * 10 }} xp to level up
-            </div>
-          </span>
-        </div>
-      </span>
-      <span
-        ><div class="banner level">Level</div>
-        <div class="banner level number">
-          {{ Math.floor(state.userData.level) }}
-        </div>
-      </span>
-      <span
-        ><img
-          class="banner img"
-          :src="
-            state.userData.url.slice(0, 125) +
-            'thumb_' +
-            state.userData.url.slice(125)
-          "
-      /></span>
+  <div v-if="user">
+    <div v-if="registeredUser && state.userData">
+      <div v-if="state.owner && state.admin">
+        <div class="connect-button connected" v-html="state.primary"></div>
+      </div>
+      <div class="btn connected" v-else>
+        <span>
+          <div class="banner username">{{ state.userData.name }}</div>
+          <div>
+            <span>
+              <div class="banner progress-custom">
+                <div :style="levelBarStyle"></div>
+              </div>
+              <div class="banner progress-custom future">
+                Need {{ (state.userData.level % 1) * 10 }} xp to level up
+              </div>
+            </span>
+          </div>
+        </span>
+        <span
+          ><div class="banner level">Level</div>
+          <div class="banner level number">
+            {{ Math.floor(state.userData.level) }}
+          </div>
+        </span>
+        <span
+          ><img
+            class="banner img"
+            :src="
+              state.userData.url.slice(0, 125) +
+              'thumb_' +
+              state.userData.url.slice(125)
+            "
+        /></span>
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +99,10 @@ export default defineComponent({
       network: '',
       magicScrollsData: [],
       userData: computed(() => store.state.User.userProfile),
+      owner: computed(() => store.state.User.owner),
+      admin: computed(
+        () => useRoute().name === 'Admin' || useRoute().name === 'Instructions',
+      ),
     });
 
     const levelBarStyle = computed(() => (state.userData
@@ -338,6 +347,52 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.connect-button {
+  /* Small button */
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  position: fixed;
+  width: 10vw;
+  height: 3vw;
+  left: 88vw;
+  top: 0.7vw;
+
+  /* standart theme/error */
+  background: #ff5252;
+  border-radius: 4px;
+
+  font-family: Secular One;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.7vw;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.00892857em;
+  text-transform: uppercase;
+
+  /* shades/white */
+  color: #ffffff;
+
+  /* Inside Auto Layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin: 0px 0px;
+
+  &:hover {
+    background: #cc3b3b;
+  }
+  &.connected {
+    &:hover {
+      background: #ff5252;
+    }
+    cursor: cursor;
+  }
+}
 .text {
   margin-top: 1.5vw;
 }

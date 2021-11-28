@@ -87,16 +87,20 @@
       </div>
     </div>
   </div>
+  <report-job :job="this.job" @submit="emit('submit')"></report-job>
 </template>
 
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import Web3 from 'web3';
 import Web3Token from 'web3-token';
+import ReportJob from '../Buttons/ReportJob.vue';
 
 require('dotenv').config();
 
@@ -105,10 +109,13 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 export default defineComponent({
+  components: { ReportJob },
   name: 'JobReview',
   props: ['job'],
   emits: ['submit'],
   setup(props, { emit }) {
+    const dummy = ref();
+
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
