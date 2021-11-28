@@ -1,92 +1,138 @@
 <template>
   <div class="overlay">
-    <h2 class="text">Final Judgement</h2>
-    <h3>job id</h3>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="not-talented"
-        value="not-talented"
-      />
-      <label for="not-talented">Not talented enough</label><br />
-    </div>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="perma-lock"
-        value="perma-lock"
-      />
-      <label for="perma-lock">Perma-lock</label><br />
-    </div>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="perfection"
-        value="perfection"
-      />
-      <label for="perfection">Perfectionists</label><br />
-    </div>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="abandon"
-        value="abandon"
-      />
-      <label for="abandon">Abandoning</label><br />
-    </div>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="freelancer-g"
-        value="freelancer-g"
-      />
-      <label for="freelancer-g">Annoying Freelancer</label><br />
-    </div>
-    <div>
-      <input
-        v-model="reasoning.pattern"
-        type="radio"
-        id="client-g"
-        value="client-g"
-      />
-      <label for="client-g">Annoying Client</label><br />
-    </div>
+    <h2 class="text">Final Judgement of #{{ reasoning.client }}</h2>
+    <span class="radio-side">
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="not-talented"
+          value="not-talented"
+          @change="changedFees(10, 0, 0, false)"
+        />
+        <label for="not-talented">Not talented enough</label><br />
+      </div>
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="perma-lock"
+          value="perma-lock"
+          @change="changedFees(10, 0, 90, true)"
+        />
+        <label for="perma-lock">Perma-lock</label><br />
+      </div>
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="perfection"
+          value="perfection"
+          @change="changedFees(10, 45, 45, true)"
+        />
+        <label for="perfection">Perfectionists</label><br />
+      </div>
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="abandon"
+          value="abandon"
+          @change="changedFees(0, 100, 0, true)"
+        />
+        <label for="abandon">Abandoning</label><br />
+      </div>
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="freelancer-g"
+          value="freelancer-g"
+          @change="changedFees(5, 95, 0, true)"
+        />
+        <label for="freelancer-g">Annoying Freelancer</label><br />
+      </div>
+      <div>
+        <input
+          v-model="reasoning.pattern"
+          type="radio"
+          id="client-g"
+          value="client-g"
+          @change="changedFees(5, 0, 95, true)"
+        />
+        <label for="client-g">Annoying Client</label><br />
+      </div>
+    </span>
+    <span class="shares-side">
+      <div>Total fees and return</div>
+      <br />
+      <div>
+        <label>DeGuild fees</label>
+        <input
+          class="fees"
+          type="number"
+          :value="reasoning.deGuildFees"
+          readonly
+        />
+        %
+      </div>
+      <div>
+        <label for="client-share">Client</label>
+        <input
+          v-model="reasoning.client"
+          id="client-share"
+          type="number"
+          oninput="validity.valid||(value='');"
+          min="0"
+          max="100"
+          @change="mathForReturn(true)"
+          :readonly="reasoning.fixed"
+        />
+        %
+      </div>
+      <div>
+        <label for="taker-share">Freelancer</label>
+        <input
+          v-model="reasoning.freelancer"
+          id="taker-share"
+          type="number"
+          oninput="validity.valid||(value='');"
+          min="0"
+          max="100"
+          @change="mathForReturn(false)"
+          :readonly="reasoning.fixed"
+        />
+        %
+      </div>
+      <br/>
+      <div
+        v-if="
+          reasoning.deGuildFees + reasoning.client + reasoning.freelancer !==
+          100
+        "
+        style="color: red;"
+      >
+        Please distribute return fairly!
+      </div>
+    </span>
 
-    <div>
-      <label>DeGuild fees</label>
-      <input type="number" :value="reasoning.deGuildFees" readonly />
-      %
+    <div v-if="reasoning.pattern === 'abandon'">
+      <button
+        class="last-decision cancel"
+        @click="state.fetching ? null : decided()"
+      >
+        CANCEL JOB
+      </button>
     </div>
-    <div>
-      <label for="client-share">Client</label>
-      <input
-        id="client-share"
-        type="number"
-        oninput="validity.valid||(value='');"
-        min=0
-        max=100
-      />
-      %
-    </div>
-    <div>
-      <label for="taker-share">Freelancer</label>
-      <input
-        id="taker-share"
-        type="number"
-        oninput="validity.valid||(value='');"
-        min=0
-        max=100
-      />
-      %
-    </div>
-
-    <div>
-      <button class="register" @click="state.fetching ? null : decided()">
+    <div v-else>
+      <button
+        class="last-decision"
+        v-if="
+          reasoning.deGuildFees + reasoning.client + reasoning.freelancer ===
+          100
+        "
+        @click="state.fetching ? null : decided()"
+      >
         {{ this.title }}
       </button>
     </div>
@@ -129,7 +175,8 @@ export default defineComponent({
       pattern: null,
       deGuildFees: 0,
       client: 0,
-      freelance: 0,
+      freelancer: 0,
+      fixed: false,
     });
 
     async function decided() {
@@ -144,10 +191,29 @@ export default defineComponent({
       emit('decided');
     }
 
+    function changedFees(dgf, cl, fl, fx) {
+      reasoning.deGuildFees = dgf;
+      reasoning.client = cl;
+      reasoning.freelancer = fl;
+      reasoning.fixed = fx;
+    }
+
+    function mathForReturn(isClient) {
+      if (!isClient) {
+        reasoning.client = 100 - reasoning.deGuildFees - reasoning.freelancer;
+        reasoning.freelancer = 100 - reasoning.deGuildFees - reasoning.client;
+      } else {
+        reasoning.freelancer = 100 - reasoning.deGuildFees - reasoning.client;
+        reasoning.client = 100 - reasoning.deGuildFees - reasoning.freelancer;
+      }
+    }
+
     return {
       state,
       reasoning,
       dummy,
+      mathForReturn,
+      changedFees,
       decided,
     };
   },
@@ -158,9 +224,9 @@ export default defineComponent({
   /* Rectangle 9939 */
 
   position: absolute;
-  width: 53.802vw;
-  height: 32.604vw;
-  left: 23.125vw;
+  width: 60vw;
+  height: 60vh;
+  left: 21vw;
   top: 10.823vw;
 
   background: rgba(0, 0, 0, 0.5);
@@ -168,7 +234,7 @@ export default defineComponent({
 
 .text {
   position: relative;
-  width: 53.802vw;
+  width: 60vw;
   height: 3.125vw;
 
   display: flex;
@@ -177,132 +243,106 @@ export default defineComponent({
   align-items: center;
   font-family: Roboto;
   font-style: normal;
-  font-weight: normal;
+  font-weight: 900;
   font-size: 2.5vw;
   line-height: 3.646vw;
   color: #ffffff;
 }
-
-.preview {
-  position: relative;
-  width: 14vw;
-  height: 14vw;
-  left: 45.99vw;
-  top: 17.906vw;
-
-  border-radius: 50%;
-}
-
-.upload {
-  position: relative;
-  color: #ffffff;
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 1vw;
-  margin: 1vw 1vw 1vw 1vw;
-
-  &.choose {
-    width: 15vw;
-  }
-
-  &.button {
-    color: black;
-    width: 6.927vw;
-    height: 2vw;
-    line-height: 1vw;
-    padding: 0.5vw 0.5vw 0.5vw 0.5vw;
-  }
-}
-
-.username {
-  position: relative;
-  width: 22vw;
-  height: 2.125vw;
-  margin-top: 1vw;
-  padding: 0vw 0.5vw 0vw 0.5vw;
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 1vw;
-  color: black;
-}
-
-.register {
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 1.5vw;
-  margin-top: 2vw;
-
-  padding: 0.2vw 0.833vw;
-
-  position: relative;
-
-  background: #fdf1e3;
-
-  border-radius: 0.208vw;
-}
-
-.noImg {
-  position: relative;
-  width: 11vw;
-  height: 11vw;
-  background: grey;
-  border-radius: 50%;
-
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 2vw;
-  color: #ffffff;
-}
-
-input[type='file'] {
-  display: none;
-}
-
-.custom-file-upload {
-  position: relative;
-  width: 30vw;
-  height: 2vw;
-  margin-top: 1vw;
-  padding-bottom: 1vw;
-  padding-left: 1vw;
-  // background: red;
-
-  // display: flex;
-  // align-items: center;
-  // justify-content: center;
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 1vw;
-  color: #000000;
-  cursor: pointer;
-
-  &.button {
-    padding-bottom: 0vw;
-    padding: 0.5vw 0.5vw 0.5vw 0.5vw;
-
-    background: rgba(224, 224, 224, 0.6);
-    overflow: hidden;
-  }
-}
-.label-upload {
+.radio-side {
   position: absolute;
-  cursor: default;
-  color: white;
-  bottom: 1vw;
-  right: 1vw;
-  font-size: 1vw;
+  display: block;
+  left: 4.5vw;
+  padding-top: 5vh;
+  width: 25vw;
+  height: 27vh;
+  background: rgba(0, 0, 0, 0.12);
+  input[type='radio'] {
+    position: absolute;
+    left: 3vw;
+    width: 1vw;
+    height: 1vw;
+  }
+  label {
+    margin-left: 1vw;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 1.5vw;
+    line-height: 2vw;
+    color: #ffffff;
+  }
 }
-.upload-pos {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  left: 30vw;
+.shares-side {
+  position: absolute;
+  display: block;
+  right: 4.5vw;
+  padding-top: 5vh;
+  width: 25vw;
+  height: 27vh;
+  background: rgba(0, 0, 0, 0.12);
+
+  div {
+    margin-left: 1vw;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 1.5vw;
+    line-height: 2vw;
+    color: #ffffff;
+  }
+  input[type='number'] {
+    margin-left: 8vw;
+    text-align: right;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 1.5vw;
+    line-height: 2vw;
+    left: 3vw;
+    width: 8vw;
+    height: 1.5vw;
+    &.fees {
+      color: #ffffff;
+      background: #4b2400;
+    }
+  }
+  label {
+    left: 2vw;
+    position: absolute;
+    margin-left: 1vw;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 900;
+    font-size: 1.5vw;
+    line-height: 2vw;
+    color: #ffffff;
+  }
+}
+.last-decision {
+  position: absolute;
+  bottom: 2vw;
+  left: 26vw;
+  width: 9vw;
+  height: 6vh;
+  font-family: Roboto;
+  font-style: normal;
+  color: #754d28;
+  background: #fdf1e3;
+  font-size: 1.5vw;
+  font-weight: 500;
+  text-decoration: none;
+
+  cursor: pointer;
+  border-radius: 10%;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
+
+  &.cancel {
+    width: 15vw;
+    left: 23.5vw;
+
+    color: #ffffff;
+    background: #ff0000;
+  }
 }
 .fas {
   color: rgb(92, 92, 92);
