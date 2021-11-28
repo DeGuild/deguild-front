@@ -1,6 +1,5 @@
 <template>
   <background v-if="!overlay" />
-  <connect-wallet />
 
   <div v-if="user !== null">
     <dialogue-box></dialogue-box>
@@ -19,7 +18,6 @@
 import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
-import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
@@ -31,7 +29,6 @@ import Registration from '../components/General/Registration.vue';
 export default {
   name: 'RegistrationSite',
   components: {
-    ConnectWallet,
     Background,
     NoWallet,
     ApproveModal,

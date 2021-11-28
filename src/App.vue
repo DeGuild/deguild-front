@@ -15,6 +15,7 @@
 
   <router-view />
   <navigation v-if="user && !overlay && registered"></navigation>
+  <connect-wallet></connect-wallet>
   <registration
     v-if="user && !overlay && update"
     title="Update Profile"
@@ -26,6 +27,7 @@ import { useStore } from 'vuex';
 import { computed } from 'vue';
 import Navigation from '@/components/General/Navigation.vue';
 import Registration from '@/components/General/Registration.vue';
+import ConnectWallet from './components/Buttons/ConnectWallet.vue';
 
 const Web3 = require('web3');
 
@@ -36,6 +38,7 @@ export default {
   components: {
     Navigation,
     Registration,
+    ConnectWallet,
   },
   setup() {
     const store = useStore();

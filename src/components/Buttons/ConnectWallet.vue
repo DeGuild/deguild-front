@@ -4,7 +4,12 @@
       <div class="text" v-html="state.primary"></div>
     </div>
   </div>
-  <div v-if="user && registeredUser && state.userData">
+  <div v-if="state.owner && state.admin">
+    <div class="btn">
+      <div class="text" v-html="state.primary"></div>
+    </div>
+  </div>
+  <div v-if="user && registeredUser && state.userData && !state.owner || !state.admin">
     <div class="btn connected">
       <span>
         <div class="banner username">{{ state.userData.name }}</div>
@@ -94,6 +99,8 @@ export default defineComponent({
       network: '',
       magicScrollsData: [],
       userData: computed(() => store.state.User.userProfile),
+      owner: computed(() => store.state.User.owner),
+      admin: computed(() => useRoute().name === 'Admin'),
     });
 
     const levelBarStyle = computed(() => (state.userData

@@ -1,6 +1,5 @@
 <template>
   <background />
-  <connect-wallet />
   <div v-if="user !== null">
     <dialogue-box></dialogue-box>
 
@@ -21,7 +20,6 @@ import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
 
-import ConnectWallet from '../components/Buttons/ConnectWallet.vue';
 import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
 import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
@@ -34,7 +32,6 @@ import Profile from '../components/Buttons/Profile.vue';
 export default {
   name: 'HistorySite',
   components: {
-    ConnectWallet,
     Background,
     NoWallet,
     ApproveModal,
