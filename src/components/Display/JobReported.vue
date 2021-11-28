@@ -69,10 +69,19 @@
           <div class="text client-name">
             <p>{{ this.job.clientName }}</p>
           </div>
-          <h3 class="btn" @click.stop="this.console.log('ad')">JUDGE</h3>
-          <h3 class="btn submission" @click.stop="this.console.log('ad')">
+          <h3 class="btn" @click.stop="judge">JUDGE</h3>
+          <h3 class="btn submission" @click.stop="adminInvestigate">
             CHECK SUBMISSION
           </h3>
+
+          <a
+            class="btn"
+            v-if="this.job.submission.length > 0"
+            v-show="!state.fetching && state.zipUrl"
+            :href="state.zipUrl"
+            download
+            >Download
+          </a>
         </div>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
           <h1>CLIENT: {{ this.job.client }}</h1>
@@ -103,6 +112,7 @@
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
+import Web3Token from 'web3-token';
 import Skill from './SkillThumb.vue';
 
 require('dotenv').config();
@@ -124,6 +134,7 @@ export default defineComponent({
     const state = reactive({
       smaller: true,
       user: userAddress.value.user,
+      zipUrl: null,
     });
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
@@ -174,14 +185,59 @@ export default defineComponent({
       // console.log(this.job.client);
     }
 
-    function review() {
+    function judge() {
       store.dispatch(
         'User/setDialog',
         'Would you like to accept this submission?',
       );
       // console.log(this.job);
-      store.dispatch('User/setReviewJob', this.job);
-      store.dispatch('User/setOverlay', true);
+      store.dispatch('User/setReportedJob', this.job);
+    }
+
+    async function adminInvestigate() {
+      const address = (await web3.eth.getAccounts())[0];
+
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+      console.log(token);
+      emit('decided');
+    }
+
+    async function generateLink() {
+      store.dispatch('User/setFetching', true);
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        // getting address from which we will sign message
+        const address = (await web3.eth.getAccounts())[0];
+
+        // generating a token with 1 day of expiration time
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, address),
+          '1d',
+        );
+        const requestOptions = {
+          method: 'GET',
+          // eslint-disable-next-line quote-props
+          headers: { Authorization: token },
+        };
+
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}/${this.job.id}`,
+          requestOptions,
+        );
+        const data = await response.json();
+        // console.log(data);
+        state.zipUrl = data.result;
+      } catch (err) {
+        store.dispatch('User/setFetching', false);
+      }
+      store.dispatch('User/setFetching', false);
     }
 
     return {
@@ -189,8 +245,9 @@ export default defineComponent({
       userAddress,
       take,
       extend,
-      review,
+      judge,
       cancel,
+      adminInvestigate,
     };
   },
 });

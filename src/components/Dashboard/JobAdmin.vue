@@ -57,7 +57,7 @@
     v-if="overlay && reviewJob"
     @submit="selectPosted()"
   ></job-review> -->
-  <job-court :title="'Judge'" v-if="false"></job-court>
+  <job-court :title="'Judge'" v-if="state.reportedJob"></job-court>
 </template>
 
 <script>
@@ -201,18 +201,19 @@ export default defineComponent({
       searchTitle: null,
       level: 5,
       fetching: computed(() => store.state.User.fetching),
+      reportedJob: computed(() => store.state.User.reportedJob),
     });
 
-    async function getJobsAdded() {
+    async function getJobsReported() {
       store.dispatch('User/setDialog', 'Please wait!');
-      const caller = await deGuild.getPastEvents('JobAdded', {
+      const caller = await deGuild.getPastEvents('JobCaseOpened', {
         fromBlock: 0,
         toBlock: 'latest',
       });
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
-      // console.log(history);
+      console.log(history);
       state.jobs = history;
 
       return history;
@@ -239,25 +240,11 @@ export default defineComponent({
     }
 
     async function fetchReportedCases() {
-      if (store.state.User.occupied) {
-        store.dispatch(
-          'User/setDialog',
-          'Please finish your current job before taking a new job',
-        );
-        return;
-      }
-      const jobsAdded = await getJobsAdded();
+      const jobsAdded = await getJobsReported();
       state.jobs = jobsAdded.filter(
-        (job) => job.state === 1
-          && job.client !== userAddress.value
-          && (job.taker === userAddress.value
-            || job.taker === '0x0000000000000000000000000000000000000000'),
+        (job) => job.state === 0,
       );
       changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'Be careful! Though you can take any job, you might not be able to complete it easily.',
-      );
     }
 
     async function fetchTitle() {

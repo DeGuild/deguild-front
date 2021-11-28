@@ -1,6 +1,7 @@
 <template>
   <div class="overlay">
     <h2 class="text">Final Judgement of #{{ reasoning.client }}</h2>
+    <button class="back" @click="goBack">X</button>
     <span class="radio-side">
       <div>
         <input
@@ -104,13 +105,13 @@
         />
         %
       </div>
-      <br/>
+      <br />
       <div
         v-if="
           reasoning.deGuildFees + reasoning.client + reasoning.freelancer !==
           100
         "
-        style="color: red;"
+        style="color: red"
       >
         Please distribute return fairly!
       </div>
@@ -119,7 +120,7 @@
     <div v-if="reasoning.pattern === 'abandon'">
       <button
         class="last-decision cancel"
-        @click="state.fetching ? null : decided()"
+        @click="state.fetching ? null : cancelJob()"
       >
         CANCEL JOB
       </button>
@@ -151,6 +152,10 @@ require('dotenv').config();
 const Web3 = require('web3');
 const noImg = require('@/assets/no-url.jpg');
 
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+
 export default defineComponent({
   name: 'Registration',
   props: ['title'],
@@ -159,6 +164,7 @@ export default defineComponent({
     const dummy = ref();
     const store = useStore();
     const web3 = new Web3(window.ethereum);
+    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
     const state = reactive({
       imageData: null,
@@ -187,6 +193,24 @@ export default defineComponent({
         (msg) => web3.eth.personal.sign(msg, address),
         '1d',
       );
+      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+      const caller = await deGuild.methods
+        .cancel(this.job.id)
+        .send({ from: realAddress });
+      console.log(token);
+      console.log(caller);
+      emit('decided');
+    }
+
+    async function cancelJob() {
+      const address = (await web3.eth.getAccounts())[0];
+
+      // generating a token with 1 day of expiration time
+      const token = await Web3Token.sign(
+        (msg) => web3.eth.personal.sign(msg, address),
+        '1d',
+      );
       console.log(token);
       emit('decided');
     }
@@ -196,6 +220,10 @@ export default defineComponent({
       reasoning.client = cl;
       reasoning.freelancer = fl;
       reasoning.fixed = fx;
+    }
+
+    function goBack() {
+      store.dispatch('User/setReportedJob', this.job);
     }
 
     function mathForReturn(isClient) {
@@ -215,6 +243,8 @@ export default defineComponent({
       mathForReturn,
       changedFees,
       decided,
+      goBack,
+      cancelJob,
     };
   },
 });
@@ -224,9 +254,9 @@ export default defineComponent({
   /* Rectangle 9939 */
 
   position: absolute;
-  width: 60vw;
+  width: 80vw;
   height: 60vh;
-  left: 21vw;
+  left: 10vw;
   top: 10.823vw;
 
   background: rgba(0, 0, 0, 0.5);
@@ -234,7 +264,7 @@ export default defineComponent({
 
 .text {
   position: relative;
-  width: 60vw;
+  width: 80vw;
   height: 3.125vw;
 
   display: flex;
@@ -253,7 +283,7 @@ export default defineComponent({
   display: block;
   left: 4.5vw;
   padding-top: 5vh;
-  width: 25vw;
+  width: 35vw;
   height: 27vh;
   background: rgba(0, 0, 0, 0.12);
   input[type='radio'] {
@@ -277,7 +307,7 @@ export default defineComponent({
   display: block;
   right: 4.5vw;
   padding-top: 5vh;
-  width: 25vw;
+  width: 35vw;
   height: 27vh;
   background: rgba(0, 0, 0, 0.12);
 
@@ -321,7 +351,7 @@ export default defineComponent({
 .last-decision {
   position: absolute;
   bottom: 2vw;
-  left: 26vw;
+  left: 35vw;
   width: 9vw;
   height: 6vh;
   font-family: Roboto;
@@ -338,7 +368,7 @@ export default defineComponent({
 
   &.cancel {
     width: 15vw;
-    left: 23.5vw;
+    left: 32vw;
 
     color: #ffffff;
     background: #ff0000;
@@ -346,5 +376,13 @@ export default defineComponent({
 }
 .fas {
   color: rgb(92, 92, 92);
+}
+.back {
+  position: absolute;
+  right: 1vw;
+  top: 1vw;
+  font-size: 2vw;
+  color: rgb(255, 0, 0);
+  font-weight: 900;
 }
 </style>

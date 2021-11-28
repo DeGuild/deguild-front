@@ -16,6 +16,7 @@ export const UserModule = {
     selectedSkills: new Set(),
     registered: false,
     update: false,
+    reportedJob: null,
   },
   mutations: {
     SET_USER(state, user) {
@@ -60,6 +61,9 @@ export const UserModule = {
     SET_SELECTED_SKILL(state, array) {
       state.selectedSkills = array;
     },
+    SET_REPORTED_JOB(state, job) {
+      state.reportedJob = job;
+    },
   },
   actions: {
     reset({ commit }) {
@@ -76,6 +80,7 @@ export const UserModule = {
       commit('SET_REGISTRATION', false);
       commit('SET_USER_PROFILE', null);
       commit('SET_UPDATE_USER_PROFILE', false);
+      commit('SET_REPORTED_JOB', null);
     },
     setUser({ commit }, user) {
       commit('SET_USER', user);
@@ -109,6 +114,9 @@ export const UserModule = {
     },
     setReviewJob({ commit }, job) {
       commit('SET_REVIEW_JOB', job);
+    },
+    setReportedJob({ commit }, job) {
+      commit('SET_REPORTED_JOB', job);
     },
     setChosenSkills({ commit }, skills) {
       commit('SET_SELECTED_SKILL', skills);
