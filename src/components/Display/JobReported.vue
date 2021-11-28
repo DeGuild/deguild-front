@@ -70,9 +70,6 @@
             <p>{{ this.job.clientName }}</p>
           </div>
           <h3 class="btn" @click.stop="this.console.log('ad')">JUDGE</h3>
-          <h3 class="btn force-cancel" @click.stop="this.console.log('ad')">
-            FORCE CANCEL
-          </h3>
           <h3 class="btn submission" @click.stop="this.console.log('ad')">
             CHECK SUBMISSION
           </h3>
@@ -220,16 +217,16 @@ export default defineComponent({
   font-family: Roboto;
   font-style: normal;
   &.id {
-    left: 25.5vw;
+    left: 30.5vw;
   }
   &.level {
-    left: 32vw;
+    left: 37vw;
   }
   &.time {
-    left: 38.5vw;
+    left: 43.5vw;
   }
   &.reward {
-    left: 45vw;
+    left: 50vw;
   }
   &.difficulty {
     background: #fdf1e3;
@@ -450,14 +447,14 @@ export default defineComponent({
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 4vw;
-  height: 2vw;
-  top: 1.4vw;
+  width: 9vw;
+  height: 4vw;
+  top: 0vw;
   right: 1vw;
   font-family: Roboto;
   color: #754d28;
   background: #fdf1e3;
-  font-size: 0.8vw;
+  font-size: 1.5vw;
   font-weight: 800;
 
   cursor: pointer;
@@ -465,19 +462,11 @@ export default defineComponent({
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
   &.submission {
-    width: 9vw;
-    right: 16vw;
+    width: 18vw;
+    right: 11vw;
 
     color: #000000;
     background: #ffffff;
-  }
-  &.force-cancel {
-    right: 6vw;
-
-    width: 9vw;
-
-    color: #ff0000;
-    background: #000000;
   }
   &.check {
     color: #fdf1e3;

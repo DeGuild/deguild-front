@@ -25,35 +25,37 @@
         <div class="search icon"><i class="fa fa-user-clock"></i></div>
         Posted
       </div>
-      <select
-        class="sorter box-1"
-        v-model="state.selectedSort"
-        @change="changedSort()"
-      >
-        <option value="id">ID</option>
-        <option value="reward">REWARD</option>
-        <option value="difficulty">DIFFICULTY</option>
-        <option value="level">LEVEL</option>
-      </select>
-      <select
-        class="sorter box-2"
-        v-model="state.selectedOrder"
-        @change="changedSort()"
-      >
-        <option value="asc">Ascending</option>
-        <option value="dsc">Descending</option>
-      </select>
-      <div class="sorter text"><h2>Sort By</h2></div>
+      <div v-if="state.recommend || state.available || state.posted">
+        <select
+          class="sorter box-1"
+          v-model="state.selectedSort"
+          @change="changedSort()"
+        >
+          <option value="id">ID</option>
+          <option value="reward">REWARD</option>
+          <option value="difficulty">DIFFICULTY</option>
+          <option value="level">LEVEL</option>
+        </select>
+        <select
+          class="sorter box-2"
+          v-model="state.selectedOrder"
+          @change="changedSort()"
+        >
+          <option value="asc">Ascending</option>
+          <option value="dsc">Descending</option>
+        </select>
+        <div class="sorter text"><h2>Sort By</h2></div>
 
-      <div class="searcher icon">
-        <p><i class="fa fa-search" aria-hidden="true"></i></p>
+        <div class="searcher icon">
+          <p><i class="fa fa-search" aria-hidden="true"></i></p>
+        </div>
+        <input
+          class="searcher"
+          v-model="state.searchTitle"
+          @keyup.enter="state.fetching ? null : findJobs()"
+          placeholder="Search job title"
+        />
       </div>
-      <input
-        class="searcher"
-        v-model="state.searchTitle"
-        @keyup.enter="state.fetching ? null : findJobs()"
-        placeholder="Search job title"
-      />
     </div>
     <div class="display" v-show="!state.fetching">
       <br />
@@ -214,6 +216,7 @@ export default defineComponent({
     }
     const state = reactive({
       jobs: null,
+      jobsSaved: null,
       recommend: false,
       available: false,
       posted: false,
@@ -362,10 +365,13 @@ export default defineComponent({
         );
         return;
       }
-      const jobsAdded = await getJobsAdded();
       const correctRegex = new RegExp(state.searchTitle);
-
-      state.jobs = jobsAdded.filter((job) => correctRegex.test(job.title));
+      if (state.jobsSaved) {
+        state.jobs = state.jobsSaved.filter((job) => correctRegex.test(job.title));
+      } else {
+        state.jobsSaved = state.jobs;
+        state.jobs = state.jobs.filter((job) => correctRegex.test(job.title));
+      }
       changedSort();
       store.dispatch(
         'User/setDialog',

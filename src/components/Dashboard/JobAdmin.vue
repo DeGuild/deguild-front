@@ -3,42 +3,45 @@
     <div class="search">
       <div
         class="search button recommend"
-        v-bind:class="{ selected: state.recommend, disabled: state.fetching }"
+        v-bind:class="{ selected: state.reported, disabled: state.fetching }"
         @click="state.fetching ? null : selectAvailable()"
       >
         <div class="search icon"><i class="fa fa-star"></i></div>
         Reported
       </div>
-      <select
-        class="sorter box-1"
-        v-model="state.selectedSort"
-        @change="changedSort()"
-      >
-        <option value="id">ID</option>
-        <option value="reward">REWARD</option>
-        <option value="difficulty">DIFFICULTY</option>
-        <option value="level">LEVEL</option>
-      </select>
-      <select
-        class="sorter box-2"
-        v-model="state.selectedOrder"
-        @change="changedSort()"
-      >
-        <option value="asc">Ascending</option>
-        <option value="dsc">Descending</option>
-      </select>
-      <div class="sorter text"><h2>Sort By</h2></div>
+      <div v-if="state.jobs">
+        <select
+          class="sorter box-1"
+          v-model="state.selectedSort"
+          @change="changedSort()"
+        >
+          <option value="id">ID</option>
+          <option value="reward">REWARD</option>
+          <option value="difficulty">DIFFICULTY</option>
+          <option value="level">LEVEL</option>
+        </select>
+        <select
+          class="sorter box-2"
+          v-model="state.selectedOrder"
+          @change="changedSort()"
+        >
+          <option value="asc">Ascending</option>
+          <option value="dsc">Descending</option>
+        </select>
+        <div class="sorter text"><h2>Sort By</h2></div>
 
-      <div class="searcher icon">
-        <p><i class="fa fa-search" aria-hidden="true"></i></p>
+        <div class="searcher icon">
+          <p><i class="fa fa-search" aria-hidden="true"></i></p>
+        </div>
+        <input
+          class="searcher"
+          v-model="state.searchTitle"
+          @keyup.enter="state.fetching ? null : findJobs()"
+          placeholder="Search job title"
+        />
       </div>
-      <input
-        class="searcher"
-        v-model="state.searchTitle"
-        @keyup.enter="state.fetching ? null : findJobs()"
-        placeholder="Search job title"
-      />
     </div>
+
     <div class="display" v-show="!state.fetching">
       <br />
       <div v-for="job in state.jobs" :key="job.id">
@@ -54,7 +57,7 @@
     v-if="overlay && reviewJob"
     @submit="selectPosted()"
   ></job-review> -->
-  <job-court :title="'Judge'"></job-court>
+  <job-court :title="'Judge'" v-if="false"></job-court>
 </template>
 
 <script>
@@ -189,7 +192,8 @@ export default defineComponent({
     }
     const state = reactive({
       jobs: null,
-      recommend: false,
+      jobsSaved: null,
+      reported: false,
       available: false,
       posted: false,
       selectedOrder: 'asc',
@@ -198,17 +202,6 @@ export default defineComponent({
       level: 5,
       fetching: computed(() => store.state.User.fetching),
     });
-
-    async function isOccupied(address) {
-      const realAddress = web3.utils.toChecksumAddress(address);
-      try {
-        const caller = await deGuild.methods.jobOf(realAddress).call();
-        return caller !== '0';
-      } catch (error) {
-        // console.error('Not purchasable');
-        return false;
-      }
-    }
 
     async function getJobsAdded() {
       store.dispatch('User/setDialog', 'Please wait!');
@@ -245,7 +238,7 @@ export default defineComponent({
       sortJobs();
     }
 
-    async function fetchAvailable() {
+    async function fetchReportedCases() {
       if (store.state.User.occupied) {
         store.dispatch(
           'User/setDialog',
@@ -275,10 +268,13 @@ export default defineComponent({
         );
         return;
       }
-      const jobsAdded = await getJobsAdded();
       const correctRegex = new RegExp(state.searchTitle);
-
-      state.jobs = jobsAdded.filter((job) => correctRegex.test(job.title));
+      if (state.jobsSaved) {
+        state.jobs = state.jobsSaved.filter((job) => correctRegex.test(job.title));
+      } else {
+        state.jobsSaved = state.jobs;
+        state.jobs = state.jobs.filter((job) => correctRegex.test(job.title));
+      }
       changedSort();
       store.dispatch(
         'User/setDialog',
@@ -287,12 +283,10 @@ export default defineComponent({
     }
 
     async function selectAvailable() {
-      state.recommend = false;
-      state.available = true;
-      state.posted = false;
+      state.reported = true;
       store.dispatch('User/setFetching', true);
 
-      await fetchAvailable();
+      await fetchReportedCases();
       store.dispatch('User/setFetching', false);
     }
 
@@ -305,10 +299,8 @@ export default defineComponent({
     }
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
-      const occ = await isOccupied(userAddress.value);
-      store.dispatch('User/setOccupied', occ);
 
-      // await selectAvailable();
+      await selectAvailable();
       store.dispatch('User/setFetching', false);
     });
 
