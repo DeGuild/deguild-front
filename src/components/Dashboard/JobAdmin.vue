@@ -320,8 +320,8 @@ export default defineComponent({
   background-repeat: no-repeat;
 }
 .display {
-  width: 95vw;
-  height: 68vh;
+  width: 96vw;
+  height: 75vh;
   position: absolute;
   left: 1vw;
   top: 10vh;

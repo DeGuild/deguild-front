@@ -70,18 +70,30 @@
             <p>{{ this.job.clientName }}</p>
           </div>
           <h3 class="btn" @click.stop="judge">JUDGE</h3>
-          <h3 class="btn submission" @click.stop="adminInvestigate">
+          <h3
+            class="btn submission"
+            v-show="!state.fetching && !state.notFound"
+            v-if="!state.zipUrl"
+            @click.stop="adminInvestigate"
+          >
             CHECK SUBMISSION
           </h3>
 
           <a
-            class="btn"
-            v-if="this.job.submission.length > 0"
+            class="btn download"
             v-show="!state.fetching && state.zipUrl"
             :href="state.zipUrl"
+            @click.stop=""
             download
             >Download
           </a>
+          <div
+            class="btn no-submission"
+            v-show="!state.fetching && state.notFound"
+            disabled
+          >
+            NO SUBMISSION
+          </div>
         </div>
         <div class="text description" v-bind:class="{ smaller: state.smaller }">
           <h1>CLIENT: {{ this.job.client }}</h1>
@@ -128,7 +140,7 @@ export default defineComponent({
   components: { Skill },
   props: ['job'],
   emits: ['cancel'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
@@ -186,29 +198,25 @@ export default defineComponent({
     }
 
     function judge() {
-      store.dispatch(
-        'User/setDialog',
-        'Would you like to accept this submission?',
-      );
       // console.log(this.job);
       store.dispatch('User/setReportedJob', this.job);
     }
 
+    // async function adminInvestigate() {
+    //   const address = (await web3.eth.getAccounts())[0];
+
+    //   // generating a token with 1 day of expiration time
+    //   const token = await Web3Token.sign(
+    //     (msg) => web3.eth.personal.sign(msg, address),
+    //     '1d',
+    //   );
+    //   const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+
+    //   console.log(token);
+    //   emit('decided');
+    // }
+
     async function adminInvestigate() {
-      const address = (await web3.eth.getAccounts())[0];
-
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-
-      console.log(token);
-      emit('decided');
-    }
-
-    async function generateLink() {
       store.dispatch('User/setFetching', true);
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -222,19 +230,31 @@ export default defineComponent({
           '1d',
         );
         const requestOptions = {
-          method: 'GET',
+          method: 'POST',
           // eslint-disable-next-line quote-props
-          headers: { Authorization: token },
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            addressTaker: props.job.taker,
+            title: props.job.title,
+          }),
         };
 
         const response = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}/${this.job.id}`,
+          `https://us-central1-deguild-2021.cloudfunctions.net/guild/submission/${deGuildAddress}`,
           requestOptions,
         );
-        const data = await response.json();
-        // console.log(data);
-        state.zipUrl = data.result;
+        if (response.status === 200) {
+          const data = await response.json();
+          console.log(data);
+          state.zipUrl = data.result;
+        } else {
+          state.notFound = true;
+        }
       } catch (err) {
+        console.error(err);
         store.dispatch('User/setFetching', false);
       }
       store.dispatch('User/setFetching', false);
@@ -518,6 +538,9 @@ export default defineComponent({
   border-radius: 10%;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.12), 0px 2px 2px rgba(0, 0, 0, 0.24);
 
+  &:hover {
+    background: #ffd19d;
+  }
   &.submission {
     width: 18vw;
     right: 11vw;
@@ -525,12 +548,29 @@ export default defineComponent({
     color: #000000;
     background: #ffffff;
   }
+  &.no-submission {
+    width: 18vw;
+    right: 11vw;
+    top: 1.5vw;
+
+    color: #000000;
+    background: #ffffff;
+
+    &:hover {
+    background: #ffffff;}
+  }
+  &.download {
+    top: 1.5vw;
+    width: 11vw;
+    right: 11vw;
+    text-decoration: none;
+
+    color: #000000;
+    background: #ffffff;
+  }
   &.check {
     color: #fdf1e3;
     background: #ca7a30;
-  }
-  &:hover {
-    background: #ffd19d;
   }
 }
 .icon {
