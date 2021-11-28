@@ -87,9 +87,9 @@ import {
 import { useStore } from 'vuex';
 
 import Overlay from '../General/Overlay.vue';
-import JobReview from './JobReview.vue';
-import JobToAdd from './JobToAdd.vue';
-import Job from './Job.vue';
+import JobReview from '../Forms/JobReview.vue';
+import JobToAdd from '../Forms/JobToAdd.vue';
+import Job from '../Display/Job.vue';
 
 require('dotenv').config();
 
@@ -108,7 +108,7 @@ export default defineComponent({
     JobReview,
     JobToAdd,
   },
-  name: 'JobAdmin',
+  name: 'JobDashboard',
   setup() {
     const store = useStore();
     const userAddress = computed(() => store.state.User.user);

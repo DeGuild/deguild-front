@@ -12,7 +12,7 @@ import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
 import NoWallet from '../components/General/NoWallet.vue';
-import JobAdmin from '../components/Display/JobAdmin.vue';
+import JobAdmin from '../components/Dashboard/JobAdmin.vue';
 // @ is an alias to /src
 
 export default {

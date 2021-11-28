@@ -4,26 +4,10 @@
       <div
         class="search button recommend"
         v-bind:class="{ selected: state.recommend, disabled: state.fetching }"
-        @click="state.fetching ? null : selectRecommend()"
-      >
-        <div class="search icon"><i class="fa fa-star"></i></div>
-        Recommend
-      </div>
-      <div
-        class="search button available"
-        v-bind:class="{ selected: state.available, disabled: state.fetching }"
         @click="state.fetching ? null : selectAvailable()"
       >
-        <div class="search icon"><i class="fas fa-balance-scale"></i></div>
-        Available
-      </div>
-      <div
-        class="search button check-post"
-        v-bind:class="{ selected: state.posted, disabled: state.fetching }"
-        @click="state.fetching ? null : selectPosted()"
-      >
-        <div class="search icon"><i class="fa fa-user-clock"></i></div>
-        Posted
+        <div class="search icon"><i class="fa fa-star"></i></div>
+        Reported
       </div>
       <select
         class="sorter box-1"
@@ -66,19 +50,14 @@
     </div>
   </div>
   <overlay v-if="overlay"> </overlay>
-  <job-to-add
-    v-if="overlay && !reviewJob"
-    @submit="selectPosted()"
-  ></job-to-add>
-  <job-review
+  <!-- <job-review
     :job="reviewJob"
     v-if="overlay && reviewJob"
     @submit="selectPosted()"
-  ></job-review>
+  ></job-review> -->
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 
 import {
@@ -87,9 +66,7 @@ import {
 import { useStore } from 'vuex';
 
 import Overlay from '../General/Overlay.vue';
-import JobReview from './JobReview.vue';
-import JobToAdd from './JobToAdd.vue';
-import Job from './Job.vue';
+import Job from '../Display/JobReported.vue';
 
 require('dotenv').config();
 
@@ -105,10 +82,8 @@ export default defineComponent({
   components: {
     Job,
     Overlay,
-    JobReview,
-    JobToAdd,
   },
-  name: 'JobDashboard',
+  name: 'JobAdmin',
   setup() {
     const store = useStore();
     const userAddress = computed(() => store.state.User.user);
@@ -116,7 +91,7 @@ export default defineComponent({
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
     const overlay = computed(() => store.state.User.overlay);
-    const reviewJob = computed(() => store.state.User.reviewJob);
+    const examiningJob = computed(() => store.state.User.reportedJob);
     function thumbThis(url) {
       const original = url.slice(0, 125);
       const file = url.slice(125);
@@ -250,23 +225,6 @@ export default defineComponent({
       return history;
     }
 
-    async function getJobsPosted() {
-      store.dispatch('User/setDialog', 'Please wait!');
-      const caller = await deGuild.getPastEvents('JobAdded', {
-        filter: { client: userAddress.value },
-        fromBlock: 0,
-        toBlock: 'latest',
-      });
-      // console.log(caller);
-      const history = await Promise.all(
-        caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
-      );
-      // console.log(history);
-      state.jobs = history;
-
-      return history;
-    }
-
     function sortJobs() {
       if (state.selectedOrder === 'asc') {
         state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
@@ -285,28 +243,6 @@ export default defineComponent({
       // console.log(state.selectedOrder);
       // console.log(state.selectedSort);
       sortJobs();
-    }
-
-    async function fetchRecommend() {
-      if (store.state.User.occupied) {
-        store.dispatch(
-          'User/setDialog',
-          'Please finish your current job before taking a new job',
-        );
-        return;
-      }
-      const jobsAdded = await getJobsAdded();
-      state.jobs = jobsAdded.filter(
-        (job) => job.state === 1
-          && job.level - state.level > -2
-          && job.level - state.level < 1
-          && job.client !== userAddress.value,
-      );
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'Recommendation from us is based on your level. Please take a look!',
-      );
     }
 
     async function fetchAvailable() {
@@ -328,29 +264,6 @@ export default defineComponent({
       store.dispatch(
         'User/setDialog',
         'Be careful! Though you can take any job, you might not be able to complete it easily.',
-      );
-    }
-
-    async function fetchPosted() {
-      // const test = await fetch(
-      //   `https://us-central1-deguild-2021.cloudfunctions.net/app/postedJobs/${deGuildAddress}/${web3.utils.toChecksumAddress(
-      //     userAddress.value,
-      //   )}/0/${state.selectedSort}/${state.selectedOrder}/${
-      //     state.searchTitle ? state.searchTitle : ''
-      //   }`,
-      //   { mode: 'cors' },
-      // );
-
-      // const testResult = await test.json();
-      // console.log(testResult);
-
-      state.jobs = [];
-      const jobsAdded = await getJobsPosted();
-      state.jobs = jobsAdded.filter((job) => job.client === userAddress.value);
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        'Your jobs are now being worked on. Please kindly wait for submissions.',
       );
     }
 
@@ -382,24 +295,6 @@ export default defineComponent({
       await fetchAvailable();
       store.dispatch('User/setFetching', false);
     }
-    async function selectRecommend() {
-      state.recommend = true;
-      state.available = false;
-      state.posted = false;
-      store.dispatch('User/setFetching', true);
-
-      await fetchRecommend();
-      store.dispatch('User/setFetching', false);
-    }
-    async function selectPosted() {
-      state.recommend = false;
-      state.available = false;
-      state.posted = true;
-      store.dispatch('User/setFetching', true);
-
-      await fetchPosted();
-      store.dispatch('User/setFetching', false);
-    }
 
     async function findJobs() {
       // console.log(state.searchTitle);
@@ -421,10 +316,8 @@ export default defineComponent({
       state,
       userAddress,
       overlay,
-      reviewJob,
+      examiningJob,
       selectAvailable,
-      selectPosted,
-      selectRecommend,
       findJobs,
       changedSort,
     };
@@ -437,18 +330,18 @@ export default defineComponent({
   -webkit-box-shadow: inset 0px 0px 0px 1vw #6c421b;
   -moz-box-shadow: inset 0px 0px 0px 1vw #6c421b;
   box-shadow: inset 0px 0px 0px 1vw #6c421b;
-  width: 63vw;
-  height: 80vh;
+  width: 98vw;
+  height: 87vh;
   position: absolute;
   background: url('../../assets/dashboard-bg.png');
-  left: 35vw;
-  bottom: 0vw;
+  left: 1vw;
+  bottom: 2vh;
   overflow: auto;
   background-size: cover;
   background-repeat: no-repeat;
 }
 .display {
-  width: 61vw;
+  width: 95vw;
   height: 68vh;
   position: absolute;
   left: 1vw;
@@ -456,7 +349,7 @@ export default defineComponent({
   overflow: auto;
 }
 .search {
-  width: 61.05vw;
+  width: 96vw;
   height: 8vh;
   top: 1vw;
   left: 1vw;

@@ -1,41 +1,8 @@
 <template>
   <div class="background">
-    <div class="search">
-      <select
-        class="sorter box-1"
-        v-model="state.selectedSort"
-        @change="changedSort()"
-      >
-        <option value="id">ID</option>
-        <option value="reward">REWARD</option>
-        <option value="difficulty">DIFFICULTY</option>
-        <option value="level">LEVEL</option>
-      </select>
-      <select
-        class="sorter box-2"
-        v-model="state.selectedOrder"
-        @change="changedSort()"
-      >
-        <option value="asc">Ascending</option>
-        <option value="dsc">Descending</option>
-      </select>
-      <div class="sorter text"><h2>Sort By</h2></div>
-
-      <div class="searcher icon">
-        <p><i class="fa fa-search" aria-hidden="true"></i></p>
-      </div>
-      <input
-        class="searcher"
-        v-model="state.searchTitle"
-        @keyup.enter="findJobs()"
-        placeholder="Search job title"
-      />
-    </div>
-    <div class="display" v-if="!state.fetching">
+    <div class="display" v-if="!state.fetching && state.job">
       <br />
-      <div v-for="job in state.jobs" :key="job.id">
-        <job :job="job"></job>
-      </div>
+      <job :job="state.job" @submit="dummy()"></job>
     </div>
     <div class="display" v-show="state.fetching">
       <img src="@/assets/Spinner-1s-200px.svg" />
@@ -46,11 +13,12 @@
 <script>
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
+
 import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
 import { useStore } from 'vuex';
-import Job from './Job.vue';
+import Job from '../Display/JobAssigned.vue';
 
 require('dotenv').config();
 
@@ -60,14 +28,15 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
+
 const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   components: { Job },
-  name: 'JobHistory',
+  name: 'MyTask',
   setup() {
     const store = useStore();
-    const userAddress = computed(() => store.state.User);
+    const userAddress = computed(() => store.state.User.user);
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
     function thumbThis(url) {
@@ -81,24 +50,26 @@ export default defineComponent({
         const address = addresses[index];
         tokenIds[index].forEach((id) => skillsOnChain.push([address, id]));
       }
-      const displayableSkills = await Promise.all(skillsOnChain.map(async (pair) => {
-        const manager = new web3.eth.Contract(certificateABI, pair[0]);
-        const URI = await manager.methods.tokenURI(pair[1]).call();
-        const response = await fetch(URI, { mode: 'cors' });
-        const caller = await manager.methods.shop().call();
-        const shop = new web3.eth.Contract(certificateABI, caller);
-        const shopCaller = await shop.methods.name().call();
-        const data = await response.json();
+      const displayableSkills = await Promise.all(
+        skillsOnChain.map(async (pair) => {
+          const manager = new web3.eth.Contract(certificateABI, pair[0]);
+          const URI = await manager.methods.tokenURI(pair[1]).call();
+          const response = await fetch(URI, { mode: 'cors' });
+          const caller = await manager.methods.shop().call();
+          const shop = new web3.eth.Contract(certificateABI, caller);
+          const shopCaller = await shop.methods.name().call();
+          const data = await response.json();
 
-        return {
-          name: data.title,
-          image: thumbThis(data.url),
-          address: data.address,
-          tokenId: data.tokenId,
-          shopName: shopCaller,
-          added: false,
-        };
-      }));
+          return {
+            name: data.title,
+            image: thumbThis(data.url),
+            address: data.address,
+            tokenId: data.tokenId,
+            shopName: shopCaller,
+            added: false,
+          };
+        }),
+      );
 
       return displayableSkills;
     }
@@ -167,7 +138,10 @@ export default defineComponent({
     }
 
     const state = reactive({
-      jobs: null,
+      job: null,
+      recommend: false,
+      available: true,
+      posted: false,
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
@@ -175,77 +149,56 @@ export default defineComponent({
       fetching: computed(() => store.state.User.fetching),
     });
 
-    async function getJobsCompleted() {
-      store.dispatch('User/setDialog', 'Please wait!');
+    async function getCurrentJob() {
       store.dispatch('User/setFetching', true);
 
-      const caller = await deGuild.getPastEvents('JobCompleted', {
-        filter: { taker: userAddress.value.user },
+      store.dispatch('User/setDialog', 'Please wait!');
+      const realAddress = web3.utils.toChecksumAddress(userAddress.value);
+      const caller = await deGuild.methods.jobOf(realAddress).call();
+      const events = await deGuild.getPastEvents('JobTaken', {
+        filter: { taker: realAddress },
         fromBlock: 0,
         toBlock: 'latest',
       });
-      const history = await Promise.all(
-        caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
-      );
-      // console.log(history);
-      store.dispatch('User/setFetching', false);
-
-      state.jobs = history;
-      return history;
-    }
-
-    function sortJobs() {
-      if (state.selectedOrder === 'asc') {
-        state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
-          > parseInt(b[state.selectedSort], 10)
-          ? 1
-          : -1));
+      const selected = events.filter((ele) => ele.returnValues[0] === caller);
+      // console.log(selected);
+      if (selected.length > 0) {
+        const history = await idToJob(caller, selected[0].blockNumber);
+        state.job = history;
+        if (state.job.submitted) {
+          store.dispatch(
+            'User/setDialog',
+            'Submission completed. Your submission is now being reviewed.',
+          );
+        } else if (!state.job.submitted && state.job.note.length > 0) {
+          store.dispatch(
+            'User/setDialog',
+            'Oh! It appears your submission is not quite right.\nPlease look at the feedbacks.',
+          );
+        } else {
+          store.dispatch(
+            'User/setDialog',
+            'Please carefully read the description. \n Once you have finished your work, upload the zipped file.',
+          );
+        }
       } else {
-        state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
-          < parseInt(b[state.selectedSort], 10)
-          ? 1
-          : -1));
+        store.dispatch('User/setDialog', 'You have nothing to do right now.');
       }
+      store.dispatch('User/setFetching', false);
     }
-
-    function changedSort() {
-      // console.log(state.selectedOrder);
-      // console.log(state.selectedSort);
-      sortJobs();
+    function dummy() {
+      getCurrentJob();
     }
-
-    async function fetchTitle() {
-      const jobsAdded = await getJobsCompleted();
-      const correctRegex = new RegExp(state.searchTitle);
-
-      state.jobs = jobsAdded.filter((job) => correctRegex.test(job.title));
-      changedSort();
-      store.dispatch(
-        'User/setDialog',
-        `Here is the list of jobs related to ${state.searchTitle}.`,
-      );
-    }
-
-    async function findJobs() {
-      // console.log(state.searchTitle);
-      // console.log(await getJobsCompleted());
-      await fetchTitle();
-      // const data = await fetchTitle();
-    }
-
     onBeforeMount(async () => {
-      await getJobsCompleted();
-      store.dispatch(
-        'User/setDialog',
-        'Every job you have completed are shown.',
-      );
-    });
+      store.dispatch('User/setFetching', true);
 
+      await getCurrentJob();
+      store.dispatch('User/setFetching', false);
+    });
     return {
       state,
       userAddress,
-      findJobs,
-      changedSort,
+      dummy,
     };
   },
 });
@@ -268,15 +221,15 @@ export default defineComponent({
 }
 .display {
   width: 61vw;
-  height: 68vh;
+  height: 76vh;
   position: absolute;
   left: 1vw;
-  top: 10vh;
+  top: 1vw;
   overflow: auto;
 }
 .search {
   width: 61.05vw;
-  height: 8vh;
+  height: 4.2vw;
   top: 1vw;
   left: 1vw;
   position: relative;
@@ -369,100 +322,6 @@ export default defineComponent({
     100% {
       transform: rotate(360deg);
     }
-  }
-}
-
-.searcher {
-  position: absolute;
-  height: 2.95vw;
-  width: 18vw;
-  right: 1vw;
-  top: 0.4vw;
-  background: #814f21;
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 1vw;
-  line-height: 0vw;
-
-  color: #ffffff;
-  border: 1px solid #814f21;
-
-  &.icon {
-    width: 3vw;
-    height: 3.05vw;
-    align-content: center;
-    justify-content: center;
-    right: 19vw;
-  }
-
-  &::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: whitesmoke;
-    opacity: 1; /* Firefox */
-  }
-
-  &:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
-    color: whitesmoke;
-  }
-
-  &::-ms-input-placeholder {
-    /* Microsoft Edge */
-    color: whitesmoke;
-  }
-}
-.sorter {
-  &.box-1 {
-    position: absolute;
-    height: 2vw;
-    right: 33vw;
-    top: 1.4vw;
-    width: 7.5vw;
-
-    /* Roboto / OVERLINE */
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 1vw;
-  }
-  &.box-2 {
-    position: absolute;
-    height: 2vw;
-    right: 23vw;
-    width: 9.5vw;
-
-    top: 1.4vw;
-
-    /* Roboto / OVERLINE */
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 1vw;
-  }
-  &.text {
-    position: absolute;
-    height: 1vw;
-
-    right: 36.8vw;
-    top: 0.5vw;
-    /* Roboto / OVERLINE */
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 0.6vw;
-    line-height: 0vw;
-    /* identical to box height, or 160% */
-    display: flex;
-    align-items: center;
-    text-transform: uppercase;
-
-    /* Gray / 50 */
-    color: #787885;
-
-    /* White 100% */
-    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
-      1px 1px 0 #fff;
   }
 }
 </style>

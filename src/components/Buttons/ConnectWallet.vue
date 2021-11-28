@@ -5,8 +5,7 @@
     </div>
   </div>
   <div v-if="state.owner && state.admin">
-    <div class="btn">
-      <div class="text" v-html="state.primary"></div>
+    <div class="connect-button connected" v-html="state.primary">
     </div>
   </div>
   <div v-if="user && registeredUser && state.userData && !state.owner || !state.admin">
@@ -345,6 +344,52 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.connect-button {
+  /* Small button */
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  position: fixed;
+  width: 10vw;
+  height: 3vw;
+  left: 88vw;
+  top: 0.7vw;
+
+  /* standart theme/error */
+  background: #ff5252;
+  border-radius: 4px;
+
+  font-family: Secular One;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.7vw;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.00892857em;
+  text-transform: uppercase;
+
+  /* shades/white */
+  color: #ffffff;
+
+  /* Inside Auto Layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin: 0px 0px;
+
+  &:hover {
+    background: #cc3b3b;
+  }
+  &.connected {
+    &:hover {
+      background: #ff5252;
+    }
+    cursor: cursor;
+  }
+}
 .text {
   margin-top: 1.5vw;
 }

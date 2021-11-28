@@ -23,7 +23,7 @@ import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
-import Registration from '../components/General/Registration.vue';
+import Registration from '../components/Forms/Registration.vue';
 // @ is an alias to /src
 
 export default {

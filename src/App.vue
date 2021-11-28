@@ -26,7 +26,7 @@
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 import Navigation from '@/components/General/Navigation.vue';
-import Registration from '@/components/General/Registration.vue';
+import Registration from '@/components/Forms/Registration.vue';
 import ConnectWallet from './components/Buttons/ConnectWallet.vue';
 
 const Web3 = require('web3');

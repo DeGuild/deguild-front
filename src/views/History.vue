@@ -25,7 +25,7 @@ import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
 import ApproveModal from '../components/General/Approve.vue';
 import DialogueBox from '../components/General/DialogueBox.vue';
-import JobHistory from '../components/Display/JobHistory.vue';
+import JobHistory from '../components/Dashboard/JobHistory.vue';
 import Profile from '../components/Buttons/Profile.vue';
 // @ is an alias to /src
 
