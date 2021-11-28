@@ -49,12 +49,12 @@
       <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
-  <overlay v-if="overlay"> </overlay>
   <!-- <job-review
     :job="reviewJob"
     v-if="overlay && reviewJob"
     @submit="selectPosted()"
   ></job-review> -->
+  <job-court :title="'Judge'"></job-court>
 </template>
 
 <script>
@@ -65,8 +65,8 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 
-import Overlay from '../General/Overlay.vue';
 import Job from '../Display/JobReported.vue';
+import JobCourt from '../Forms/JobCourt.vue';
 
 require('dotenv').config();
 
@@ -81,7 +81,7 @@ const noImg = require('@/assets/no-url.jpg');
 export default defineComponent({
   components: {
     Job,
-    Overlay,
+    JobCourt,
   },
   name: 'JobAdmin',
   setup() {
