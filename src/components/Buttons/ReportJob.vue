@@ -14,25 +14,45 @@
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 
+const Web3 = require('web3');
+const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
+
+const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
+
 export default defineComponent({
   name: 'ReportJob',
   props: ['job'],
-  setup(props) {
+  emits: ['submit'],
+
+  setup(props, { emit }) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
+    const web3 = new Web3(window.ethereum);
+
     const state = reactive({
       user: computed(() => store.state.User.user),
       fetching: computed(() => store.state.User.fetching),
     });
-    function report() {
+    async function report() {
+      store.dispatch('User/setFetching', true);
+
       store.dispatch(
         'User/setDialog',
         'Please confirm your action, make sure you contact the DeGuild master',
       );
-      store.dispatch(
-        'User/setDialog',
-        props.job.id,
-      );
+      try {
+        const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+        const realAddress = web3.utils.toChecksumAddress(state.user);
+
+        await deGuild.methods.report(props.job.id).send({ from: realAddress });
+        store.dispatch('User/setDialog', `Job ID${props.job.id} is reported!`);
+
+        store.dispatch('User/setFetching', false);
+        emit('submit');
+      } catch (error) {
+        store.dispatch('User/setDialog', 'Job report has been cancelled!');
+        store.dispatch('User/setFetching', false);
+      }
     }
 
     return {
@@ -49,8 +69,7 @@ export default defineComponent({
   /* Shadow Blue · 16dp */
   width: 15vw;
   height: 4vw;
-  box-shadow:
-    0.0vw 0.5vw 0.5vw rgba(0, 0, 0, 0.4);
+  box-shadow: 0vw 0.5vw 0.5vw rgba(0, 0, 0, 0.4);
   border-radius: 2vw;
   position: absolute;
   font-size: 2vw;
@@ -65,7 +84,7 @@ export default defineComponent({
   }
 }
 .text {
-        padding-left: 1.5vw;
+  padding-left: 1.5vw;
 
   font-family: Secular One;
   font-style: normal;

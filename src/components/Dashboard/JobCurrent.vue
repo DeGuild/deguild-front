@@ -2,14 +2,14 @@
   <div class="background">
     <div class="display" v-if="!state.fetching && state.job">
       <br />
-      <job :job="state.job" @submit="dummy()"></job>
+      <job :job="state.job" @submit="refreshDashboard()"></job>
     </div>
     <div class="display" v-show="state.fetching">
       <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
   <div v-if="!state.fetching && state.job">
-    <report-job :job="state.job"></report-job>
+    <report-job :job="state.job" @submit="refreshDashboard()"></report-job>
   </div>
 </template>
 
@@ -188,7 +188,7 @@ export default defineComponent({
       }
       store.dispatch('User/setFetching', false);
     }
-    function dummy() {
+    function refreshDashboard() {
       getCurrentJob();
     }
     onBeforeMount(async () => {
@@ -200,7 +200,7 @@ export default defineComponent({
     return {
       state,
       userAddress,
-      dummy,
+      refreshDashboard,
     };
   },
 });

@@ -125,6 +125,9 @@
     <div class="badge" v-if="this.job.submitted && this.job.state === 2">
       <!-- <i class="fas fa-clipboard-check"></i> -->
     </div>
+    <h3 class="badge reported" v-if="this.job.state === 0">
+          <i class="fas fa-bomb" aria-hidden="true"></i>
+        </h3>
     <div
       class="badge correct"
       v-if="this.job.client === state.user && this.job.state === 3"
@@ -452,6 +455,11 @@ export default defineComponent({
         font-weight: 900;
       }
     }
+  }
+  &.reported{
+    color: #a676ff;
+    background: #330085 ;
+    font-size: 2.4vw;
   }
 }
 .text {

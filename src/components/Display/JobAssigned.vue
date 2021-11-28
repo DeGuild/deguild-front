@@ -74,6 +74,9 @@
         <h3 class="badge dislike" v-if="state.rejected">
           <i class="fas fa-thumbs-down" aria-hidden="true"></i>
         </h3>
+        <h3 class="badge reported" v-if="this.job.state === 0">
+          <i class="fas fa-bomb" aria-hidden="true"></i>
+        </h3>
         <div class="text status">
           <h4>STATUS: {{ this.job.status }}</h4>
           <h4 class="text due-date">
@@ -83,7 +86,7 @@
             {{ state.time }}
           </h4>
         </div>
-        <div class="custom-file-upload">
+        <div class="custom-file-upload" v-if="this.job.state === 2">
           <div class="label-upload">
             Only accept .zip file of size less than 500 MB
           </div>
@@ -517,6 +520,11 @@ export default defineComponent({
   &.dislike {
     color: #ffffff;
     background: #ff0000;
+    font-size: 2.4vw;
+  }
+  &.reported{
+    color: #a676ff;
+    background: #330085 ;
     font-size: 2.4vw;
   }
 }
