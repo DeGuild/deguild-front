@@ -8,6 +8,9 @@
       <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
+  <div v-if="!state.fetching && state.job">
+    <report-job :job="state.job"></report-job>
+  </div>
 </template>
 
 <script>
@@ -18,6 +21,7 @@ import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
 import { useStore } from 'vuex';
+import ReportJob from '../Buttons/ReportJob.vue';
 import Job from '../Display/JobAssigned.vue';
 
 require('dotenv').config();
@@ -32,7 +36,7 @@ const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifa
 const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
-  components: { Job },
+  components: { Job, ReportJob },
   name: 'MyTask',
   setup() {
     const store = useStore();
@@ -100,9 +104,7 @@ export default defineComponent({
         };
         if (clientProfile.status === 200) {
           info = await clientProfile.json();
-          info.url = `${info.url.slice(0, 125)
-          }thumb_${
-            info.url.slice(125)}`;
+          info.url = `${info.url.slice(0, 125)}thumb_${info.url.slice(125)}`;
         }
         const { timestamp } = block;
         const jobObject = {
