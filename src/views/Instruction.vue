@@ -1,16 +1,7 @@
 <template>
-  <background v-if="!overlay" />
 
   <div v-if="user !== null">
-    <dialogue-box></dialogue-box>
-
-    <div v-if="wallet === true">
-      <registration title="Register" />
-    </div>
-    <div v-if="wallet !== true">
-      <approve-modal></approve-modal>
-      <approve-wallet></approve-wallet>
-    </div>
+    <admin-manual></admin-manual>
   </div>
   <no-wallet v-if="user === null" />
 </template>
@@ -19,23 +10,15 @@
 import { useStore } from 'vuex';
 import { computed, reactive } from 'vue';
 import { useHead } from '@vueuse/head';
-import ApproveWallet from '../components/Buttons/ApproveWallet.vue';
-import Background from '../components/General/Background.vue';
 import NoWallet from '../components/General/NoWallet.vue';
-import ApproveModal from '../components/General/Approve.vue';
-import DialogueBox from '../components/General/DialogueBox.vue';
-import Registration from '../components/Forms/Registration.vue';
+import AdminManual from '../components/General/AdminManual.vue';
 // @ is an alias to /src
 
 export default {
-  name: 'RegistrationSite',
+  name: 'InstructionSite',
   components: {
-    Background,
     NoWallet,
-    ApproveModal,
-    ApproveWallet,
-    DialogueBox,
-    Registration,
+    AdminManual,
   },
   setup() {
     const store = useStore();
@@ -46,7 +29,7 @@ export default {
     // console.log(store.state.User.user);
     // console.log(user);
     const siteData = reactive({
-      title: 'DeGuild - Register',
+      title: 'DeGuild - Admin',
       description: 'Freelancer platform for everyone',
     });
     useHead({

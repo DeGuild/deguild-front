@@ -4,40 +4,41 @@
       <div class="text" v-html="state.primary"></div>
     </div>
   </div>
-  <div v-if="state.owner && state.admin">
-    <div class="connect-button connected" v-html="state.primary">
-    </div>
-  </div>
-  <div v-if="user && registeredUser && state.userData && !state.owner || !state.admin">
-    <div class="btn connected">
-      <span>
-        <div class="banner username">{{ state.userData.name }}</div>
-        <div>
-          <span>
-            <div class="banner progress-custom">
-              <div :style="levelBarStyle"></div>
-            </div>
-            <div class="banner progress-custom future">
-              Need {{ (state.userData.level % 1) * 10 }} xp to level up
-            </div>
-          </span>
-        </div>
-      </span>
-      <span
-        ><div class="banner level">Level</div>
-        <div class="banner level number">
-          {{ Math.floor(state.userData.level) }}
-        </div>
-      </span>
-      <span
-        ><img
-          class="banner img"
-          :src="
-            state.userData.url.slice(0, 125) +
-            'thumb_' +
-            state.userData.url.slice(125)
-          "
-      /></span>
+  <div v-if="user">
+    <div v-if="registeredUser && state.userData">
+      <div v-if="state.owner && state.admin">
+        <div class="connect-button connected" v-html="state.primary"></div>
+      </div>
+      <div class="btn connected" v-else>
+        <span>
+          <div class="banner username">{{ state.userData.name }}</div>
+          <div>
+            <span>
+              <div class="banner progress-custom">
+                <div :style="levelBarStyle"></div>
+              </div>
+              <div class="banner progress-custom future">
+                Need {{ (state.userData.level % 1) * 10 }} xp to level up
+              </div>
+            </span>
+          </div>
+        </span>
+        <span
+          ><div class="banner level">Level</div>
+          <div class="banner level number">
+            {{ Math.floor(state.userData.level) }}
+          </div>
+        </span>
+        <span
+          ><img
+            class="banner img"
+            :src="
+              state.userData.url.slice(0, 125) +
+              'thumb_' +
+              state.userData.url.slice(125)
+            "
+        /></span>
+      </div>
     </div>
   </div>
 </template>
@@ -99,7 +100,9 @@ export default defineComponent({
       magicScrollsData: [],
       userData: computed(() => store.state.User.userProfile),
       owner: computed(() => store.state.User.owner),
-      admin: computed(() => useRoute().name === 'Admin'),
+      admin: computed(
+        () => useRoute().name === 'Admin' || useRoute().name === 'Instructions',
+      ),
     });
 
     const levelBarStyle = computed(() => (state.userData

@@ -31,6 +31,11 @@
         >Admin Page</a
       >
     </li>
+    <li>
+      <a :class="state.instructionClass" @click="this.$router.push('/admin/instructions')"
+        >Instructions</a
+      >
+    </li>
     <li><a @click="this.$router.push('/')">Back to DeGuild</a></li>
   </ul>
 </template>
@@ -49,8 +54,9 @@ export default defineComponent({
       myTasks: computed(() => useRoute().name === 'Task'),
       jobHistory: computed(() => useRoute().name === 'History'),
       adminClass: computed(() => (useRoute().name === 'Admin' ? 'active' : null)),
+      instructionClass: computed(() => (useRoute().name === 'Instructions' ? 'active' : null)),
       owner: computed(() => store.state.User.owner),
-      admin: computed(() => useRoute().name === 'Admin'),
+      admin: computed(() => useRoute().name === 'Admin' || useRoute().name === 'Instructions'),
     });
 
     // console.log(useRoute().name);
