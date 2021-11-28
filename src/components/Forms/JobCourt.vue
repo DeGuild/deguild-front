@@ -1,94 +1,118 @@
 <template>
   <div class="overlay">
     <h2 class="text">Final Judgement</h2>
-    <form>
-      <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Not talented enough</label><br />
-      </div>
-       <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Perma-lock</label><br />
-      </div>
-       <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Perfectionists</label><br />
-      </div>
-       <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Abandoning</label><br />
-      </div>
-       <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Annoying Freelancer</label><br />
-      </div>
-       <div>
-        <input type="radio" id="not-talented" value="not-talented" />
-        <label for="not-talented">Annoying Client</label><br />
-      </div>
+    <h3>job id</h3>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="not-talented"
+        value="not-talented"
+      />
+      <label for="not-talented">Not talented enough</label><br />
+    </div>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="perma-lock"
+        value="perma-lock"
+      />
+      <label for="perma-lock">Perma-lock</label><br />
+    </div>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="perfection"
+        value="perfection"
+      />
+      <label for="perfection">Perfectionists</label><br />
+    </div>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="abandon"
+        value="abandon"
+      />
+      <label for="abandon">Abandoning</label><br />
+    </div>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="freelancer-g"
+        value="freelancer-g"
+      />
+      <label for="freelancer-g">Annoying Freelancer</label><br />
+    </div>
+    <div>
+      <input
+        v-model="reasoning.pattern"
+        type="radio"
+        id="client-g"
+        value="client-g"
+      />
+      <label for="client-g">Annoying Client</label><br />
+    </div>
 
-      <div>
-        <label>DeGuild</label>
-        <input type="number" />
-        %
-      </div>
-      <div>
-        <label for="client-share">Client</label>
-        <input id="client-share"  type="number" />
-        %
-      </div>
-      <div>
-        <label for="taker-share">Freelancer</label>
-        <input id="taker-share" type="number" />
-        %
-      </div>
+    <div>
+      <label>DeGuild fees</label>
+      <input type="number" :value="reasoning.deGuildFees" readonly />
+      %
+    </div>
+    <div>
+      <label for="client-share">Client</label>
+      <input
+        id="client-share"
+        type="number"
+        oninput="validity.valid||(value='');"
+        min=0
+        max=100
+      />
+      %
+    </div>
+    <div>
+      <label for="taker-share">Freelancer</label>
+      <input
+        id="taker-share"
+        type="number"
+        oninput="validity.valid||(value='');"
+        min=0
+        max=100
+      />
+      %
+    </div>
 
-      <div>
-        <button
-          class="register"
-          @click="state.fetching ? null : onUpload()"
-          :disabled="!state.username || !state.imageData || state.uploading"
-        >
-          {{ this.title }}
-        </button>
-      </div>
-    </form>
+    <div>
+      <button class="register" @click="state.fetching ? null : decided()">
+        {{ this.title }}
+      </button>
+    </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, reactive, computed } from 'vue';
-import { useStore } from 'vuex';
 import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from 'firebase/storage';
+  defineComponent, reactive, computed, ref,
+} from 'vue';
+import { useStore } from 'vuex';
 import Web3Token from 'web3-token';
-import { useRouter, useRoute } from 'vue-router';
 
 require('dotenv').config();
 
 const Web3 = require('web3');
-
-const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
-
 const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   name: 'Registration',
   props: ['title'],
-  emits: ['profileUpdated'],
+  emits: ['decided'],
   setup(_, { emit }) {
-    // console.log(store.state.User.user);
-    // console.log(user);
-    // Connection to MetaMask wallet
+    const dummy = ref();
     const store = useStore();
-    const router = useRouter();
-    const route = useRoute();
     const web3 = new Web3(window.ethereum);
-    const userStore = computed(() => store.state.User);
 
     const state = reactive({
       imageData: null,
@@ -101,104 +125,31 @@ export default defineComponent({
       fetching: computed(() => store.state.User.fetching),
     });
 
-    function previewZipName(event) {
-      // console.log('File changed!');
-      state.uploadValue = 0;
-      const file = event.target.files[0];
-      console.log(file);
-      state.imageData = file;
-      state.fileName = file.name;
+    const reasoning = reactive({
+      pattern: null,
+      deGuildFees: 0,
+      client: 0,
+      freelance: 0,
+    });
 
-      const previewing = URL.createObjectURL(event.target.files[0]);
-      state.picture = previewing;
-    }
-
-    async function onUpload() {
-      store.dispatch('User/setFetching', true);
+    async function decided() {
+      const address = (await web3.eth.getAccounts())[0];
 
       // generating a token with 1 day of expiration time
       const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, userStore.value.user),
+        (msg) => web3.eth.personal.sign(msg, address),
         '1d',
       );
-      const storage = getStorage();
-      const storageRef = ref(storage, `images/${userStore.value.user}/profile`);
-
-      const uploadTask = uploadBytesResumable(storageRef, state.imageData);
-      // Register three observers:
-      // 1. 'state_changed' observer, called any time the state changes
-      // 2. Error observer, called on failure
-      // 3. Completion observer, called on successful completion
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Observe state change events such as progress, pause, and resume
-          state.uploading = true;
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log(`Upload is ${progress}% done`);
-          state.uploadValue = progress;
-          // eslint-disable-next-line default-case
-          switch (snapshot.state) {
-            case 'paused':
-              // console.log('Upload is paused');
-              break;
-            case 'running':
-              // console.log('Upload is running');
-              break;
-          }
-        },
-        (error) => {
-          // Handle unsuccessful uploads
-          console.error(error.message);
-          state.uploading = false;
-          store.dispatch('User/setFetching', false);
-        },
-        async () => {
-          let url = null;
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            // console.log('File available at', downloadURL);
-            url = downloadURL;
-            state.picture = downloadURL;
-            const requestOptions = {
-              method: 'POST',
-              // eslint-disable-next-line quote-props
-              headers: {
-                Authorization: token,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                name: state.username,
-                url,
-                address: deGuildAddress,
-              }),
-            };
-            await fetch(
-              'https://us-central1-deguild-2021.cloudfunctions.net/guild/register',
-              requestOptions,
-            );
-
-            // console.log(
-            //   'File available at',
-            //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-            // );
-            // const data = await response.json();
-            // console.log(data);
-
-            state.uploading = false;
-            store.dispatch('User/setRegistration', true);
-            store.dispatch(
-              'User/setDialog',
-              'Alright, we will change that for you!',
-            );
-            store.dispatch('User/setFetching', false);
-            if (route.name === 'registration') router.push('/');
-          });
-          emit('profileUpdated');
-        },
-      );
+      console.log(token);
+      emit('decided');
     }
 
-    return { state, previewZipName, onUpload };
+    return {
+      state,
+      reasoning,
+      dummy,
+      decided,
+    };
   },
 });
 </script>

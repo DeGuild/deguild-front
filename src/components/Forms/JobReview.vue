@@ -93,7 +93,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 
-import { defineComponent, reactive, computed } from 'vue';
+import {
+  defineComponent, reactive, computed, ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import Web3 from 'web3';
 import Web3Token from 'web3-token';
@@ -109,6 +111,8 @@ export default defineComponent({
   props: ['job'],
   emits: ['submit'],
   setup(props, { emit }) {
+    const dummy = ref();
+
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const isSubmitted = computed(() => props.job.submitted);
