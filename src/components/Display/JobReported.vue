@@ -248,13 +248,13 @@ export default defineComponent({
         );
         if (response.status === 200) {
           const data = await response.json();
-          console.log(data);
+          // console.log(data);
           state.zipUrl = data.result;
         } else {
           state.notFound = true;
         }
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         store.dispatch('User/setFetching', false);
       }
       store.dispatch('User/setFetching', false);

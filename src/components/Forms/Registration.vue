@@ -91,7 +91,7 @@ export default defineComponent({
       // console.log('File changed!');
       state.uploadValue = 0;
       const file = event.target.files[0];
-      console.log(file);
+      // console.log(file);
       state.imageData = file;
       state.fileName = file.name;
 
@@ -133,9 +133,10 @@ export default defineComponent({
               break;
           }
         },
+        // eslint-disable-next-line no-unused-vars
         (error) => {
           // Handle unsuccessful uploads
-          console.error(error.message);
+          // console.error(error.message);
           state.uploading = false;
           store.dispatch('User/setFetching', false);
         },

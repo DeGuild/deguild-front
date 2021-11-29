@@ -147,7 +147,6 @@ import {
   defineComponent, reactive, computed, ref,
 } from 'vue';
 import { useStore } from 'vuex';
-import Web3Token from 'web3-token';
 
 require('dotenv').config();
 
@@ -159,7 +158,7 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
 
 export default defineComponent({
-  name: 'Registration',
+  name: 'JobCourt',
   props: ['title'],
   emits: ['decided'],
   setup(_, { emit }) {
@@ -198,20 +197,20 @@ export default defineComponent({
     ) {
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
-      const caller = await deGuild.methods
+      await deGuild.methods
         .judge(id, decision, isCompleted, feeRate, clientRate, takerRate)
         .send({ from: realAddress });
-      console.log(caller);
+      // console.log(caller);
       emit('decided');
     }
 
     async function forceCancel(id) {
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
-      const caller = await deGuild.methods
+      await deGuild.methods
         .forceCancel(id)
         .send({ from: realAddress });
-      console.log(caller);
+      // console.log(caller);
       emit('decided');
     }
 
@@ -274,18 +273,6 @@ export default defineComponent({
       }
     }
 
-    async function cancelJob() {
-      const address = (await web3.eth.getAccounts())[0];
-
-      // generating a token with 1 day of expiration time
-      const token = await Web3Token.sign(
-        (msg) => web3.eth.personal.sign(msg, address),
-        '1d',
-      );
-      console.log(token);
-      emit('decided');
-    }
-
     function changedFees(dgf, cl, fl, fx) {
       reasoning.deGuildFees = dgf;
       reasoning.client = cl;
@@ -315,7 +302,6 @@ export default defineComponent({
       changedFees,
       decided,
       goBack,
-      cancelJob,
     };
   },
 });

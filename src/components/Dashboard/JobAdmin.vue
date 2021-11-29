@@ -213,7 +213,7 @@ export default defineComponent({
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
-      console.log(history);
+      // console.log(history);
       state.jobs = history;
 
       return history;
