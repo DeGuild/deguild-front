@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="label-upload">
-      *Only accept .jpg or .png file (smaller than 5 MB)
+      *Only accept .jpg file (smaller than 5 MB)
     </div>
 
     <div>
@@ -98,6 +98,24 @@ export default defineComponent({
       const previewing = URL.createObjectURL(event.target.files[0]);
       state.picture = previewing;
     }
+    async function isRegistered(address) {
+      try {
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
+            address,
+          )}`,
+          { mode: 'cors' },
+        );
+        const info = await response.json();
+
+        if (response.status === 200) {
+          return info;
+        }
+        return null;
+      } catch (err) {
+        return null;
+      }
+    }
 
     async function onUpload() {
       store.dispatch('User/setFetching', true);
@@ -164,23 +182,21 @@ export default defineComponent({
               requestOptions,
             );
 
-            // console.log(
-            //   'File available at',
-            //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-            // );
-            // const data = await response.json();
-            // console.log(data);
+            const profile = await isRegistered(userStore.value.user);
 
             state.uploading = false;
             store.dispatch('User/setRegistration', true);
+            store.dispatch('User/setUserProfile', profile);
+
             store.dispatch(
               'User/setDialog',
               'Alright, we will change that for you!',
             );
             store.dispatch('User/setFetching', false);
+            emit('profileUpdated');
+
             if (route.name === 'registration') router.push('/');
           });
-          emit('profileUpdated');
         },
       );
     }
