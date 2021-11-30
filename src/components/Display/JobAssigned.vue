@@ -95,7 +95,7 @@
             <span class="custom-file-upload text-label">{{ state.fileName }}</span>
           </label>
           <span>
-            <button class="btn" @click="onUpload()" v-if="state.zipData">
+            <button class="btn" @click="uploadSubmission()" v-if="state.zipData">
               Upload
             </button>
           </span>
@@ -178,7 +178,7 @@ export default defineComponent({
       state.fileName = file.name;
     }
 
-    async function onUpload() {
+    async function uploadSubmission() {
       // generating a token with 1 day of expiration time
       const token = await Web3Token.sign(
         (msg) => web3.eth.personal.sign(msg, userAddress.value.user),
@@ -262,7 +262,7 @@ export default defineComponent({
       state,
       userAddress,
       previewZipName,
-      onUpload,
+      uploadSubmission,
     };
   },
 });
