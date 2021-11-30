@@ -100,7 +100,7 @@
             </button>
           </span>
           <span class="progress" v-if="state.uploading">
-            <span class="progress text">
+            <span class="progress text-label">
               Progress: {{ state.uploadValue.toFixed() + '%' }}
             </span>
             <progress
@@ -593,7 +593,7 @@ input[type='file'] {
   justify-content: center;
   cursor: wait;
 
-  &.text {
+  &.text-label {
     left: 2vw;
     height: 2vw;
     top: -1vw;

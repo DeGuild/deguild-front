@@ -155,7 +155,8 @@ export default defineComponent({
           .allowance(realAddress, deGuildAddress)
           .call();
         // console.log(caller, balance, address);
-        return caller <= balance && caller > 0;
+        // console.log(typeof caller, typeof balance, address);
+        return (caller <= balance && caller > 0) || (balance === '0');
       } catch (error) {
         return false;
       }
@@ -235,7 +236,7 @@ export default defineComponent({
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
-          console.log(registered);
+          // console.log(registered);
 
           store.dispatch(
             'User/setUser',
