@@ -235,6 +235,7 @@ export default defineComponent({
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
+          console.log(registered);
 
           store.dispatch(
             'User/setUser',
@@ -261,11 +262,13 @@ export default defineComponent({
             'User/setDialog',
             'Hi there! So, what would you like to take?',
           );
-          // console.log(registered);
 
           if (registered) {
             store.dispatch('User/setRegistration', true);
             store.dispatch('User/setUserProfile', registered);
+            if (route.name === 'registration') {
+              router.push('/');
+            }
           } else {
             router.push('/register');
           }

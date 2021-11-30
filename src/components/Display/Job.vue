@@ -64,10 +64,10 @@
           </div>
           <img class="image" :src="this.job.image" />
           <div class="text">
-            <h4>{{ this.job.title }}</h4>
+            {{ this.job.title }}
           </div>
           <div class="text client-name">
-            <p>{{ this.job.clientName }}</p>
+            {{ this.job.clientName }}
           </div>
           <h3
             class="btn"
@@ -126,8 +126,8 @@
       <!-- <i class="fas fa-clipboard-check"></i> -->
     </div>
     <div class="badge reported" v-if="this.job.state === 0">
-          <i class="fas fa-bomb" aria-hidden="true"></i>
-        </div>
+      <i class="fas fa-bomb" aria-hidden="true"></i>
+    </div>
     <div
       class="badge correct"
       v-if="this.job.client === state.user && this.job.state === 3"
@@ -456,9 +456,9 @@ export default defineComponent({
       }
     }
   }
-  &.reported{
+  &.reported {
     color: #a676ff;
-    background: #330085 ;
+    background: #330085;
     font-size: 1.1vw;
   }
 }
@@ -468,23 +468,24 @@ export default defineComponent({
   height: 2.5vw;
   left: 5vw;
   top: 0vw;
-
+  margin-top: 1vw;
   font-family: Roboto;
-  font-style: normal;
-  font-size: 0.9vw;
+  font-weight: 900;
+  font-size: 1vw;
   line-height: 1vw;
 
   color: #000000;
   align-items: center;
   text-align: left;
+  overflow: hidden;
 
   text-overflow: ellipsis;
+  white-space: nowrap;
 
   background-size: cover;
-  overflow: hidden;
   &.client-name {
-    top: 1.7vw;
-    font-size: 0.7vw;
+    top: 1.5vw;
+    font-size: 0.8vw;
   }
   &.description {
     width: 54vw;
@@ -492,6 +493,10 @@ export default defineComponent({
     top: 1vw;
     left: 1vw;
     padding-left: 1vw;
+    font-size: 1vw;
+    white-space: normal;
+    line-height: 3vw;
+
     overflow: auto;
     &.smaller {
       height: 0vw;

@@ -50,10 +50,10 @@
         </div>
         <img class="image" :src="this.job.image" />
         <div class="text">
-          <h4>{{ this.job.title }}</h4>
+          {{ this.job.title }}
         </div>
         <div class="text client-current">
-          <p>{{ this.job.client }}</p>
+          {{ this.job.client }}
         </div>
         <div class="text description">
           <h1 v-if="this.job.note">FEEDBACK FROM CLIENT:</h1>
@@ -92,7 +92,7 @@
           </div>
           <label for="file-upload" class="custom-file-upload button">
             <i class="fas fa-paperclip"></i>
-            <span class="custom-file-upload text">{{ state.fileName }}</span>
+            <span class="custom-file-upload text-label">{{ state.fileName }}</span>
           </label>
           <span>
             <button class="btn" @click="onUpload()" v-if="state.zipData">
@@ -313,7 +313,7 @@ export default defineComponent({
     height: 2vw;
     width: 10vw;
     left: 1vw;
-    top: 4vw;
+    top: 4.5vw;
     padding-left: 1vw;
     font-family: Roboto;
     font-style: normal;
@@ -430,20 +430,21 @@ export default defineComponent({
   height: 2.5vw;
   left: 5vw;
   top: 0vw;
-
+  margin-top: 1vw;
   font-family: Roboto;
-  font-style: normal;
-  font-size: 0.9vw;
+  font-weight: 900;
+  font-size: 1vw;
   line-height: 1vw;
 
   color: #000000;
   align-items: center;
   text-align: left;
+  overflow: hidden;
 
   text-overflow: ellipsis;
+  white-space: nowrap;
 
   background-size: cover;
-  overflow: hidden;
   &.client-current {
     top: 1.7vw;
     font-size: 0.7vw;
@@ -451,7 +452,7 @@ export default defineComponent({
   &.description {
     width: 54vw;
     height: 16vw;
-    top: 8vw;
+    top: 7vw;
     left: 1vw;
     padding-left: 1vw;
     overflow: auto;
@@ -460,7 +461,7 @@ export default defineComponent({
   &.status {
     width: 54vw;
     height: 3vw;
-    top: 24vw;
+    top: 23vw;
     left: 1vw;
     padding-left: 1vw;
     background-color: rgba(113, 255, 255, 0.1);
@@ -578,7 +579,7 @@ input[type='file'] {
     background: rgba(224, 224, 224, 0.6);
     overflow: hidden;
   }
-  &.text {
+  &.text-label {
     top: 0vw;
     left: 2vw;
   }
