@@ -64,10 +64,10 @@
           </div>
           <img class="image" :src="this.job.image" />
           <div class="text">
-            <h4>{{ this.job.title }}</h4>
+            {{ this.job.title }}
           </div>
           <div class="text client-name">
-            <p>{{ this.job.clientName }}</p>
+            {{ this.job.clientName }}
           </div>
           <h3 class="btn" @click.stop="judge">JUDGE</h3>
           <h3
@@ -483,35 +483,36 @@ export default defineComponent({
   }
 }
 .text {
-  position: absolute;
+   position: absolute;
   width: 20vw;
   height: 2.5vw;
   left: 5vw;
   top: 0vw;
-
+  margin-top: 1vw;
   font-family: Roboto;
-  font-style: normal;
-  font-size: 0.9vw;
+  font-weight: 900;
+  font-size: 1vw;
   line-height: 1vw;
 
   color: #000000;
   align-items: center;
   text-align: left;
+  overflow: hidden;
 
   text-overflow: ellipsis;
+  white-space: nowrap;
 
   background-size: cover;
-  overflow: hidden;
   &.client-name {
     top: 1.7vw;
     font-size: 0.7vw;
   }
   &.description {
-    width: 54vw;
+    width: 90vw;
     height: 26vw;
     top: 1vw;
-    left: 1vw;
-    padding-left: 1vw;
+    left: 0vw;
+    padding-left: 2vw;
     overflow: auto;
     &.smaller {
       height: 0vw;
@@ -594,6 +595,8 @@ export default defineComponent({
   font-weight: 100;
   font-size: 1.7vw;
   line-height: 2.2vw;
+  width: 89vw;
+
   white-space: pre-wrap;
 }
 </style>
