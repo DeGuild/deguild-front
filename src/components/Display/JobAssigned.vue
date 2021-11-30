@@ -187,7 +187,7 @@ export default defineComponent({
       const storage = getStorage();
       const storageRef = ref(
         storage,
-        `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
+        `zipfile/${userAddress.value.user}/${this.job.title}-submission.zip`,
       );
 
       const uploadTask = uploadBytesResumable(storageRef, state.zipData);
@@ -230,7 +230,7 @@ export default defineComponent({
             body: JSON.stringify({
               address: deGuildAddress,
               tokenId: this.job.id,
-              submission: `zipfile/${userAddress.value.user}/${this.job.title}-submission`,
+              submission: `zipfile/${userAddress.value.user}/${this.job.title}-submission.zip`,
               note: '',
             }),
           };
