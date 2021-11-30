@@ -188,18 +188,21 @@ export default defineComponent({
       store.dispatch('User/setFetching', true);
 
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      try {
+        const caller = await deGuild.methods
+          .take(this.job.id)
+          .send({ from: realAddress });
 
-      const caller = await deGuild.methods
-        .take(this.job.id)
-        .send({ from: realAddress });
+        store.dispatch(
+          'User/setDialog',
+          'Done! Please start working on your job early and contact your client as soon as possible',
+        );
+        store.dispatch('User/setFetching', false);
 
-      store.dispatch(
-        'User/setDialog',
-        'Done! Please start working on your job early and contact your client as soon as possible',
-      );
-      store.dispatch('User/setFetching', false);
-
-      this.$router.push('/task');
+        this.$router.push('/task');
+      } catch {
+        store.dispatch('User/setFetching', false);
+      }
     }
 
     async function cancel() {
@@ -207,18 +210,23 @@ export default defineComponent({
       store.dispatch('User/setFetching', true);
 
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
+      try {
+        const caller = await deGuild.methods
+          .cancel(this.job.id)
+          .send({ from: realAddress });
 
-      const caller = await deGuild.methods
-        .cancel(this.job.id)
-        .send({ from: realAddress });
+        store.dispatch(
+          'User/setDialog',
+          'Done! Please think twice before posting any job because it will cost you some gas fees.',
+        );
+        store.dispatch('User/setFetching', false);
 
-      store.dispatch(
-        'User/setDialog',
-        'Done! Please think twice before posting any job because it will cost you some gas fees.',
-      );
-      setTimeout(() => {
-        emit('cancel');
-      }, 1000);
+        setTimeout(() => {
+          emit('cancel');
+        }, 1000);
+      } catch {
+        store.dispatch('User/setFetching', false);
+      }
     }
 
     function extend() {
