@@ -223,7 +223,7 @@ export default defineComponent({
       selectedOrder: 'asc',
       selectedSort: 'id',
       searchTitle: null,
-      level: 5,
+      level: computed(() => store.state.User.userProfile.level),
       fetching: computed(() => store.state.User.fetching),
     });
 
@@ -301,8 +301,7 @@ export default defineComponent({
       const jobsAdded = await getJobsAdded();
       state.jobs = jobsAdded.filter(
         (job) => job.state === 1
-          && job.level - state.level > -2
-          && job.level - state.level < 1
+          && Math.abs(job.level - state.level) < 2
           && job.client !== userAddress.value,
       );
       changedSort();
