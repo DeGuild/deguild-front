@@ -53,6 +53,7 @@ import { useRouter, useRoute } from 'vue-router';
 import {
   reactive, onBeforeMount, computed, defineComponent,
 } from 'vue';
+import Web3Token from 'web3-token';
 
 require('dotenv').config();
 
@@ -156,7 +157,7 @@ export default defineComponent({
           .call();
         // console.log(caller, balance, address);
         // console.log(typeof caller, typeof balance, address);
-        return (caller <= balance && caller > 0) || (balance === '0');
+        return (caller <= balance && caller > 0) || balance === '0';
       } catch (error) {
         return false;
       }
@@ -209,7 +210,45 @@ export default defineComponent({
         return null;
       }
     }
+    async function updateLevel(userinfo, userAddress) {
+      try {
+        const token = await Web3Token.sign(
+          (msg) => web3.eth.personal.sign(msg, userAddress),
+          '1d',
+        );
+        const requestOptions = {
+          method: 'POST',
+          // eslint-disable-next-line quote-props
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: userinfo.name,
+            url: userinfo.url,
+            address: deGuildAddress,
+          }),
+        };
+        await fetch(
+          'https://us-central1-deguild-2021.cloudfunctions.net/guild/register',
+          requestOptions,
+        );
+        const response = await fetch(
+          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
+            userAddress,
+          )}`,
+          { mode: 'cors' },
+        );
+        const info = await response.json();
 
+        if (response.status === 200) {
+          return info;
+        }
+        return null;
+      } catch (err) {
+        return null;
+      }
+    }
     /**
      * Disconnect user from the dapp
      */
@@ -232,7 +271,8 @@ export default defineComponent({
             method: 'eth_requestAccounts',
           });
           const ownership = await isOwner(accounts[0]);
-          const registered = await isRegistered(accounts[0]);
+          const oldProfile = await isRegistered(accounts[0]);
+          const registered = await updateLevel(oldProfile, accounts[0]);
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
           // const toAdd = [];
