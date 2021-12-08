@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "dist",
+    "site": "deguild-test",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
