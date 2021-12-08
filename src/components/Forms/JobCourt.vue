@@ -187,6 +187,16 @@ export default defineComponent({
       fixed: false,
     });
 
+    /**
+     * Send a transaction to judge the job
+     *
+     * @param {string} id job id
+     * @param {bool} decision If true, taker is banned. Vice versa.
+     * @param {bool} isCompleted whether job is considered completed
+     * @param {string} feeRate the share taken away by deGuild
+     * @param {string} clientRate the share given back to client
+     * @param {string} takerRate the share given back to taker
+     */
     async function judge(
       id,
       decision,
@@ -200,20 +210,26 @@ export default defineComponent({
       await deGuild.methods
         .judge(id, decision, isCompleted, feeRate, clientRate, takerRate)
         .send({ from: realAddress });
-      // console.log(caller);
       emit('decided');
     }
 
+    /**
+     * Send a transaction to cancel the job
+     *
+     * @param {string} id job id
+     */
     async function forceCancel(id) {
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
 
       await deGuild.methods
         .forceCancel(id)
         .send({ from: realAddress });
-      // console.log(caller);
       emit('decided');
     }
 
+    /**
+     * it will send the transaction based on the parameters given by the admin
+     */
     async function decided() {
       switch (reasoning.pattern) {
         case 'not-talented':
@@ -273,6 +289,9 @@ export default defineComponent({
       }
     }
 
+    /**
+     * set the fees according to the admin's inputs
+     */
     function changedFees(dgf, cl, fl, fx) {
       reasoning.deGuildFees = dgf;
       reasoning.client = cl;
@@ -280,10 +299,18 @@ export default defineComponent({
       reasoning.fixed = fx;
     }
 
+    /**
+     * close overlay
+     */
     function goBack() {
       store.dispatch('User/setReportedJob', this.job);
     }
 
+    /**
+     * Calculate return shares
+     *
+     * @param {bool} isClient whether the input is client fees
+     */
     function mathForReturn(isClient) {
       if (!isClient) {
         reasoning.client = 100 - reasoning.deGuildFees - reasoning.freelancer;
