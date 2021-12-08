@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "dist",
-    "site": "deguild-test",
+    "site": "deguild-rinkeby",
     "rewrites": [
       {
         "source": "**",
