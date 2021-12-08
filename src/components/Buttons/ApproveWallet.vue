@@ -1,6 +1,6 @@
 <template>
   <div v-if="user">
-    <button class="btn" @click="approve" v-html="state.primary"></button>
+    <button class="btn" @click="state.fetching ? null : approve()" v-html="state.primary"></button>
   </div>
 </template>
 
@@ -33,6 +33,7 @@ export default defineComponent({
       primary: 'APPROVE',
       network: '',
       magicScrollsData: [],
+      fetching: computed(() => store.state.User.fetching),
     });
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
@@ -63,20 +64,26 @@ export default defineComponent({
      * @return {bool} approval.
      */
     async function approve() {
+      store.dispatch('User/setFetching', true);
       state.primary = "<i class='fas fa-spinner fa-spin'></i>";
 
       const deguildCoin = new web3.eth.Contract(dgcABI, dgcAddress);
       const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
       try {
         const balance = await deguildCoin.methods.balanceOf(realAddress).call();
+
         await deguildCoin.methods
           .approve(deGuildAddress, balance)
           .send({ from: realAddress });
         const approval = await hasApproval(realAddress);
         store.dispatch('User/setApproval', approval);
+        store.dispatch('User/setFetching', false);
 
         return approval;
       } catch (error) {
+        store.dispatch('User/setFetching', false);
+        state.primary = 'APPROVE';
+
         return false;
       }
     }
