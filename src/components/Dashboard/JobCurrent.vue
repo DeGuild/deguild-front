@@ -14,9 +14,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
-
 import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
@@ -43,11 +40,26 @@ export default defineComponent({
     const userAddress = computed(() => store.state.User.user);
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
+
+    /**
+     * Returns a thumbnail url from firebase storage
+     *
+     * @param {string} url url of the image
+     * @return {string} url of the thumbnail.
+     */
     function thumbThis(url) {
       const original = url.slice(0, 80);
       const file = url.slice(80);
       return `${original}thumb_${file}`;
     }
+
+    /**
+     * Returns an array of skills from on-chain part
+     *
+     * @param {string[]} addresses array of addresses
+     * @param {string[][]} tokenIds 2D array of tokens (each array for an address)
+     * @return {object[]} displayable skills.
+     */
     async function fetchSkills(addresses, tokenIds) {
       const skillsOnChain = [];
       for (let index = 0; index < addresses.length; index += 1) {
