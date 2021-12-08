@@ -11,7 +11,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .overlay {
-  /* Rectangle 9939 */
 
   position: absolute;
   width: 53.802vw;

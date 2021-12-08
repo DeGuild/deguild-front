@@ -56,8 +56,7 @@ export default {
         },
       ],
     });
-    // console.log(store.state.User.user);
-    // console.log(user);
+
     return { user, wallet };
   },
 };
