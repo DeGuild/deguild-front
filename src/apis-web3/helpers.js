@@ -111,7 +111,7 @@ async function idToJob(tokenId, blockNumber) {
       submission: infoOffChain.submission,
       description: infoOffChain.description,
       submitted: infoOffChain.submission.length > 0,
-      deadline: addDays(timestamp, 7),
+      deadline: addDays(timestamp, infoOffChain.time),
       status:
        infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
     };
