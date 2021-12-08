@@ -8,9 +8,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
-
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 
@@ -33,6 +30,10 @@ export default defineComponent({
       user: computed(() => store.state.User.user),
       fetching: computed(() => store.state.User.fetching),
     });
+
+    /**
+     * Report the job, sending transaction to smart contract and admin will notice a problem
+     */
     async function report() {
       store.dispatch('User/setFetching', true);
 

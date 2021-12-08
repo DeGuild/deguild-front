@@ -66,9 +66,6 @@ export default defineComponent({
   props: ['title'],
   emits: ['profileUpdated'],
   setup(_, { emit }) {
-    // console.log(store.state.User.user);
-    // console.log(user);
-    // Connection to MetaMask wallet
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
@@ -87,17 +84,27 @@ export default defineComponent({
 
     });
 
+    /**
+    * From file input `event`, it will diplay file name and picture
+    *
+    * @param {object} event passed event from input
+    */
     function previewZipName(event) {
-      // console.log('File changed!');
       state.uploadValue = 0;
       const file = event.target.files[0];
-      // console.log(file);
       state.imageData = file;
       state.fileName = file.name;
 
       const previewing = URL.createObjectURL(event.target.files[0]);
       state.picture = previewing;
     }
+
+    /**
+    * Returns user info if registered
+    *
+    * @param {address} address ethereum address
+    * @returns {object} info of registered user or null
+    */
     async function isRegistered(address) {
       try {
         const response = await fetch(
@@ -117,6 +124,14 @@ export default defineComponent({
       }
     }
 
+    /**
+    * Upload image and update profile
+    *
+    * Algorithm:
+    * 1. Sign a message to use as Authorization token
+    * 2. Upload image
+    * 3. Register
+    */
     async function onUpload() {
       store.dispatch('User/setFetching', true);
 
@@ -139,34 +154,20 @@ export default defineComponent({
           // Observe state change events such as progress, pause, and resume
           state.uploading = true;
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log(`Upload is ${progress}% done`);
           state.uploadValue = progress;
-          // eslint-disable-next-line default-case
-          switch (snapshot.state) {
-            case 'paused':
-              // console.log('Upload is paused');
-              break;
-            case 'running':
-              // console.log('Upload is running');
-              break;
-          }
         },
-        // eslint-disable-next-line no-unused-vars
-        (error) => {
+        () => {
           // Handle unsuccessful uploads
-          // console.error(error.message);
           state.uploading = false;
           store.dispatch('User/setFetching', false);
         },
         async () => {
           let url = null;
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            // console.log('File available at', downloadURL);
             url = downloadURL;
             state.picture = downloadURL;
             const requestOptions = {
               method: 'POST',
-              // eslint-disable-next-line quote-props
               headers: {
                 Authorization: token,
                 'Content-Type': 'application/json',
@@ -207,7 +208,6 @@ export default defineComponent({
 </script>
 <style scoped lang="scss">
 .overlay {
-  /* Rectangle 9939 */
 
   position: absolute;
   width: 53.802vw;
@@ -321,11 +321,6 @@ input[type='file'] {
   margin-top: 1vw;
   padding-bottom: 1vw;
   padding-left: 1vw;
-  // background: red;
-
-  // display: flex;
-  // align-items: center;
-  // justify-content: center;
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;

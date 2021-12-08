@@ -44,13 +44,12 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
 import { useStore } from 'vuex';
 import Job from '../Display/Job.vue';
+import { idToJob } from '../../apis-web3/helpers';
 
 require('dotenv').config();
 
@@ -59,8 +58,6 @@ const Web3 = require('web3');
 const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
-const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
-const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   components: { Job },
@@ -70,101 +67,6 @@ export default defineComponent({
     const userAddress = computed(() => store.state.User);
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
     const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
-    function thumbThis(url) {
-      const original = url.slice(0, 80);
-      const file = url.slice(80);
-      return `${original}thumb_${file}`;
-    }
-    async function fetchSkills(addresses, tokenIds) {
-      const skillsOnChain = [];
-      for (let index = 0; index < addresses.length; index += 1) {
-        const address = addresses[index];
-        tokenIds[index].forEach((id) => skillsOnChain.push([address, id]));
-      }
-      const displayableSkills = await Promise.all(skillsOnChain.map(async (pair) => {
-        const manager = new web3.eth.Contract(certificateABI, pair[0]);
-        const URI = await manager.methods.tokenURI(pair[1]).call();
-        const response = await fetch(URI, { mode: 'cors' });
-        const caller = await manager.methods.shop().call();
-        const shop = new web3.eth.Contract(certificateABI, caller);
-        const shopCaller = await shop.methods.name().call();
-        const data = await response.json();
-
-        return {
-          name: data.title,
-          image: thumbThis(data.url),
-          address: data.address,
-          tokenId: data.tokenId,
-          shopName: shopCaller,
-          added: false,
-        };
-      }));
-
-      return displayableSkills;
-    }
-
-    function addDays(date, days) {
-      const result = new Date(date * 1000);
-      result.setDate(result.getDate() + days);
-      return result;
-    }
-
-    async function idToJob(tokenId, blockNumber) {
-      try {
-        const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
-        const URI = await deGuild.methods.jobURI(tokenId).call();
-        const responseOffChain = await fetch(URI, { mode: 'cors' });
-        const infoOffChain = await responseOffChain.json();
-        const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
-        const block = await web3.eth.getBlock(blockNumber);
-        const clientProfile = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
-            infoOnChain[1],
-          )}`,
-          { mode: 'cors' },
-        );
-        let info = {
-          name: 'Unknown',
-          url: noImg,
-        };
-        if (clientProfile.status === 200) {
-          info = await clientProfile.json();
-          info.url = `${info.url.slice(0, 125)
-          }thumb_${
-            info.url.slice(125)}`;
-        }
-        const { timestamp } = block;
-        const jobObject = {
-          id: tokenId,
-          time: infoOffChain.time,
-          reward: web3.utils.fromWei(infoOnChain[0]),
-          client: infoOnChain[1],
-          clientName: info.name,
-          taker: infoOnChain[2],
-          skills: skillsFetched,
-          state: parseInt(infoOnChain[5], 10),
-          difficulty: infoOnChain[6],
-          level: parseInt(infoOffChain.level, 10),
-          image: info.url,
-          title: infoOffChain.title,
-          note: infoOffChain.note,
-          submission: infoOffChain.submission,
-          description: infoOffChain.description,
-          submitted: infoOffChain.submission.length > 0,
-          deadline: addDays(timestamp, 7),
-          status:
-            infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
-        };
-
-        // console.log(jobObject);
-        return jobObject;
-      } catch (err) {
-        return {};
-      }
-
-      // console.log(infoOffChain);
-      // console.log(infoOnChain);
-    }
 
     const state = reactive({
       jobs: null,
@@ -187,7 +89,6 @@ export default defineComponent({
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
-      // console.log(history);
       store.dispatch('User/setFetching', false);
 
       state.jobs = history;
@@ -209,8 +110,6 @@ export default defineComponent({
     }
 
     function changedSort() {
-      // console.log(state.selectedOrder);
-      // console.log(state.selectedSort);
       sortJobs();
     }
 
@@ -227,10 +126,7 @@ export default defineComponent({
     }
 
     async function findJobs() {
-      // console.log(state.searchTitle);
-      // console.log(await getJobsCompleted());
       await fetchTitle();
-      // const data = await fetchTitle();
     }
 
     onBeforeMount(async () => {
@@ -286,7 +182,6 @@ export default defineComponent({
   font-weight: 500;
   font-size: 0.8vw;
   color: white;
-  // padding-bottom: 1vw;
 
   &.icon {
     width: unset;
@@ -296,7 +191,6 @@ export default defineComponent({
     font-size: 1.5vw;
     padding-top: 0.5vw;
     padding-bottom: 0.25vw;
-    // background: red;
     background: unset;
   }
   &.button {

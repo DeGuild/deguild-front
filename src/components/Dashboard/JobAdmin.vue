@@ -45,24 +45,21 @@
     <div class="display" v-show="!state.fetching">
       <br />
       <div v-for="job in state.jobs" :key="job.id">
-        <job :job="job" ></job>
+        <job :job="job"></job>
       </div>
     </div>
     <div class="display" v-show="state.fetching">
       <img src="@/assets/Spinner-1s-200px.svg" />
     </div>
   </div>
-  <!-- <job-review
-    :job="reviewJob"
-    v-if="overlay && reviewJob"
-    @submit="selectPosted()"
-  ></job-review> -->
-  <job-court :title="'Judge'" v-if="state.reportedJob" @decided="selectAvailable()"></job-court>
+  <job-court
+    :title="'Judge'"
+    v-if="state.reportedJob"
+    @decided="selectAvailable()"
+  ></job-court>
 </template>
 
 <script>
-/* eslint-disable max-len */
-
 import {
   defineComponent, reactive, computed, onBeforeMount,
 } from 'vue';
@@ -70,6 +67,7 @@ import { useStore } from 'vuex';
 
 import Job from '../Display/JobReported.vue';
 import JobCourt from '../Forms/JobCourt.vue';
+import { idToJob } from '../../apis-web3/helpers';
 
 require('dotenv').config();
 
@@ -78,8 +76,6 @@ const Web3 = require('web3');
 const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
 const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
-const certificateABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/SkillCertificates/V2/ISkillCertificate+.sol/ISkillCertificatePlus.json').abi;
-const noImg = require('@/assets/no-url.jpg');
 
 export default defineComponent({
   components: {
@@ -95,101 +91,7 @@ export default defineComponent({
 
     const overlay = computed(() => store.state.User.overlay);
     const examiningJob = computed(() => store.state.User.reportedJob);
-    function thumbThis(url) {
-      const original = url.slice(0, 125);
-      const file = url.slice(125);
-      return `${original}thumb_${file}`;
-    }
-    async function fetchSkills(addresses, tokenIds) {
-      const skillsOnChain = [];
-      for (let index = 0; index < addresses.length; index += 1) {
-        const address = addresses[index];
-        tokenIds[index].forEach((id) => skillsOnChain.push([address, id]));
-      }
-      const displayableSkills = await Promise.all(
-        skillsOnChain.map(async (pair) => {
-          const manager = new web3.eth.Contract(certificateABI, pair[0]);
-          const URI = await manager.methods.tokenURI(pair[1]).call();
-          const response = await fetch(URI, { mode: 'cors' });
-          const caller = await manager.methods.shop().call();
-          const shop = new web3.eth.Contract(certificateABI, caller);
-          const shopCaller = await shop.methods.name().call();
-          const data = await response.json();
 
-          return {
-            name: data.title,
-            image: thumbThis(data.url),
-            address: data.address,
-            tokenId: data.tokenId,
-            shopName: shopCaller,
-            added: false,
-          };
-        }),
-      );
-
-      return displayableSkills;
-    }
-
-    function addDays(date, days) {
-      const result = new Date(date * 1000);
-      result.setDate(result.getDate() + days);
-      return result;
-    }
-
-    async function idToJob(tokenId, blockNumber) {
-      try {
-        const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
-        const URI = await deGuild.methods.jobURI(tokenId).call();
-        const responseOffChain = await fetch(URI, { mode: 'cors' });
-        const infoOffChain = await responseOffChain.json();
-        const skillsFetched = await fetchSkills(infoOnChain[3], infoOnChain[4]);
-        const block = await web3.eth.getBlock(blockNumber);
-        const clientProfile = await fetch(
-          `https://us-central1-deguild-2021.cloudfunctions.net/app/readProfile/${web3.utils.toChecksumAddress(
-            infoOnChain[1],
-          )}`,
-          { mode: 'cors' },
-        );
-        let info = {
-          name: 'Unknown',
-          url: noImg,
-        };
-        if (clientProfile.status === 200) {
-          info = await clientProfile.json();
-          info.url = `${info.url.slice(0, 125)}thumb_${info.url.slice(125)}`;
-        }
-        const { timestamp } = block;
-        const jobObject = {
-          id: tokenId,
-          time: infoOffChain.time,
-          reward: web3.utils.fromWei(infoOnChain[0]),
-          client: infoOnChain[1],
-          clientName: info.name,
-          taker: infoOnChain[2],
-          skills: skillsFetched,
-          state: parseInt(infoOnChain[5], 10),
-          difficulty: infoOnChain[6],
-          level: parseInt(infoOffChain.level, 10),
-          image: info.url,
-          title: infoOffChain.title,
-          note: infoOffChain.note,
-          submission: infoOffChain.submission,
-          description: infoOffChain.description,
-          submitted: infoOffChain.submission.length > 0,
-          deadline: addDays(timestamp, 7),
-          status:
-            infoOffChain.submission.length > 0 ? 'Submitted' : 'No submission',
-        };
-
-        // console.log(jobObject);
-        return jobObject;
-      } catch (err) {
-        return {};
-      }
-
-      // console.log(infoOffChain);
-      // console.log(infoOnChain);
-    }
     const state = reactive({
       jobs: null,
       jobsSaved: null,
@@ -204,6 +106,11 @@ export default defineComponent({
       reportedJob: computed(() => store.state.User.reportedJob),
     });
 
+    /**
+     * Returns an array of reported jobs, fetching data from emitted events of `JobCaseOpened`
+     *
+     * @return {Object[]} an array of reported jobs.
+     */
     async function getJobsReported() {
       store.dispatch('User/setDialog', 'Please wait!');
       const caller = await deGuild.getPastEvents('JobCaseOpened', {
@@ -213,12 +120,14 @@ export default defineComponent({
       const history = await Promise.all(
         caller.map((ele) => idToJob(ele.returnValues[0], ele.blockNumber)),
       );
-      // console.log(history);
       state.jobs = history;
 
       return history;
     }
 
+    /**
+     * Sorting jobs display in the site (Client-side)
+     */
     function sortJobs() {
       if (state.selectedOrder === 'asc') {
         state.jobs = state.jobs.sort((a, b) => (parseInt(a[state.selectedSort], 10)
@@ -233,20 +142,25 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Helper function
+     */
     function changedSort() {
-      // console.log(state.selectedOrder);
-      // console.log(state.selectedSort);
       sortJobs();
     }
 
+    /**
+     * Fetch reported jobs to be displayed and sort
+     */
     async function fetchReportedCases() {
       const jobsAdded = await getJobsReported();
-      state.jobs = jobsAdded.filter(
-        (job) => job.state === 0,
-      );
+      state.jobs = jobsAdded.filter((job) => job.state === 0);
       changedSort();
     }
 
+    /**
+     * Fetch reported jobs and display only matched title (using RegEx)
+     */
     async function fetchTitle() {
       if (store.state.User.occupied) {
         store.dispatch(
@@ -269,6 +183,9 @@ export default defineComponent({
       );
     }
 
+    /**
+     * Fetch available reported jobs
+     */
     async function selectAvailable() {
       state.reported = true;
       store.dispatch('User/setFetching', true);
@@ -277,13 +194,16 @@ export default defineComponent({
       store.dispatch('User/setFetching', false);
     }
 
+    /**
+     * Fetch available reported jobs from title searched
+     */
     async function findJobs() {
-      // console.log(state.searchTitle);
       store.dispatch('User/setFetching', true);
 
       await fetchTitle();
       store.dispatch('User/setFetching', false);
     }
+
     onBeforeMount(async () => {
       store.dispatch('User/setFetching', true);
 
@@ -339,7 +259,6 @@ export default defineComponent({
   font-weight: 500;
   font-size: 0.8vw;
   color: white;
-  // padding-bottom: 1vw;
 
   &.icon {
     width: unset;
@@ -349,7 +268,6 @@ export default defineComponent({
     font-size: 1.5vw;
     padding-top: 0.5vw;
     padding-bottom: 0.25vw;
-    // background: red;
     background: unset;
   }
   &.button {

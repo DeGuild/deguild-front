@@ -13,8 +13,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
@@ -22,7 +20,7 @@ import { useStore } from 'vuex';
 export default defineComponent({
   name: 'SkillDisplay',
   props: ['skill'],
-  setup(props) {
+  setup() {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
@@ -30,49 +28,9 @@ export default defineComponent({
       user: userAddress.value.user,
     });
 
-    function add() {
-      // console.log(store.state.User.selectedSkills);
-      const current = store.state.User.selectedSkills;
-      const added = {
-        name: props.skill.name,
-        image: props.skill.image,
-        address: props.skill.address,
-        tokenId: props.skill.tokenId,
-        shopName: props.skill.shopName,
-        added: !props.skill.added,
-      };
-      let found = false;
-      current.forEach((skill) => {
-        if (
-          skill.address === props.skill.address
-          && skill.tokenId === props.skill.tokenId
-        ) {
-          found = true;
-        }
-      });
-      if (!found) current.add(added);
-      // console.log(added);
-
-      store.dispatch('User/setChosenSkills', current);
-    }
-    function remove() {
-      const current = store.state.User.selectedSkills;
-      current.forEach((skill) => {
-        if (
-          skill.address === props.skill.address
-          && skill.tokenId === props.skill.tokenId
-        ) {
-          current.delete(skill);
-        }
-      });
-      store.dispatch('User/setChosenSkills', current);
-    }
-
     return {
       state,
       userAddress,
-      add,
-      remove,
     };
   },
 });
@@ -175,10 +133,7 @@ export default defineComponent({
   }
 }
 .icon {
-  // background-color: red;
   width: 6vw;
-  // height:
-  // overflow: hidden;
   text-overflow: ellipsis;
   font-size: 2.5vw;
   margin-top: 1vw;

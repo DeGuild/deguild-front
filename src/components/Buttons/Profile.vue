@@ -5,25 +5,22 @@
 </template>
 
 <script>
-/* eslint-disable no-await-in-loop */
-
 import { useStore } from 'vuex';
-// import { useRoute } from 'vue-router';
 
 import { computed, defineComponent } from 'vue';
-
-// eslint-disable-next-line no-unused-vars
 
 export default defineComponent({
   name: 'Profile',
   setup() {
     const store = useStore();
-    // const route = useRoute();
 
     const user = computed(() => store.state.User.user);
     const current = computed(() => store.state.User.update);
     const fetching = computed(() => store.state.User.fetching);
 
+    /**
+     * Brings up the update profile component
+     */
     function showUpdate() {
       store.dispatch('User/setUpdateProfile', !current.value);
     }

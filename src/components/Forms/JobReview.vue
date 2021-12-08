@@ -56,9 +56,6 @@
             >Download
           </a>
         </div>
-        <!-- <div class="file" v-if="state.zipUrl">
-          <a class="btn" :href="state.zipUrl" download>Download </a>
-        </div> -->
         <div class="decision" v-if="this.job.state === 2">
           <span>
             <textarea
@@ -91,8 +88,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 
 import {
   defineComponent, reactive, computed, ref,
@@ -128,16 +123,19 @@ export default defineComponent({
     const minutes = computed(() => (props.job.deadline.getMinutes() <= 9
       ? `0${props.job.deadline.getMinutes()}`
       : props.job.deadline.getMinutes()));
-    // console.log(isSubmitted);
+
     const state = reactive({
       user: userAddress.value.user,
       submitted: isSubmitted.value,
       fetching: computed(() => store.state.User.fetching),
-
+      comment: null,
       time: `${hour.value}:${minutes.value}`,
       zipUrl: null,
     });
 
+    /**
+    * Fetching the submission file
+    */
     async function generateLink() {
       store.dispatch('User/setFetching', true);
       try {
@@ -153,7 +151,6 @@ export default defineComponent({
         );
         const requestOptions = {
           method: 'GET',
-          // eslint-disable-next-line quote-props
           headers: { Authorization: token },
         };
 
@@ -162,7 +159,7 @@ export default defineComponent({
           requestOptions,
         );
         const data = await response.json();
-        // console.log(data);
+
         state.zipUrl = data.result;
       } catch (err) {
         store.dispatch('User/setFetching', false);
@@ -170,12 +167,18 @@ export default defineComponent({
       store.dispatch('User/setFetching', false);
     }
 
+    /**
+    * Close the job review overlay
+    */
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
       emit('submit');
     }
 
+    /**
+    * Reject the job submission, it will send a notification to job taker
+    */
     async function rejectSubmission() {
       store.dispatch('User/setFetching', true);
       try {
@@ -191,7 +194,6 @@ export default defineComponent({
         );
         const requestOptions = {
           method: 'PUT',
-          // eslint-disable-next-line quote-props
           headers: {
             Authorization: token,
             'Content-Type': 'application/json',
@@ -218,6 +220,9 @@ export default defineComponent({
       }
     }
 
+    /**
+    * Complete the job  it will send a transaction to the smart contract that this job is completed
+    */
     async function complete() {
       store.dispatch('User/setFetching', true);
 
@@ -227,7 +232,7 @@ export default defineComponent({
           'Please wait! We are processing your transaction.',
         );
         const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-        const caller = await deGuild.methods
+        await deGuild.methods
           .complete(this.job.id)
           .send({ from: realAddress });
         store.dispatch(
@@ -248,6 +253,7 @@ export default defineComponent({
       generateLink,
       complete,
       rejectSubmission,
+      dummy,
     };
   },
 });

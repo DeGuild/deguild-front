@@ -15,7 +15,6 @@ export default defineComponent({
     const store = useStore();
     const state = reactive({
       dialog: computed(() => store.state.User.dialog),
-      // dialog: 'test!est!test!test!test!',
       dialogStyle: computed(() => store.state.User.dialog.length > 80),
     });
 

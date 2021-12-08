@@ -43,8 +43,7 @@ export default {
     const wallet = computed(() => store.state.User.approval);
     const overlay = computed(() => store.state.User.overlay);
     const reviewJob = computed(() => store.state.User.reviewJob);
-    // console.log(store.state.User.user);
-    // console.log(user);
+
     const siteData = reactive({
       title: 'DeGuild - Register',
       description: 'Freelancer platform for everyone',

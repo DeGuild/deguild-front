@@ -52,7 +52,6 @@ export default defineComponent({
         'If any freelancer admitted to be a griefer (submitting unrelated files (5+ times), and any other abuse),\n then ban the griefer and revert the job with 5% fees to return the money.',
       manual5:
         'If any client admitted to be a griefer (perma-rejecting (5+ times), and any other abuse),\n then ban the griefer and complete the job with 5% fees to transfer the money.',
-      // manual: 'test!est!test!test!test!',
       manualStyle: computed(() => store.state.User.manual.length > 80),
     });
 

@@ -44,15 +44,13 @@
 </template>
 
 <script>
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 
 import {
   reactive, onBeforeMount, computed, defineComponent,
 } from 'vue';
+
 import Web3Token from 'web3-token';
 
 require('dotenv').config();
@@ -66,21 +64,26 @@ const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
-// eslint-disable-next-line no-unused-vars
-
 const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
 const ownerABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json').abi;
-// DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json
+
 export default defineComponent({
   name: 'ConnectWallet',
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+
     const user = computed(() => store.state.User.user);
     const registeredUser = computed(() => store.state.User.registered);
 
+    /**
+     * Returns a shortened address
+     *
+     * @param {address} address ethereum address
+     * @return {string} shortened address or a spinning icon.
+     */
     function shortenedAddress(address) {
       if (!address) {
         return "<i class='fas fa-spinner fa-spin'></i>";
@@ -124,11 +127,16 @@ export default defineComponent({
         const caller = await deGuild.methods.owner().call();
         return caller === realAddress;
       } catch (error) {
-        // console.error('Not purchasable');
         return false;
       }
     }
 
+    /**
+     * Returns whether the user is free to take a job or not.
+     *
+     * @param {address} address ethereum address
+     * @return {bool} availability.
+     */
     async function isOccupied(address) {
       const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
       const realAddress = web3.utils.toChecksumAddress(address);
@@ -136,7 +144,6 @@ export default defineComponent({
         const caller = await deGuild.methods.jobOf(realAddress).call();
         return caller !== '0';
       } catch (error) {
-        // console.error('Not purchasable');
         return false;
       }
     }
@@ -155,8 +162,7 @@ export default defineComponent({
         const caller = await deguildCoin.methods
           .allowance(realAddress, deGuildAddress)
           .call();
-        // console.log(caller, balance, address);
-        // console.log(typeof caller, typeof balance, address);
+
         return (caller <= balance && caller > 0) || balance === '0';
       } catch (error) {
         return false;
@@ -192,6 +198,14 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Returns the registered information of a user.
+     *
+     * @param {address} address ethereum address
+     * @return {object} user information or null.
+     *
+     * User info will come in an object like { name, level, url }
+     */
     async function isRegistered(address) {
       try {
         const response = await fetch(
@@ -210,6 +224,16 @@ export default defineComponent({
         return null;
       }
     }
+
+    /**
+     * This will send a request to set up a profile with adjusted new level
+     * Returns the registered information of a user.
+     *
+     * @param {address} address ethereum address
+     * @return {object} user information or null.
+     *
+     * User info will come in an object like { name, level, url }
+     */
     async function updateLevel(userinfo, userAddress) {
       try {
         const token = await Web3Token.sign(
@@ -218,7 +242,6 @@ export default defineComponent({
         );
         const requestOptions = {
           method: 'POST',
-          // eslint-disable-next-line quote-props
           headers: {
             Authorization: token,
             'Content-Type': 'application/json',
@@ -249,6 +272,7 @@ export default defineComponent({
         return null;
       }
     }
+
     /**
      * Disconnect user from the dapp
      */
@@ -275,8 +299,6 @@ export default defineComponent({
           const registered = await updateLevel(oldProfile, accounts[0]);
           const approve = await hasApproval(accounts[0]);
           const canTakeJob = await isOccupied(accounts[0]);
-          // const toAdd = [];
-          // console.log(registered);
 
           store.dispatch(
             'User/setUser',
@@ -289,7 +311,6 @@ export default defineComponent({
             'Please wait and I will show you what we have gotten!',
           );
 
-          // console.log(approve);
           store.dispatch('User/setApproval', approve);
           if (!approve) {
             store.dispatch(
@@ -319,7 +340,7 @@ export default defineComponent({
 
           return true;
         } catch (error) {
-          // console.log(error);
+          window.location.reload();
         }
       }
       return false;
@@ -366,7 +387,7 @@ export default defineComponent({
       await verifyNetwork();
       if (store.state.User.user) {
         const registered = await isRegistered(store.state.User.user);
-        // console.log(registered);
+
         if (registered) {
           store.dispatch('User/setRegistration', true);
           store.dispatch('User/setUserProfile', registered);

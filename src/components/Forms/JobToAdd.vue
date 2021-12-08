@@ -298,14 +298,24 @@ export default defineComponent({
       assignee: null,
     });
 
+    /**
+    * Change the input mode to custom
+    */
     function changeMode() {
       state.custom = !state.custom;
     }
+
+    /**
+    * Close the job adding overlay
+    */
     function closeOverlay() {
       store.dispatch('User/setOverlay', false);
       store.dispatch('User/setReviewJob', null);
     }
 
+    /**
+    * Send transaction to add job and store other data in the off-chain storage
+    */
     async function send() {
       store.dispatch('User/setFetching', true);
       try {
@@ -327,8 +337,6 @@ export default defineComponent({
           '1d',
         );
         const tokenId = parseInt(count, 10) + 1;
-
-        // console.log(parseInt(count, 10) + 1);
         const requestOptions = {
           method: 'POST',
           headers: { Authorization: token, 'Content-Type': 'application/json' },
@@ -347,35 +355,33 @@ export default defineComponent({
           'https://us-central1-deguild-2021.cloudfunctions.net/guild/addJob',
           requestOptions,
         );
-        // const data = await response.json();
-        // console.log(data);
+
         const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
         const taker = web3.utils.isAddress(job.assignee)
           ? web3.utils.toChecksumAddress(job.assignee)
           : '0x0000000000000000000000000000000000000000';
-        // console.log(job.bonus, taker, certificateArr, skillSet, job.difficulty);
+
         await deGuild.methods
           .addJob(job.bonus, taker, certificateArr, skillSet, job.difficulty)
           .send({ from: realAddress });
-        // console.log(transaction);
 
         store.dispatch('User/setOverlay', false);
         store.dispatch('User/setReviewJob', null);
         store.dispatch('User/setFetching', false);
         emit('submit');
       } catch (err) {
-        // console.error(err);
         store.dispatch('User/setFetching', false);
       }
     }
 
+    /**
+    * When choosing custom skill, this will display a skill to be added to skill list.
+    */
     async function customAdd() {
-      // console.log(state.skillAdd, state.skillId);
       if (!state.skillAdd || !state.skillId) return;
       try {
         const manager = new web3.eth.Contract(certificateABI, state.skillAdd);
         const URI = await manager.methods.tokenURI(state.skillId).call();
-        // console.log(URI);
         const response = await fetch(URI, { mode: 'cors' });
         const infoOffChain = await response.json();
         const caller = await manager.methods.shop().call();
@@ -390,8 +396,6 @@ export default defineComponent({
           added: true,
         };
 
-        // console.log(toAdd);
-
         const current = store.state.User.selectedSkills;
         let found = false;
         current.forEach((skill) => {
@@ -403,7 +407,6 @@ export default defineComponent({
           }
         });
         if (!found) current.add(toAdd);
-        // console.log(added);
 
         store.dispatch('User/setChosenSkills', current);
       } catch (err) {
@@ -414,6 +417,9 @@ export default defineComponent({
       }
     }
 
+    /**
+    * Fetching every skill known in DeGuild from off-chain database
+    */
     async function fetchAllSkills() {
       const response = await fetch(
         `https://us-central1-deguild-2021.cloudfunctions.net/app/guildCertificates/${
@@ -422,20 +428,21 @@ export default defineComponent({
         { mode: 'cors' },
       );
       const result = await response.json();
-      // console.log(result);
 
-      // console.log(infoOffChain, state.skillSearch);
       state.skills = result;
       store.dispatch('User/setFetching', false);
-      // console.log(state.skills);
 
       return result;
     }
 
+    /**
+    * Navigate to page index of `pageIdx`
+    *
+    *  @param {int} pageIdx page index
+    */
     async function navigateTo(pageIdx) {
       state.page = pageIdx;
       if (pageIdx === 2) {
-        // console.log('yo');
         store.dispatch('User/setFetching', true);
 
         await fetchAllSkills();
@@ -550,7 +557,6 @@ export default defineComponent({
     background: #fdf1e3;
     height: 4vw;
     width: 15vw;
-    // top: 2.5vw;
     font-family: Roboto;
     font-style: normal;
     font-size: 1.2vw;
@@ -631,7 +637,6 @@ export default defineComponent({
   background-size: cover;
   overflow: hidden;
   &.client-added {
-    // top: 7.5vw;
     font-size: 1vw;
   }
 }
@@ -711,11 +716,9 @@ export default defineComponent({
     height: 38vh;
     overflow: auto;
 
-    // background: black;
   }
   &.right {
     left: 31vw;
-    // background: red;
   }
   &.right-added {
     left: 31vw;
@@ -724,7 +727,6 @@ export default defineComponent({
 
     overflow: auto;
 
-    // background: red;
   }
 }
 .box {
