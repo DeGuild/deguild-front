@@ -5,10 +5,7 @@
 </template>
 
 <script>
-/* eslint-disable no-await-in-loop */
-
 import { useStore } from 'vuex';
-// import { useRoute } from 'vue-router';
 
 import { reactive, computed, defineComponent } from 'vue';
 
@@ -21,21 +18,14 @@ const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
-// eslint-disable-next-line no-unused-vars
 
 const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
-
-/**
- * Using relative path, just clone the git beside this project directory and compile to run
- */
-// eslint-disable-next-line no-unused-vars
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
 
 export default defineComponent({
   name: 'ApproveWallet',
   setup() {
     const store = useStore();
-    // const route = useRoute();
 
     const user = computed(() => store.state.User.user);
 
@@ -67,10 +57,10 @@ export default defineComponent({
     }
 
     /**
-     * Returns whether user is the owner of this shop
+     * Approve the contract and returns returns whether user has
+     * approved this shop to spend their DGC
      *
-     * @param {address} address ethereum address
-     * @return {bool} ownership.
+     * @return {bool} approval.
      */
     async function approve() {
       state.primary = "<i class='fas fa-spinner fa-spin'></i>";
@@ -82,7 +72,6 @@ export default defineComponent({
         await deguildCoin.methods
           .approve(deGuildAddress, balance)
           .send({ from: realAddress });
-        // console.log(caller);
         const approval = await hasApproval(realAddress);
         store.dispatch('User/setApproval', approval);
 
@@ -103,8 +92,6 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .btn {
-  /* Small button */
-
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -116,7 +103,6 @@ export default defineComponent({
   left: 38.4vw;
   top: 20vw;
 
-  /* standart theme/error */
   background: #ff7a52;
   border-radius: 4px;
 
@@ -129,10 +115,8 @@ export default defineComponent({
   letter-spacing: 0.00892857em;
   text-transform: uppercase;
 
-  /* shades/white */
   color: #ffffff;
 
-  /* Inside Auto Layout */
   flex: none;
   order: 0;
   flex-grow: 0;

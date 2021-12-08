@@ -44,15 +44,13 @@
 </template>
 
 <script>
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 
 import {
   reactive, onBeforeMount, computed, defineComponent,
 } from 'vue';
+
 import Web3Token from 'web3-token';
 
 require('dotenv').config();
@@ -66,21 +64,26 @@ const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/
 /**
  * Using relative path, just clone the git beside this project directory and compile to run
  */
-// eslint-disable-next-line no-unused-vars
-
 const dgcAddress = process.env.VUE_APP_DGC_ADDRESS;
 const dgcABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/Tokens/DeGuildCoinERC20.sol/DeGuildCoinERC20.json').abi;
 const ownerABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json').abi;
-// DeGuild-MG-CS-Token-contracts/artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json
+
 export default defineComponent({
   name: 'ConnectWallet',
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+
     const user = computed(() => store.state.User.user);
     const registeredUser = computed(() => store.state.User.registered);
 
+    /**
+     * Returns whether user is the owner of this shop
+     *
+     * @param {address} address ethereum address
+     * @return {bool} ownership.
+     */
     function shortenedAddress(address) {
       if (!address) {
         return "<i class='fas fa-spinner fa-spin'></i>";

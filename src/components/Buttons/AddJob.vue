@@ -8,8 +8,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
@@ -23,6 +21,10 @@ export default defineComponent({
       smaller: true,
       user: userAddress.value.user,
     });
+
+    /**
+     * Set overlay up to add a job
+     */
     function add() {
       store.dispatch(
         'User/setDialog',
