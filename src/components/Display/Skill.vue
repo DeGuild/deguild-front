@@ -15,8 +15,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
@@ -32,8 +30,10 @@ export default defineComponent({
       user: userAddress.value.user,
     });
 
+    /**
+    * add this skill to the skill list when adding a job
+    */
     function add() {
-      // console.log(store.state.User.selectedSkills);
       const current = store.state.User.selectedSkills;
       const added = {
         name: props.skill.name,
@@ -53,10 +53,13 @@ export default defineComponent({
         }
       });
       if (!found) current.add(added);
-      // console.log(added);
 
       store.dispatch('User/setChosenSkills', current);
     }
+
+    /**
+    * remove this skill to the skill list when adding a job
+    */
     function remove() {
       const current = store.state.User.selectedSkills;
       current.forEach((skill) => {
@@ -178,10 +181,7 @@ export default defineComponent({
   }
 }
 .icon {
-  // background-color: red;
   width: 6vw;
-  // height:
-  // overflow: hidden;
   text-overflow: ellipsis;
   font-size: 2.5vw;
   margin-top: 1vw;

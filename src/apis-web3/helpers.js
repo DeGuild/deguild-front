@@ -10,30 +10,39 @@ const certificateABI = require('../../../DeGuild-MG-CS-Token-contracts/artifacts
 const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 const noImg = require('@/assets/no-url.jpg');
+
 /**
-     * Returns a calculated date with `days` days added
-     *
-     * @param {int} date timestamp in linux machine
-     * @param {int} days number of days
-     * @return {Date} displayable skills.
-     */
+* Returns a calculated date with `days` days added
+*
+* @param {int} date timestamp in linux machine
+* @param {int} days number of days
+* @return {Date} displayable skills.
+*/
 function addDays(date, days) {
   const result = new Date(date * 1000);
   result.setDate(result.getDate() + days);
   return result;
 }
+
 /**
-     * Returns a thumbnail url from firebase storage
-     *
-     * @param {string} url url of the image
-     * @return {string} url of the thumbnail.
-     */
+* Returns a thumbnail url from firebase storage
+*
+* @param {string} url url of the image
+* @return {string} url of the thumbnail.
+*/
 function thumbThis(url) {
   const original = url.slice(0, 80);
   const file = url.slice(80);
   return `${original}thumb_${file}`;
 }
 
+/**
+* Returns an array of skills from on-chain part
+*
+* @param {string[]} addresses array of addresses
+* @param {string[][]} tokenIds 2D array of tokens (each array for an address)
+* @return {object[]} displayable skills.
+*/
 export async function fetchSkills(addresses, tokenIds) {
   const skillsOnChain = [];
   for (let index = 0; index < addresses.length; index += 1) {
@@ -64,14 +73,14 @@ export async function fetchSkills(addresses, tokenIds) {
   return displayableSkills;
 }
 
-export /**
+/**
 * Returns a combined data from on-chain and off-chain to further display in the website
 *
 * @param {string} tokenId tokenId of job
 * @param {string} blockNumber
 * @return {Object} synced data of a job.
 */
-async function idToJob(tokenId, blockNumber) {
+export async function idToJob(tokenId, blockNumber) {
   try {
     const infoOnChain = await deGuild.methods.jobInfo(tokenId).call();
     const URI = await deGuild.methods.jobURI(tokenId).call();

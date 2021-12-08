@@ -259,7 +259,6 @@ export default defineComponent({
   font-weight: 500;
   font-size: 0.8vw;
   color: white;
-  // padding-bottom: 1vw;
 
   &.icon {
     width: unset;
@@ -269,7 +268,6 @@ export default defineComponent({
     font-size: 1.5vw;
     padding-top: 0.5vw;
     padding-bottom: 0.25vw;
-    // background: red;
     background: unset;
   }
   &.button {

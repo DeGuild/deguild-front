@@ -123,9 +123,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
-
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 import {
@@ -157,7 +154,7 @@ export default defineComponent({
     const minutes = computed(() => (props.job.deadline.getMinutes() <= 9
       ? `0${props.job.deadline.getMinutes()}`
       : props.job.deadline.getMinutes()));
-    // console.log(isSubmitted);
+
     const state = reactive({
       user: userAddress.value.user,
       uploadValue: 0,
@@ -169,15 +166,25 @@ export default defineComponent({
       time: `${hour.value}:${minutes.value}`,
     });
 
+    /**
+    * From file input `event`, it will diplay file name
+    *
+    * @param {object} event passed event from input
+    */
     function previewZipName(event) {
-      // console.log('File changed!');
       state.uploadValue = 0;
       const file = event.target.files[0];
-      // console.log(file);
       state.zipData = file;
       state.fileName = file.name;
     }
 
+    /**
+    * Upload submission and notify the job client
+    *
+    * Algorithm:
+    * 1. Sign a message to use as Authorization token
+    * 2. Update file according to the submission
+    */
     async function uploadSubmission() {
       // generating a token with 1 day of expiration time
       const token = await Web3Token.sign(
@@ -202,27 +209,15 @@ export default defineComponent({
           // Observe state change events such as progress, pause, and resume
           state.uploading = true;
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log(`Upload is ${progress}% done`);
           state.uploadValue = progress;
-          // eslint-disable-next-line default-case
-          switch (snapshot.state) {
-            case 'paused':
-              // console.log('Upload is paused');
-              break;
-            case 'running':
-              // console.log('Upload is running');
-              break;
-          }
         },
-        (error) => {
+        () => {
           // Handle unsuccessful uploads
-          // console.log(error.message);
           state.uploading = false;
         },
         async () => {
           const requestOptions = {
             method: 'PUT',
-            // eslint-disable-next-line quote-props
             headers: {
               Authorization: token,
               'Content-Type': 'application/json',
@@ -235,17 +230,10 @@ export default defineComponent({
             }),
           };
 
-          const response = await fetch(
+          await fetch(
             'https://us-central1-deguild-2021.cloudfunctions.net/guild/submit',
             requestOptions,
           );
-
-          // console.log(
-          //   'File available at',
-          //   `zipfile/${userAddress.value.user}/${state.zipData.name}`,
-          // );
-          const data = await response.json();
-          // console.log(data);
 
           state.submitted = true;
           state.uploading = false;
@@ -334,7 +322,6 @@ export default defineComponent({
 }
 .job {
   position: relative;
-  // padding-top: 1vw;
   height: 0vw;
   padding-left: 2vw;
   padding-right: 2vw;
@@ -530,10 +517,7 @@ export default defineComponent({
   }
 }
 .icon {
-  // background-color: red;
   width: 6vw;
-  // height:
-  // overflow: hidden;
   text-overflow: ellipsis;
   font-size: 2.5vw;
   margin-top: 1vw;

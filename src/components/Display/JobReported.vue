@@ -119,9 +119,6 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
-
 import { defineComponent, reactive, computed } from 'vue';
 import { useStore } from 'vuex';
 import Web3Token from 'web3-token';
@@ -133,89 +130,38 @@ const Web3 = require('web3');
 
 const deGuildAddress = process.env.VUE_APP_DEGUILD_ADDRESS;
 
-const deGuildABI = require('../../../../DeGuild-MG-CS-Token-contracts/artifacts/contracts/DeGuild/V2/IDeGuild+.sol/IDeGuildPlus.json').abi;
-
 export default defineComponent({
   name: 'JobReportedDisplay',
   components: { Skill },
   props: ['job'],
-  emits: ['cancel'],
-  setup(props, { emit }) {
+  setup(props) {
     const store = useStore();
     const userAddress = computed(() => store.state.User);
     const state = reactive({
       smaller: true,
       user: userAddress.value.user,
       zipUrl: null,
+      notFound: null,
     });
     const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
-    const deGuild = new web3.eth.Contract(deGuildABI, deGuildAddress);
 
-    async function take() {
-      store.dispatch(
-        'User/setDialog',
-        'Please wait and I will tell the client that you will be taking this job!',
-      );
-      store.dispatch('User/setFetching', true);
-
-      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-
-      const caller = await deGuild.methods
-        .take(this.job.id)
-        .send({ from: realAddress });
-
-      store.dispatch(
-        'User/setDialog',
-        'Done! Please start working on your job early and contact your client as soon as possible',
-      );
-      store.dispatch('User/setFetching', false);
-
-      this.$router.push('/task');
-    }
-
-    async function cancel() {
-      store.dispatch('User/setDialog', 'Please wait, we are cancelling this!');
-      store.dispatch('User/setFetching', true);
-
-      const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-
-      const caller = await deGuild.methods
-        .cancel(this.job.id)
-        .send({ from: realAddress });
-
-      store.dispatch(
-        'User/setDialog',
-        'Done! Please think twice before posting any job because it will cost you some gas fees.',
-      );
-      setTimeout(() => {
-        emit('cancel');
-      }, 1000);
-    }
-
+    /**
+    * Extending the reported job component
+    */
     function extend() {
       state.smaller = !state.smaller;
-      // console.log(this.job.client);
     }
 
+    /**
+    * Open court component to judge the case according to Admin investigation
+    */
     function judge() {
-      // console.log(this.job);
       store.dispatch('User/setReportedJob', this.job);
     }
 
-    // async function adminInvestigate() {
-    //   const address = (await web3.eth.getAccounts())[0];
-
-    //   // generating a token with 1 day of expiration time
-    //   const token = await Web3Token.sign(
-    //     (msg) => web3.eth.personal.sign(msg, address),
-    //     '1d',
-    //   );
-    //   const realAddress = web3.utils.toChecksumAddress(store.state.User.user);
-
-    //   console.log(token);
-    //   emit('decided');
-    // }
-
+    /**
+    * Fetching the submission file as an evidence
+    */
     async function adminInvestigate() {
       store.dispatch('User/setFetching', true);
       try {
@@ -231,7 +177,6 @@ export default defineComponent({
         );
         const requestOptions = {
           method: 'POST',
-          // eslint-disable-next-line quote-props
           headers: {
             Authorization: token,
             'Content-Type': 'application/json',
@@ -248,13 +193,11 @@ export default defineComponent({
         );
         if (response.status === 200) {
           const data = await response.json();
-          // console.log(data);
           state.zipUrl = data.result;
         } else {
           state.notFound = true;
         }
       } catch (err) {
-        // console.error(err);
         store.dispatch('User/setFetching', false);
       }
       store.dispatch('User/setFetching', false);
@@ -263,10 +206,8 @@ export default defineComponent({
     return {
       state,
       userAddress,
-      take,
       extend,
       judge,
-      cancel,
       adminInvestigate,
     };
   },
@@ -324,7 +265,6 @@ export default defineComponent({
 }
 .job {
   position: relative;
-  // padding-top: 1vw;
   padding-left: 2vw;
   padding-right: 2vw;
   margin-bottom: 1vw;
@@ -464,13 +404,11 @@ export default defineComponent({
     left: 14.5vw;
     top: 5vw;
 
-    // margin: 0.2vw 0.2vw 0.2vw 0.2vw;
     &.label {
       position: relative;
       display: unset;
       left: -0.2vw;
       top: -0.35vw;
-      // margin: 0.2vw 0.2vw 0.2vw 0.2vw;
       background: unset;
       font-size: 1.2vw;
       margin-left: 0.4vw;
@@ -575,10 +513,7 @@ export default defineComponent({
   }
 }
 .icon {
-  // background-color: red;
   width: 6vw;
-  // height:
-  // overflow: hidden;
   text-overflow: ellipsis;
   font-size: 2.5vw;
   margin-top: 1vw;
